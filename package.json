@@ -1,0 +1,23 @@
+{
+  "name": "google-news-rss-pusher",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Push contents which Google News RSS to Your Channel.",
+  "keywords": [
+    "rss",
+    "rss-webhook"
+  ],
+  "author": {
+    "name": "cuttleman",
+    "email": "silluat11@gmail.com",
+    "url": "https://cuttle-portfolio-2023.vercel.app/"
+  },
+  "license": "ISC",
+  "packageManager": "pnpm@8.9.0",
+  "scripts": {
+    "@front/client": "cd apps/@front/client && pnpm"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.3"
+  }
+}
