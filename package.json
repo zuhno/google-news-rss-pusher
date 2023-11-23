@@ -15,7 +15,8 @@
   "license": "ISC",
   "packageManager": "pnpm@8.9.0",
   "scripts": {
-    "@front/client": "cd apps/@front/client && pnpm"
+    "@front/client": "cd apps/@front/client && pnpm",
+    "@back/server": "cd apps/@back/server && pnpm"
   },
   "devDependencies": {
     "prettier": "^3.0.3"
