@@ -19,11 +19,14 @@ export class OAuth2Service {
     );
 
     if (!result.data) return false;
+    console.log(result.data);
     const webhook = result.data.incoming_webhook;
+    // TODO : webhook info save to db
     // webhook.channel_id - pk
     // webhook.channel - ch_name
     // webhook.url - ch_url
 
+    // TODO : Fail Response implement
     if (!webhook?.channel) return false;
 
     return true;

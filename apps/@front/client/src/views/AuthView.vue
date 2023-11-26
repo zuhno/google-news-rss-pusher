@@ -1,5 +1,10 @@
 <script lang="ts">
 export default {
+  data() {
+    return {
+      isInstalled: false,
+    };
+  },
   async mounted() {
     const code = this.$route.query.code;
 
@@ -13,7 +18,8 @@ export default {
       }).then((res) => res.json());
 
       if (result) {
-        this.$router.replace("/");
+        this.isInstalled = true;
+        // this.$router.replace("/");
       }
     }
   },
@@ -21,5 +27,8 @@ export default {
 </script>
 
 <template>
-  <div></div>
+  <div>
+    <div v-if="isInstalled">설치가 완료되었습니다.</div>
+    <div v-else>이미 설치가 완료되었습니다.</div>
+  </div>
 </template>
