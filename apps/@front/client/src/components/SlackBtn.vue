@@ -1,13 +1,15 @@
-<script setup lang="ts"></script>
+<script lang="ts">
+export default {
+  props: {
+    clientId: String,
+  },
+};
+</script>
 
 <template>
-  <main>
-    <a
-      href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook&client_id=3636965766418.4749362651861"
-    >
-      <button class="btn-slack">Add to Slack</button>
-    </a>
-  </main>
+  <a :href="'https://slack.com/oauth/v2/authorize?scope=incoming-webhook&client_id=' + clientId">
+    <button class="btn-slack">Add to Slack</button>
+  </a>
 </template>
 
 <style scoped lang="scss">

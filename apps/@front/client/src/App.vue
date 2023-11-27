@@ -1,8 +1,25 @@
-<script setup lang="ts">
+<script lang="ts">
 import { RouterView } from "vue-router";
+import RootLayout from "@/components/layout/RootLayout.vue";
+import HeaderSection from "@/components/layout/HeaderSection.vue";
+import FooterSection from "@/components/layout/FooterSection.vue";
+
+export default {
+  components: {
+    RouterView,
+    HeaderSection,
+    FooterSection,
+    RootLayout,
+  },
+};
 </script>
 
 <template>
-  <!-- TODO : 대시보드, 부동산피드 목록, 블록체인 피드목록, 슬랙 추가 버튼은 각 피드 목록에서... -->
-  <RouterView />
+  <main>
+    <HeaderSection />
+    <RootLayout>
+      <RouterView />
+    </RootLayout>
+    <FooterSection />
+  </main>
 </template>

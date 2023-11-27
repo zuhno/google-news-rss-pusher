@@ -1,18 +1,28 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import DashboardView from "../views/DashboardView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",
-      name: "home",
-      component: HomeView,
+      name: "dashboard",
+      component: DashboardView,
+    },
+    {
+      path: "/real-state",
+      name: "real-state",
+      component: () => import("../views/FeedRealEstateView.vue"),
+    },
+    {
+      path: "/blockchain",
+      name: "blockchain",
+      component: () => import("../views/FeedBlockchainView.vue"),
     },
     {
       path: "/auth",
       name: "auth",
-      component: () => import("../views/AuthView.vue"),
+      component: () => import("../views/SlackAuthView.vue"),
     },
   ],
 });
