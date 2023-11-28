@@ -10,8 +10,8 @@ const router = createRouter({
       component: DashboardView,
     },
     {
-      path: "/real-state",
-      name: "real-state",
+      path: "/real-estate",
+      name: "real-estate",
       component: () => import("../views/FeedRealEstateView.vue"),
     },
     {

@@ -10,6 +10,9 @@ export default {};
 
 <style scoped lang="scss">
 article {
-  background-color: red;
+  margin-top: 70px;
+  padding-top: 20px;
+  min-height: calc(100dvh - 70px);
+  box-sizing: border-box;
 }
 </style>
