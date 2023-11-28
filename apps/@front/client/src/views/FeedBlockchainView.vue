@@ -1,12 +1,12 @@
 <script lang="ts">
-import FeedBlockchainTemplate from "@/templates/FeedBlockchainTemplate.vue";
+import FeedBlockchain from "@/templates/feed_blockchain";
 export default {
   components: {
-    FeedBlockchainTemplate,
+    FeedBlockchain,
   },
 };
 </script>
 
 <template>
-  <FeedBlockchainTemplate />
+  <FeedBlockchain />
 </template>

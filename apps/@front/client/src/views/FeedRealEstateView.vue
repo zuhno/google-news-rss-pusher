@@ -1,12 +1,12 @@
 <script lang="ts">
-import FeedRealEstateTemplate from "@/templates/FeedRealEstateTemplate.vue";
+import FeedRealEstate from "@/templates/feed_real-estate";
 export default {
   components: {
-    FeedRealEstateTemplate,
+    FeedRealEstate,
   },
 };
 </script>
 
 <template>
-  <FeedRealEstateTemplate />
+  <FeedRealEstate />
 </template>

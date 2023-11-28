@@ -1,12 +1,13 @@
 <script lang="ts">
-import Dashboard from "@/templates/dashboard";
+import AuthSlack from "@/templates/auth_slack";
+
 export default {
   components: {
-    Dashboard,
+    AuthSlack,
   },
 };
 </script>
 
 <template>
-  <Dashboard />
+  <AuthSlack />
 </template>
