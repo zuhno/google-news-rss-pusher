@@ -6,7 +6,7 @@ export class OAuth2Controller {
   constructor(private readonly service: OAuth2Service) {}
 
   @Post()
-  async postCode(@Body() body) {
+  async postCode(@Body() body: { code: string }) {
     return this.service.postCode(body.code);
   }
 }

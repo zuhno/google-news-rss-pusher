@@ -1,18 +1,20 @@
 import { HttpService } from "@nestjs/axios";
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { firstValueFrom } from "rxjs";
-import { Supabase } from "src/common/supabase";
+import { SlackService } from "src/common/slack";
+import { SupabaseService } from "src/common/supabase";
 
 @Injectable()
 export class OAuth2Service {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
-    private readonly supabase: Supabase
+    private readonly supabaseService: SupabaseService,
+    private readonly slackService: SlackService
   ) {}
 
-  async postCode(code: string): Promise<boolean> {
+  async postCode(code: string): Promise<any[]> {
     const formData = new FormData();
     formData.append("code", code);
     formData.append("client_id", this.configService.get("SLACK_CLIENT_ID"));
@@ -24,17 +26,24 @@ export class OAuth2Service {
       })
     );
 
-    if (!result.data) return false;
-    console.log(result.data);
-    const webhook = result.data.incoming_webhook;
-    // TODO : webhook info save to db
-    // webhook.channel_id - pk
-    // webhook.channel - ch_name
-    // webhook.url - ch_url
+    if (!result.data) throw new HttpException("UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
 
-    // TODO : Fail Response implement
-    if (!webhook?.channel) return false;
+    const { data, error } = await this.supabaseService
+      .getClient()
+      .from("subscriber")
+      .insert({
+        ch_id: result.data.incoming_webhook?.channel_id,
+        ch_name: result.data.incoming_webhook?.channel,
+        ch_url: result.data.incoming_webhook?.url,
+        active: "Y",
+        noti_interval: 3,
+      })
+      .select();
 
-    return true;
+    if (error?.message) throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+
+    await firstValueFrom(this.slackService.postInitMessage(result.data.incoming_webhook?.url));
+
+    return data;
   }
 }

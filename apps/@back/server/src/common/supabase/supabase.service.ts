@@ -6,8 +6,8 @@ import { ConfigService } from "@nestjs/config";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 @Injectable({ scope: Scope.REQUEST })
-export class Supabase {
-  private readonly logger = new Logger(Supabase.name);
+export class SupabaseService {
+  private readonly logger = new Logger(SupabaseService.name);
   private clientInstance: SupabaseClient;
 
   constructor(
