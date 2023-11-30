@@ -1,11 +1,11 @@
 import { Module } from "@nestjs/common";
 import { HttpModule } from "@nestjs/axios";
+import { ConfigModule } from "@nestjs/config";
 
+import { SupabaseModule } from "@/common/supabase/supabase.module";
+import { SlackModule } from "@/common/slack/slack.module";
 import { OAuth2Controller } from "./oauth2.controller";
 import { OAuth2Service } from "./oauth2.service";
-import { SupabaseModule } from "src/common/supabase";
-import { ConfigModule } from "@nestjs/config";
-import { SlackModule } from "src/common/slack";
 
 @Module({
   imports: [ConfigModule, HttpModule, SupabaseModule, SlackModule],
