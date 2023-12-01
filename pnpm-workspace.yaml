@@ -1,4 +1,5 @@
 packages:
   - "apps/@front/*"
   - "apps/@back/*"
+  - "apps/@batch/*"
   - "packages/*"

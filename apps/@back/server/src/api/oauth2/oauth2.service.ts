@@ -31,7 +31,7 @@ export class OAuth2Service {
 
     const { data, error } = await this.supabaseService
       .getClient()
-      .from("Subscriber")
+      .serviceRole.from("Subscriber")
       .insert({
         ch_id: result.data.incoming_webhook?.channel_id,
         ch_name: result.data.incoming_webhook?.channel,

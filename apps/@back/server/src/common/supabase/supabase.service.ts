@@ -6,23 +6,28 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 @Injectable()
 export class SupabaseService {
   private readonly logger = new Logger(SupabaseService.name);
-  private clientInstance: SupabaseClient;
+  private anonClientInstance: SupabaseClient;
+  private serviceRoleClientInstance: SupabaseClient;
 
   constructor(private readonly configService: ConfigService) {}
 
   getClient() {
     this.logger.log("getting supabase client...");
-    if (this.clientInstance) {
-      return this.clientInstance;
+    if (this.anonClientInstance && this.serviceRoleClientInstance) {
+      return { anon: this.anonClientInstance, serviceRole: this.serviceRoleClientInstance };
     }
 
     this.logger.log("initialising new supabase client");
 
-    this.clientInstance = createClient(
+    this.anonClientInstance = createClient(
       this.configService.get("SUPABASE_URL"),
-      this.configService.get("SUPABASE_KEY")
+      this.configService.get("SUPABASE_ANON_KEY")
+    );
+    this.serviceRoleClientInstance = createClient(
+      this.configService.get("SUPABASE_URL"),
+      this.configService.get("SUPABASE_SERVICE_ROLE_KEY")
     );
 
-    return this.clientInstance;
+    return { anon: this.anonClientInstance, serviceRole: this.serviceRoleClientInstance };
   }
 }

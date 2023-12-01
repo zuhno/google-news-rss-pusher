@@ -11,7 +11,7 @@ export class FeedService {
   async realEstateList(lastKey?: number): Promise<RealEstateResponseDto> {
     const { data: categoryData, error: categoryErr } = await this.supabaseService
       .getClient()
-      .from("Category")
+      .anon.from("Category")
       .select("*")
       .eq("title", "부동산")
       .single();
@@ -20,7 +20,7 @@ export class FeedService {
 
     const query = this.supabaseService
       .getClient()
-      .from("Feed")
+      .anon.from("Feed")
       .select("*")
       .eq("category_id", categoryData.id)
       .order("id", { ascending: false })
@@ -41,7 +41,7 @@ export class FeedService {
     console.log("lastKey: ", lastKey);
     const { data: categoryData, error: categoryErr } = await this.supabaseService
       .getClient()
-      .from("Category")
+      .anon.from("Category")
       .select("*")
       .eq("title", "블록체인")
       .single();
@@ -50,7 +50,7 @@ export class FeedService {
 
     const query = this.supabaseService
       .getClient()
-      .from("Feed")
+      .anon.from("Feed")
       .select("*")
       .eq("category_id", categoryData.id)
       .order("id", { ascending: false })

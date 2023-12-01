@@ -16,7 +16,9 @@
   "packageManager": "pnpm@8.9.0",
   "scripts": {
     "@front/client": "cd apps/@front/client && pnpm",
-    "@back/server": "cd apps/@back/server && pnpm"
+    "@back/server": "cd apps/@back/server && pnpm",
+    "@batch/scrap": "cd apps/@batch/scrap && pnpm",
+    "@batch/broadcast": "cd apps/@batch/broadcast && pnpm"
   },
   "devDependencies": {
     "prettier": "^3.0.3"
