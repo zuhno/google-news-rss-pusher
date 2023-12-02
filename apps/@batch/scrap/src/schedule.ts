@@ -11,52 +11,50 @@ const supabaseServiceRoleClient = createClient(
 export const job = async () => {
   try {
     // Read Category List
-    const { data: categoryData, error: categoryErr } = await supabaseAnonClient
-      .from("Category")
-      .select("*");
+    const categories = await supabaseAnonClient.from("Category").select("*");
 
-    if (categoryErr) throw new Error(categoryErr.message);
-    if (categoryData.length === 0) return;
+    if (categories.error) throw new Error(categories.error.message);
+    if (categories.data.length === 0) return;
 
-    for await (const categoryItem of categoryData) {
+    for (const category of categories.data) {
       // Read the list of saved feeds by category
-      const { data: feedData, error: feedErr } = await supabaseAnonClient
+      const prevFeeds = await supabaseAnonClient
         .from("Feed")
         .select("*")
-        .eq("category_id", categoryItem.id)
+        .eq("category_id", category.id)
         .order("id", { ascending: false })
         .limit(3);
 
-      if (feedErr) throw new Error(feedErr.message);
+      if (prevFeeds.error) throw new Error(prevFeeds.error.message);
 
-      const prevTitles = feedData.map((feed) => feed.title || "");
+      const prevTitles = prevFeeds.data.map((feed) => feed?.title || "");
 
       // Clip new non-overlapping news against saved feed titles
-      const newFeeds = await clippedNews(prevTitles, categoryItem.title);
+      const newFeeds = await clippedNews(prevTitles, category.title);
 
       if (newFeeds.length === 0) {
-        console.log(`There is no clipping '${categoryItem.title}' news`);
+        console.log(`There is no clipping '${category.title}' news`);
         return;
       }
 
       const query = [];
-      for await (const feed of newFeeds) {
+      for (const feed of newFeeds) {
         const realLink = await getRealLink(feed.link);
 
         query.push({
           title: feed.title,
           publisher: feed.source || "-",
           link: realLink,
-          category_id: categoryItem.id,
+          category_id: category.id,
         });
       }
 
       // Insert new news data
-      const { data, error } = await supabaseServiceRoleClient.from("Feed").insert(query).select();
+      const insertedFeed = await supabaseServiceRoleClient.from("Feed").insert(query).select();
 
-      if (error) throw new Error(error.message);
+      if (insertedFeed.error) throw new Error(insertedFeed.error.message);
 
-      console.log(`${data.length} new '${categoryItem.title}' news has been added.`);
+      console.log(`${insertedFeed.data?.length} new '${category.title}' news has been added.`);
     }
   } catch (error: unknown) {
     if (axios.isAxiosError<{ message: string }>(error)) {

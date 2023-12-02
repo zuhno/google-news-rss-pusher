@@ -6,20 +6,7 @@ import { excludeTitleRegex } from "./constants";
 
 const xml2json = new XMLParser();
 
-export const getRealLink = async (link: string) => {
-  try {
-    const { data } = await axios.get(link);
-
-    const match = String(data).match(/<a[^>]*>(.*?)<\/a>/);
-
-    if (!match?.[1]) return link;
-    return match[1];
-  } catch (error) {
-    return link;
-  }
-};
-
-// unexport: Procedure to return match rate / n : 1
+// ! unexport: Procedure to return match rate / n : 1
 const _rawUnduplicatedRatio = (texts: string[], target: string) => {
   let max = 0;
 
@@ -46,7 +33,7 @@ const _rawUnduplicatedRatio = (texts: string[], target: string) => {
   return max;
 };
 
-// unexport: Procedure for returning non-overlapping lists / m : n
+// ! unexport: Procedure for returning non-overlapping lists / m : n
 const _rawUnduplicated = (items: IRssResponseItem[], ratio: number) => {
   const copiedItems = [...items];
   for (let i = 0; i < copiedItems.length; i++) {
@@ -77,7 +64,7 @@ const _rawUnduplicated = (items: IRssResponseItem[], ratio: number) => {
   return copiedItems.filter((text) => !!text);
 };
 
-// unexport: To extract a valid title
+// ! unexport: To extract a valid title
 const _extractValidTitle = (title: string, source?: string) =>
   title.replace(` - ${source}`, "").replace(/\s?<\s?[\w가-힣]*\s?/g, "");
 
@@ -115,4 +102,17 @@ export const clippedNews = async (prevTitles: string[], categoryTitle: string) =
   }
 
   return newFeeds;
+};
+
+export const getRealLink = async (link: string) => {
+  try {
+    const { data } = await axios.get(link);
+
+    const match = String(data).match(/<a[^>]*>(.*?)<\/a>/);
+
+    if (!match?.[1]) return link;
+    return match[1];
+  } catch (error) {
+    return link;
+  }
 };
