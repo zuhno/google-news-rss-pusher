@@ -1,7 +1,8 @@
 import axios from "axios";
 import { XMLParser } from "fast-xml-parser";
-import { IRssResponse, IRssResponseItem } from "./type";
-import { excludeTitleRegex } from "./constant";
+
+import { IRssResponse, IRssResponseItem } from "./types";
+import { excludeTitleRegex } from "./constants";
 
 const xml2json = new XMLParser();
 

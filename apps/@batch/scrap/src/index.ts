@@ -11,7 +11,6 @@ rule.minute = 55;
 const main = () => {
   console.log("Scheduler is Running 🥳");
 
-  job();
   // Called every 55 minutes of every hour
   scheduleJob(rule, () => {
     job();

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { createClient } from "@supabase/supabase-js";
-import { clippedNews, getRealLink } from "./util";
+import { clippedNews, getRealLink } from "./utils";
 
 const supabaseAnonClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 const supabaseServiceRoleClient = createClient(
