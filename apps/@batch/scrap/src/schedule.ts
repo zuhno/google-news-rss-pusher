@@ -1,12 +1,58 @@
 import axios from "axios";
 import { createClient } from "@supabase/supabase-js";
-import { clippedNews, getRealLink } from "./utils";
+import { XMLParser } from "fast-xml-parser";
+
+import {
+  extractValidTitle,
+  getRealLink,
+  rawUnduplicatedFeeds,
+  rawUnduplicatedRatio,
+} from "./utils";
+import type { IRssResponse, IRssResponseItem } from "./types";
+
+const xml2json = new XMLParser();
 
 const supabaseAnonClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 const supabaseServiceRoleClient = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+const clippedNews = async (prevTitles: string[], categoryTitle: string) => {
+  const newFeeds: IRssResponseItem[] = [];
+
+  const { data } = await axios.get(
+    `https://news.google.com/rss/search?q=${categoryTitle}when:1h&hl=ko`
+  );
+
+  const parseData = xml2json.parse(data) as IRssResponse;
+
+  const items = parseData?.rss?.channel?.item;
+
+  if (Array.isArray(items)) {
+    // Remove publisher from title
+    const removeSourceItems = items.map((item) => ({
+      ...item,
+      title: extractValidTitle(item.title, item.source),
+    }));
+
+    // Duplicate check with saved titles
+    const duplicatedCheckByNewFeed = removeSourceItems.filter(
+      (feed) => rawUnduplicatedRatio(prevTitles, feed.title) < 0.4
+    );
+
+    // Duplicate check by text - Considered redundant if matched more than 40%
+    newFeeds.push(...rawUnduplicatedFeeds(duplicatedCheckByNewFeed, 0.4).slice(0, 1));
+  } else if (items) {
+    items.title = extractValidTitle(items.title, items.source);
+
+    if (rawUnduplicatedRatio(prevTitles, items.title) < 0.4) {
+      newFeeds.push(items);
+    }
+  }
+
+  return newFeeds;
+};
 
 export const job = async () => {
   try {
@@ -39,7 +85,7 @@ export const job = async () => {
 
       const query = [];
       for (const feed of newFeeds) {
-        const realLink = await getRealLink(feed.link);
+        const realLink = await getRealLink(feed.link, axios.get);
 
         query.push({
           title: feed.title,
