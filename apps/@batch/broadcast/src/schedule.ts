@@ -1,11 +1,16 @@
 import axios from "axios";
 import { constants } from "node:http2";
 import { createClient } from "@supabase/supabase-js";
-import { IntervalTimeEnum } from "./types";
-import { sleep } from "./utils";
 
-const supabaseAnonClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-const supabaseServiceRoleClient = createClient(
+import { sleep } from "./utils";
+import type { IntervalTimeEnum } from "./types";
+import type { Database } from "supabase-type";
+
+const supabaseAnonClient = createClient<Database>(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+const supabaseServiceRoleClient = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );

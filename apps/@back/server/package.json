@@ -48,7 +48,8 @@
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.2.0"
+    "tsconfig-paths": "^4.2.0",
+    "supabase-type": "workspace:*"
   },
   "jest": {
     "moduleFileExtensions": [

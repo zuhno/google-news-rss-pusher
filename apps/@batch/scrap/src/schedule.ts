@@ -9,11 +9,15 @@ import {
   rawUnduplicatedRatio,
 } from "./utils";
 import type { IRssResponse, IRssResponseItem } from "./types";
+import type { Database } from "supabase-type";
 
 const xml2json = new XMLParser();
 
-const supabaseAnonClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-const supabaseServiceRoleClient = createClient(
+const supabaseAnonClient = createClient<Database>(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+const supabaseServiceRoleClient = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
