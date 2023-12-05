@@ -27,7 +27,7 @@ export class FeedService {
       const { data: lastData } = await this.supabaseService
         .getClient()
         .anon.from("Feed")
-        .select("id", { count: "exact" })
+        .select("id")
         .eq("category_id", categoryData.id)
         .limit(1);
 
@@ -37,7 +37,7 @@ export class FeedService {
     const query = this.supabaseService
       .getClient()
       .anon.from("Feed")
-      .select("*", { count: "exact" })
+      .select("*")
       .eq("category_id", categoryData.id)
       .order("id", { ascending: false })
       .limit(10);
@@ -71,7 +71,7 @@ export class FeedService {
       const { data: lastData } = await this.supabaseService
         .getClient()
         .anon.from("Feed")
-        .select("id", { count: "exact" })
+        .select("id")
         .eq("category_id", categoryData.id)
         .limit(1);
 
