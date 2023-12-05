@@ -1,0 +1,9 @@
+{
+  "name": "http-api-type",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.ts",
+  "devDependencies": {
+    "supabase-type": "workspace:*"
+  }
+}

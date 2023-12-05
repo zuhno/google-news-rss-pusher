@@ -4,7 +4,7 @@ export default {};
 
 <template>
   <footer>
-    <span>Copyright © {{ new Date().getFullYear() }}. cuttleman. All rights reserved.</span>
+    <span>Copyright © {{ new Date().getFullYear() }}. zuhno. All rights reserved.</span>
   </footer>
 </template>
 

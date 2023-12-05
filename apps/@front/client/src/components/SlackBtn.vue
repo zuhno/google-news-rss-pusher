@@ -8,20 +8,27 @@ export default {
 
 <template>
   <a :href="'https://slack.com/oauth/v2/authorize?scope=incoming-webhook&client_id=' + clientId">
-    <button class="btn-slack">Add to Slack</button>
+    <button class="btn-slack">
+      <i class="pi pi-slack"></i>
+      Add to Slack
+    </button>
   </a>
 </template>
 
 <style scoped lang="scss">
-.btn {
-  &-slack {
+a {
+  .btn-slack {
     outline: none;
     border: none;
     padding: 10px 15px;
     border-radius: 5px;
     background-color: #f5f5f5;
-    font-size: 20px;
+    font-size: 15px;
     cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    gap: 5px;
+    align-items: center;
   }
 }
 </style>

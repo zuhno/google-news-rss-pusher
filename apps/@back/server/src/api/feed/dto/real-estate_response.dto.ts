@@ -1,4 +1,3 @@
-export class RealEstateResponseDto {
-  readonly list: any[];
-  readonly lastKey?: number;
-}
+import { response } from "http-api-type";
+
+export class RealEstateResponseDto extends response.RealEstateResponse {}

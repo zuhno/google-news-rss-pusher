@@ -1,4 +1,3 @@
-export class BlockchainResponseDto {
-  readonly list: any[];
-  readonly lastKey?: number;
-}
+import { response } from "http-api-type";
+
+export class BlockchainResponseDto extends response.BlockchainResponse {}
