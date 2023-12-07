@@ -8,14 +8,16 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig({
   plugins: [
     vue(),
-    mkcert({
-      autoUpgrade: true,
-      mkcertPath: "/opt/homebrew/bin/mkcert",
-      savePath: process.cwd(),
-    }),
+    !!process.env.HTTPS &&
+      mkcert({
+        autoUpgrade: true,
+        mkcertPath: "/opt/homebrew/bin/mkcert",
+        savePath: process.cwd(),
+        source: "coding",
+      }),
   ],
   server: {
-    https: true,
+    https: !!process.env.HTTPS,
     port: 3000,
   },
   resolve: {
