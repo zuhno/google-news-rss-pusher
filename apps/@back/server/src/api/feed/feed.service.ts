@@ -6,97 +6,107 @@ import { BlockchainResponseDto } from "./dto/blockchain_response.dto";
 
 @Injectable()
 export class FeedService {
-  private lastData: Record<"real_estate_id" | "blockchain_id", number> = {
-    real_estate_id: null,
-    blockchain_id: null,
-  };
+  private lastData: Record<number, number> = {};
 
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  async realEstateList(lastKey?: number): Promise<RealEstateResponseDto> {
-    const { data: categoryData, error: categoryErr } = await this.supabaseService
+  async realEstateList({
+    lastKey,
+    limit = 10,
+  }: {
+    lastKey?: number;
+    limit: number;
+  }): Promise<RealEstateResponseDto> {
+    const category = await this.supabaseService
       .getClient()
       .anon.from("Category")
       .select("*")
       .eq("title", "부동산")
       .single();
 
-    if (categoryErr) throw new HttpException(categoryErr.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    if (category.error)
+      throw new HttpException(category.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
-    if (!this.lastData.real_estate_id) {
+    if (!this.lastData[category.data.id]) {
       const { data: lastData } = await this.supabaseService
         .getClient()
         .anon.from("Feed")
         .select("id")
-        .eq("category_id", categoryData.id)
+        .eq("category_id", category.data.id)
         .limit(1);
 
-      this.lastData.real_estate_id = lastData[0].id;
+      this.lastData[category.data.id] = lastData[0].id;
     }
 
     const query = this.supabaseService
       .getClient()
       .anon.from("Feed")
       .select("*")
-      .eq("category_id", categoryData.id)
+      .eq("category_id", category.data.id)
       .order("id", { ascending: false })
-      .limit(10);
+      .limit(limit);
 
     if (lastKey) {
       query.lt("id", lastKey);
     }
 
-    const { data: feedData, error: feedErr } = await query;
+    const feeds = await query;
 
-    const _lastKey = feedData.at(-1)?.id;
-    const hasNext = this.lastData.real_estate_id < _lastKey;
+    if (feeds.error) throw new HttpException(feeds.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
-    if (feedErr) throw new HttpException(feedErr.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    const _lastKey = feeds.data.at(-1)?.id;
+    const hasNext = this.lastData[category.data.id] < _lastKey;
 
-    return { list: feedData, hasNext, lastKey: _lastKey };
+    return { list: feeds.data, hasNext, lastKey: _lastKey };
   }
 
-  async blockchainList(lastKey?: number): Promise<BlockchainResponseDto> {
-    console.log("lastKey: ", lastKey);
-    const { data: categoryData, error: categoryErr } = await this.supabaseService
+  async blockchainList({
+    lastKey,
+    limit = 10,
+  }: {
+    lastKey?: number;
+    limit: number;
+  }): Promise<BlockchainResponseDto> {
+    const category = await this.supabaseService
       .getClient()
       .anon.from("Category")
       .select("*")
       .eq("title", "블록체인")
       .single();
 
-    if (categoryErr) throw new HttpException(categoryErr.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    if (category.error)
+      throw new HttpException(category.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
-    if (!this.lastData.blockchain_id) {
+    if (!this.lastData[category.data.id]) {
       const { data: lastData } = await this.supabaseService
         .getClient()
         .anon.from("Feed")
         .select("id")
-        .eq("category_id", categoryData.id)
+        .eq("category_id", category.data.id)
         .limit(1);
 
-      this.lastData.blockchain_id = lastData[0].id;
+      this.lastData[category.data.id] = lastData[0].id;
     }
 
     const query = this.supabaseService
       .getClient()
       .anon.from("Feed")
       .select("*")
-      .eq("category_id", categoryData.id)
+      .eq("category_id", category.data.id)
       .order("id", { ascending: false })
-      .limit(10);
+      .limit(limit);
 
     if (lastKey) {
       query.lt("id", lastKey);
     }
 
-    const { data: feedData, error: feedErr } = await query;
+    const feeds = await query;
 
-    const _lastKey = feedData.at(-1)?.id;
-    const hasNext = this.lastData.real_estate_id < _lastKey;
+    if (feeds.error) throw new HttpException(feeds.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
-    if (feedErr) throw new HttpException(feedErr.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    const _lastKey = feeds.data.at(-1)?.id;
+    const hasNext = this.lastData[category.data.id] < _lastKey;
 
-    return { list: feedData, hasNext, lastKey: _lastKey };
+    return { list: feeds.data, hasNext, lastKey: _lastKey };
   }
 }

@@ -30,7 +30,7 @@ export default {
       this.isPending = true;
       try {
         const { data } = await apis.feed.get.realEstates({
-          params: { lastKey: this.querylastKey },
+          params: { lastKey: this.querylastKey, limit: 10 },
         });
         this.hasNext = data.hasNext;
         if (data.lastKey) this.querylastKey = data.lastKey;
