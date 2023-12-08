@@ -6,13 +6,13 @@ import { FeedService } from "./feed.service";
 export class FeedController {
   constructor(private readonly feedService: FeedService) {}
 
-  @Get("/real-estate")
-  async realEstateList(@Query("lastKey") lastKey?: number, @Query("limit") limit?: number) {
-    return this.feedService.realEstateList({ lastKey, limit });
-  }
-
-  @Get("/blockchain")
-  async blockchainList(@Query("lastKey") lastKey?: number, @Query("limit") limit?: number) {
-    return this.feedService.blockchainList({ lastKey, limit });
+  @Get()
+  async getFeeds(
+    @Query("lastKey") lastKey: number,
+    @Query("limit") limit: number,
+    @Query("categoryId") categoryId: number
+  ) {
+    console.log("lastKey : ", lastKey, " limit : ", limit, " categoryId : ", categoryId);
+    return this.feedService.getFeeds({ lastKey, limit, categoryId });
   }
 }
