@@ -12,7 +12,6 @@ export class FeedController {
     @Query("limit") limit: number,
     @Query("categoryId") categoryId: number
   ) {
-    console.log("lastKey : ", lastKey, " limit : ", limit, " categoryId : ", categoryId);
     return this.feedService.getFeeds({ lastKey, limit, categoryId });
   }
 }

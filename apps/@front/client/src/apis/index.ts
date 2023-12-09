@@ -1,3 +1,4 @@
+import type { AxiosRequestConfigWithParam } from "@/types";
 import axios, { type AxiosRequestConfig } from "axios";
 
 import { response } from "http-api-type";
@@ -5,12 +6,15 @@ import { response } from "http-api-type";
 const instance = axios.create({ baseURL: import.meta.env.VITE_SERVER_DOMAIN, timeout: 10000 });
 
 export default {
-  feed: {
-    get: {
-      realEstates: (config?: AxiosRequestConfig) =>
-        instance.get<response.RealEstateResponse>("/feed/real-estate", config),
-      blockchains: (config?: AxiosRequestConfig) =>
-        instance.get<response.BlockchainResponse>("/feed/blockchain", config),
-    },
+  get: {
+    getFeeds: (
+      config?: AxiosRequestConfigWithParam<{
+        lastKey?: number | null;
+        limit?: number;
+        categoryId: number;
+      }>
+    ) => instance.get<response.FeedsResponse>("/feeds", config),
+    getConstants: (config?: AxiosRequestConfig) =>
+      instance.get<response.ConstantResponse>("/constants", config),
   },
 };

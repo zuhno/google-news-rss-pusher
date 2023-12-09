@@ -4,7 +4,7 @@ import type { PropType } from "vue";
 
 export default {
   props: {
-    feeds: Object as PropType<response.RealEstateResponse["list"]>,
+    feeds: Object as PropType<response.FeedsResponse["list"]>,
   },
   methods: {
     dateFormatting(date: string) {

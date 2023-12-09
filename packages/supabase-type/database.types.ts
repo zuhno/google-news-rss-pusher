@@ -5,23 +5,26 @@ export interface Database {
     Tables: {
       App: {
         Row: {
+          authorize_link: string;
           category_id: number;
           created_at: string;
-          from: string;
+          from: Database["public"]["Enums"]["AppFrom"];
           id: string;
           updated_at: string;
         };
         Insert: {
+          authorize_link: string;
           category_id: number;
           created_at?: string;
-          from: string;
+          from: Database["public"]["Enums"]["AppFrom"];
           id: string;
           updated_at?: string;
         };
         Update: {
+          authorize_link?: string;
           category_id?: number;
           created_at?: string;
-          from?: string;
+          from?: Database["public"]["Enums"]["AppFrom"];
           id?: string;
           updated_at?: string;
         };
@@ -208,7 +211,7 @@ export interface Database {
       [_ in never]: never;
     };
     Enums: {
-      deactive_reason: "NOT";
+      AppFrom: "SLACK";
       DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "NULL" | "UNKOWN";
       Reason: "NOT_FOUND" | "USER_REQUEST" | "UNKOWN";
     };

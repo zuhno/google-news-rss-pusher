@@ -1,13 +1,13 @@
 import { Module } from "@nestjs/common";
 
 import { SupabaseModule } from "@/common/supabase/supabase.module";
-import { ConstantService } from "./constant.service";
+import { StoreModule } from "@/common/store/store.module";
 import { ConstantController } from "./constant.controller";
+import { ConstantService } from "./constant.service";
 
 @Module({
-  imports: [SupabaseModule],
+  imports: [SupabaseModule, StoreModule],
   controllers: [ConstantController],
   providers: [ConstantService],
-  exports: [ConstantService],
 })
 export class ConstantModule {}

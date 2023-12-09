@@ -1,49 +1,49 @@
-import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 
 import { ConstantsResponseDto } from "./dto/constants_response";
-import type { SupabaseService } from "@/common/supabase/supabase.service";
+import { SupabaseService } from "@/common/supabase/supabase.service";
+import { StoreService } from "@/common/store/store.service";
+import { Database } from "supabase-type";
 
 @Injectable()
 export class ConstantService {
-  private readonly logger = new Logger(ConstantService.name);
-  private lastFeed: Record<number, number> = {};
-
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(
+    private readonly supabaseService: SupabaseService,
+    private readonly storeService: StoreService
+  ) {}
 
   async getConstant(): Promise<ConstantsResponseDto> {
-    const categories = await this.supabaseService.getClient().anon.from("Category").select("*");
+    const queries = [
+      this.supabaseService.getClient().anon.from("Category").select("*"),
+      this.supabaseService.getClient().anon.from("App").select("authorize_link, from, category_id"),
+    ];
+
+    const [categories, apps] = await Promise.all(queries);
 
     if (categories.error)
       throw new HttpException(categories.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    if (apps.error) throw new HttpException(apps.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
-    const feedsByCategory = await Promise.allSettled(
-      categories.data.map((category) =>
-        this.supabaseService
-          .getClient()
-          .anon.from("Feed")
-          .select("id, category_id")
-          .eq("category_id", category.id)
-          .limit(1)
-      )
+    await this.storeService.setLastFeed(
+      categories.data as Database["public"]["Tables"]["Category"]["Row"][]
     );
 
-    for (const feed of feedsByCategory) {
-      if (feed.status === "rejected") {
-        this.logger.error(feed.reason);
-        continue;
-      }
-      if (feed.value.error) {
-        this.logger.error(feed.value.error.message);
-        continue;
-      }
+    const remapApps = apps.data.reduce((acc, cnt: any) => {
+      return {
+        ...acc,
+        [cnt.category_id]: [
+          ...(acc[cnt.category_id] || []),
+          {
+            from: cnt.from,
+            authorizeLink: cnt.authorize_link,
+          },
+        ],
+      };
+    }, {});
 
-      this.lastFeed[feed.value.data[0].category_id] = feed.value.data[0].id;
-    }
-
-    return { categories: categories.data };
-  }
-
-  getLastFeed() {
-    return this.lastFeed;
+    return {
+      categories: categories.data as Database["public"]["Tables"]["Category"]["Row"][],
+      apps: remapApps,
+    };
   }
 }

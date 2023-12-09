@@ -1,15 +1,20 @@
 <script lang="ts">
+import { response } from "http-api-type";
+import { mapState } from "pinia";
+
+import apis from "@/apis";
+import { useConstantStore } from "@/store";
 import SlackBtn from "@/components/SlackBtn.vue";
 import FeedList from "@/components/FeedList.vue";
-import apis from "@/apis";
-import { response } from "http-api-type";
 
 interface Data {
   clientId: string;
-  querylastKey?: number | null;
-  feeds: response.RealEstateResponse["list"];
+  querylastKey: number | null;
+  feeds: response.FeedsResponse["list"];
   hasNext: boolean;
-  isPending: boolean;
+  isLoading: boolean;
+  categoryId: number | null;
+  appByCategoryId: response.ConstantResponse["apps"][number];
 }
 
 export default {
@@ -19,18 +24,31 @@ export default {
       querylastKey: null,
       feeds: [],
       hasNext: false,
-      isPending: false,
+      isLoading: false,
+      categoryId: null,
+      appByCategoryId: [],
     };
   },
+  computed: {
+    ...mapState(useConstantStore, ["categories", "apps"]),
+  },
   async mounted() {
+    this.categoryId = this.categories.find((category) => category.title === "부동산")!.id;
+    this.appByCategoryId = this.apps[this.categoryId] || [];
+    console.log(this.appByCategoryId);
     await this.fetchList();
   },
   methods: {
     async fetchList() {
-      this.isPending = true;
+      this.isLoading = true;
+
       try {
-        const { data } = await apis.feed.get.realEstates({
-          params: { lastKey: this.querylastKey, limit: 10 },
+        const { data } = await apis.get.getFeeds({
+          params: {
+            lastKey: this.querylastKey,
+            limit: 10,
+            categoryId: this.categoryId!,
+          },
         });
         this.hasNext = data.hasNext;
         if (data.lastKey) this.querylastKey = data.lastKey;
@@ -38,7 +56,7 @@ export default {
       } catch (error) {
         console.error(error);
       } finally {
-        this.isPending = false;
+        this.isLoading = false;
       }
     },
   },
@@ -47,45 +65,57 @@ export default {
 </script>
 
 <template>
-  <div class="slack-wrapper">
-    <SlackBtn :client-id="clientId" />
-  </div>
+  <section>
+    <div class="messenger-btn-wrapper">
+      <template v-for="app in appByCategoryId" :key="app.authorizeLink">
+        <template v-if="app.from === 'SLACK'">
+          <SlackBtn :authorize-link="app.authorizeLink" />
+        </template>
+      </template>
+    </div>
 
-  <div class="content">
-    <FeedList :feeds="feeds" />
+    <div class="content">
+      <FeedList :feeds="feeds" />
 
-    <button v-if="hasNext" @click="fetchList()">
-      <div v-if="isPending">
-        <i class="pi pi-spin pi-spinner" style="font-size: 1rem"></i>
-      </div>
-      <div v-else>More</div>
-    </button>
-  </div>
+      <button v-if="hasNext" @click="fetchList()">
+        <div v-if="isLoading">
+          <i class="pi pi-spin pi-spinner" style="font-size: 1rem"></i>
+        </div>
+        <div v-else>More</div>
+      </button>
+    </div>
+  </section>
 </template>
 
 <style scoped lang="scss">
-.slack-wrapper {
-  position: fixed;
-  bottom: 50px;
-  right: 100px;
-  align-self: flex-start;
-}
+section {
+  max-width: 700px;
+  width: 100%;
 
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  .messenger-btn-wrapper {
+    position: fixed;
+    bottom: 50px;
+    right: 100px;
+    display: grid;
+    gap: 10px;
+  }
 
-  button {
-    width: fit-content;
-    font-size: 15px;
-    border: none;
-    outline: none;
-    width: 100px;
-    height: 40px;
-    border-radius: 5px;
-    background-color: #f5f5f5;
-    cursor: pointer;
+  .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    button {
+      width: fit-content;
+      font-size: 15px;
+      border: none;
+      outline: none;
+      width: 100px;
+      height: 40px;
+      border-radius: 5px;
+      background-color: #f5f5f5;
+      cursor: pointer;
+    }
   }
 }
 </style>
