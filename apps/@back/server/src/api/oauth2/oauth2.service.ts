@@ -5,6 +5,7 @@ import { firstValueFrom } from "rxjs";
 
 import { SlackService } from "@/common/slack/slack.service";
 import { SupabaseService } from "@/common/supabase/supabase.service";
+import { OAuth2SlackAccessResponseDto } from "./dto/oauth2_response.dto";
 
 @Injectable()
 export class OAuth2Service {
@@ -15,7 +16,7 @@ export class OAuth2Service {
     private readonly slackService: SlackService
   ) {}
 
-  async access(code: string): Promise<any[]> {
+  async postSlackAccess(code: string): Promise<OAuth2SlackAccessResponseDto> {
     const formData = new FormData();
     formData.append("code", code);
     formData.append("client_id", this.configService.get("SLACK_CLIENT_ID"));
@@ -41,12 +42,19 @@ export class OAuth2Service {
         app_id: result.data.app_id,
         team_id: result.data.team?.id,
       })
-      .select();
+      .select()
+      .single();
 
     if (error?.message) throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
 
     await firstValueFrom(this.slackService.postInitMessage(result.data.incoming_webhook?.url));
 
-    return data;
+    return {
+      active: data.active,
+      channelId: data.ch_id,
+      channelName: data.ch_name,
+      channelUrl: data.ch_url,
+      notificationInterval: data.interval_time,
+    };
   }
 }

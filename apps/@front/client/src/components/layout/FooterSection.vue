@@ -1,7 +1,3 @@
-<script lang="ts">
-export default {};
-</script>
-
 <template>
   <footer>
     <span>Copyright © {{ new Date().getFullYear() }}. zuhno. All rights reserved.</span>

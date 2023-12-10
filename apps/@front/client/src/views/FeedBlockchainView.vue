@@ -1,10 +1,5 @@
-<script lang="ts">
+<script setup lang="ts">
 import FeedBlockchain from "@/templates/feed_blockchain";
-export default {
-  components: {
-    FeedBlockchain,
-  },
-};
 </script>
 
 <template>

@@ -1,47 +1,42 @@
-<script lang="ts">
-import { mapState } from "pinia";
+<script setup lang="ts">
+import { onMounted, ref } from "vue";
 import type { response } from "http-api-type";
 
+import apis from "@/apis";
 import { useConstantStore } from "@/store";
 import FeedList from "@/components/FeedList.vue";
-import apis from "@/apis";
 
 interface Data {
-  feedsByCategory: Record<number, response.FeedsResponse["list"]>;
+  feedsByCategory: Record<number, response.GetFeedsResponse["list"]>;
   linkMap: Record<number, string>;
 }
 
-export default {
-  data(): Data {
-    return {
-      feedsByCategory: {},
-      linkMap: { 1: "/real-estate", 2: "blockchain" },
+const localState = ref<Data>({
+  feedsByCategory: {},
+  linkMap: { 1: "/real-estate", 2: "blockchain" },
+});
+const constantStore = useConstantStore();
+
+onMounted(async () => {
+  for (const category of constantStore.categories) {
+    const { data } = await apis.get.getFeeds({ params: { categoryId: category.id, limit: 4 } });
+    localState.value.feedsByCategory = {
+      ...localState.value.feedsByCategory,
+      [category.id]: data.list,
     };
-  },
-  computed: {
-    ...mapState(useConstantStore, ["categories"]),
-  },
-  async mounted() {
-    for (const category of this.categories) {
-      const { data } = await apis.get.getFeeds({ params: { categoryId: category.id, limit: 4 } });
-      this.feedsByCategory = { ...this.feedsByCategory, [category.id]: data.list };
-    }
-  },
-  components: {
-    FeedList,
-  },
-};
+  }
+});
 </script>
 
 <template>
   <section>
-    <template v-for="category in categories" :key="category.id">
+    <template v-for="category in constantStore.categories" :key="category.id">
       <div>
         <p>
           <span>{{ category.title }}</span>
-          <router-link :to="linkMap[category.id]"><button>...more</button></router-link>
+          <router-link :to="localState.linkMap[category.id]"><button>...more</button></router-link>
         </p>
-        <FeedList :feeds="feedsByCategory[category.id]" />
+        <FeedList :feeds="localState.feedsByCategory[category.id]" />
       </div>
     </template>
   </section>

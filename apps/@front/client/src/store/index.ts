@@ -1,30 +1,30 @@
 import apis from "@/apis";
 import { defineStore } from "pinia";
 import type { response } from "http-api-type";
+import { ref } from "vue";
 
 interface State {
-  categories: response.ConstantResponse["categories"];
-  apps: response.ConstantResponse["apps"];
+  categories: response.GetConstantsResponse["categories"];
+  apps: response.GetConstantsResponse["apps"];
   isRootLoading: boolean;
 }
 
-export const useConstantStore = defineStore("constant", {
-  state: (): State => ({
-    categories: [],
-    apps: {},
-    isRootLoading: true,
-  }),
-  actions: {
-    async initFetch() {
-      try {
-        const { data } = await apis.get.getConstants();
-        this.categories = data.categories;
-        this.apps = data.apps;
-      } catch (error) {
-        console.error(error);
-      } finally {
-        this.isRootLoading = false;
-      }
-    },
-  },
+export const useConstantStore = defineStore("constant", () => {
+  const categories = ref<State["categories"]>([]);
+  const apps = ref<State["apps"]>({});
+  const isRootLoading = ref<State["isRootLoading"]>(true);
+
+  const initFetch = async () => {
+    try {
+      const { data } = await apis.get.getConstants();
+      categories.value = data.categories;
+      apps.value = data.apps;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      isRootLoading.value = false;
+    }
+  };
+
+  return { categories, apps, isRootLoading, initFetch };
 });

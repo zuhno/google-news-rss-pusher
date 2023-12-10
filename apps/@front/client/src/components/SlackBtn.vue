@@ -1,9 +1,5 @@
-<script lang="ts">
-export default {
-  props: {
-    authorizeLink: String,
-  },
-};
+<script setup lang="ts">
+const { authorizeLink } = defineProps({ authorizeLink: String });
 </script>
 
 <template>

@@ -1,14 +1,14 @@
 import { Body, Controller, Post } from "@nestjs/common";
 
 import { OAuth2Service } from "./oauth2.service";
-import { AccessOAuth2Dto } from "./dto/access-oauth2.dto";
+import { OAuth2SlackAccessBodyDto } from "./dto/oauth2_request.dto";
 
 @Controller()
 export class OAuth2Controller {
   constructor(private readonly oauth2Service: OAuth2Service) {}
 
-  @Post()
-  async access(@Body() accessOAuth2Dto: AccessOAuth2Dto) {
-    return this.oauth2Service.access(accessOAuth2Dto.code);
+  @Post("/slack")
+  async postSlackAccess(@Body() body: OAuth2SlackAccessBodyDto) {
+    return this.oauth2Service.postSlackAccess(body.code);
   }
 }

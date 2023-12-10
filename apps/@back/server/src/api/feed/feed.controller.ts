@@ -1,17 +1,14 @@
 import { Controller, Get, Query } from "@nestjs/common";
 
 import { FeedService } from "./feed.service";
+import { FeedsQueryDto } from "./dto/feeds_request.dto";
 
 @Controller()
 export class FeedController {
   constructor(private readonly feedService: FeedService) {}
 
   @Get()
-  async getFeeds(
-    @Query("lastKey") lastKey: number,
-    @Query("limit") limit: number,
-    @Query("categoryId") categoryId: number
-  ) {
-    return this.feedService.getFeeds({ lastKey, limit, categoryId });
+  async getFeeds(@Query() query: FeedsQueryDto) {
+    return this.feedService.getFeeds({ ...query });
   }
 }

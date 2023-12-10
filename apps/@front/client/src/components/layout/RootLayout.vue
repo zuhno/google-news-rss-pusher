@@ -1,23 +1,17 @@
-<script lang="ts">
-import { mapActions, mapState } from "pinia";
+<script setup lang="ts">
 import { useConstantStore } from "@/store";
+import { onMounted } from "vue";
 
-export default {
-  computed: {
-    ...mapState(useConstantStore, ["isRootLoading"]),
-  },
-  async mounted() {
-    this.initFetch();
-  },
-  methods: {
-    ...mapActions(useConstantStore, ["initFetch"]),
-  },
-};
+const constantStore = useConstantStore();
+
+onMounted(async () => {
+  await constantStore.initFetch();
+});
 </script>
 
 <template>
   <article>
-    <div v-if="isRootLoading" class="loader">
+    <div v-if="constantStore.isRootLoading" class="loader">
       <i class="pi pi-spin pi-spinner" style="font-size: 5rem"></i>
     </div>
     <slot v-else></slot>

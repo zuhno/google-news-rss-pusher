@@ -1,6 +1,6 @@
-<script lang="ts">
+<script setup lang="ts">
+import { onMounted, ref } from "vue";
 import { response } from "http-api-type";
-import { mapState } from "pinia";
 
 import apis from "@/apis";
 import { useConstantStore } from "@/store";
@@ -10,64 +10,59 @@ import FeedList from "@/components/FeedList.vue";
 interface Data {
   clientId: string;
   querylastKey: number | null;
-  feeds: response.FeedsResponse["list"];
+  feeds: response.GetFeedsResponse["list"];
   hasNext: boolean;
   isLoading: boolean;
   categoryId: number | null;
-  appByCategoryId: response.ConstantResponse["apps"][number];
+  appByCategoryId: response.GetConstantsResponse["apps"][number];
 }
 
-export default {
-  data(): Data {
-    return {
-      clientId: import.meta.env.VITE_SLACK_CLIENT_ID,
-      querylastKey: null,
-      feeds: [],
-      hasNext: false,
-      isLoading: false,
-      categoryId: null,
-      appByCategoryId: [],
-    };
-  },
-  computed: {
-    ...mapState(useConstantStore, ["categories", "apps"]),
-  },
-  async mounted() {
-    this.categoryId = this.categories.find((category) => category.title === "블록체인")!.id;
-    this.appByCategoryId = this.apps[this.categoryId] || [];
+const localState = ref<Data>({
+  clientId: import.meta.env.VITE_SLACK_CLIENT_ID,
+  querylastKey: null,
+  feeds: [],
+  hasNext: false,
+  isLoading: false,
+  categoryId: null,
+  appByCategoryId: [],
+});
+const constantStore = useConstantStore();
 
-    await this.fetchList();
-  },
-  methods: {
-    async fetchList() {
-      this.isLoading = true;
+async function fetchList() {
+  localState.value.isLoading = true;
 
-      try {
-        const { data } = await apis.get.getFeeds({
-          params: {
-            lastKey: this.querylastKey,
-            limit: 10,
-            categoryId: this.categoryId!,
-          },
-        });
-        this.hasNext = data.hasNext;
-        if (data.lastKey) this.querylastKey = data.lastKey;
-        if (data.list.length > 0) this.feeds = [...this.feeds, ...data.list];
-      } catch (error) {
-        console.error(error);
-      } finally {
-        this.isLoading = false;
-      }
-    },
-  },
-  components: { SlackBtn, FeedList },
-};
+  try {
+    const { data } = await apis.get.getFeeds({
+      params: {
+        lastKey: localState.value.querylastKey,
+        limit: 10,
+        categoryId: localState.value.categoryId!,
+      },
+    });
+    localState.value.hasNext = data.hasNext;
+    if (data.lastKey) localState.value.querylastKey = data.lastKey;
+    if (data.list.length > 0) localState.value.feeds = [...localState.value.feeds, ...data.list];
+  } catch (error) {
+    console.error(error);
+  } finally {
+    localState.value.isLoading = false;
+  }
+}
+
+onMounted(async () => {
+  localState.value.categoryId = constantStore.categories.find(
+    (category) => category.title === "블록체인"
+  )!.id;
+  localState.value.appByCategoryId = constantStore.apps[localState.value.categoryId] || [];
+
+  await fetchList();
+});
 </script>
 
 <template>
   <section>
     <div class="messenger-btn-wrapper">
-      <template v-for="app in appByCategoryId" :key="app.authorizeLink">
+      <template v-for="app in localState.appByCategoryId" :key="app.authorizeLink">
         <template v-if="app.from === 'SLACK'">
           <SlackBtn :authorize-link="app.authorizeLink" />
         </template>
@@ -75,10 +70,10 @@ export default {
     </div>
 
     <div class="content">
-      <FeedList :feeds="feeds" />
+      <FeedList :feeds="localState.feeds" />
 
-      <button v-if="hasNext" @click="fetchList()">
-        <div v-if="isLoading">
+      <button v-if="localState.hasNext" @click="fetchList()">
+        <div v-if="localState.isLoading">
           <i class="pi pi-spin pi-spinner" style="font-size: 1rem"></i>
         </div>
         <div v-else>More</div>

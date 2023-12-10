@@ -1,25 +1,20 @@
-<script lang="ts">
+<script setup lang="ts">
 import { response } from "http-api-type";
 import type { PropType } from "vue";
 
-export default {
-  props: {
-    feeds: Object as PropType<response.FeedsResponse["list"]>,
-  },
-  methods: {
-    dateFormatting(date: string) {
-      const _date = new Date(date);
-      const formatter = new Intl.DateTimeFormat("ko-KR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      return formatter.format(_date);
-    },
-  },
-};
+const { feeds } = defineProps({ feeds: Object as PropType<response.GetFeedsResponse["list"]> });
+
+function dateFormatting(date: string) {
+  const _date = new Date(date);
+  const formatter = new Intl.DateTimeFormat("ko-KR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return formatter.format(_date);
+}
 </script>
 
 <template>

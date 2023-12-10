@@ -1,10 +1,9 @@
-<script lang="ts">
-export default {
-  methods: {
-    isActive(path: string) {
-      return path === this.$router.currentRoute.value.path ? "active" : null;
-    },
-  },
+<script setup lang="ts">
+import { useRouter } from "vue-router";
+const router = useRouter();
+
+const isActive = (path: string) => {
+  return path === router.currentRoute.value.path ? "active" : null;
 };
 </script>
 
