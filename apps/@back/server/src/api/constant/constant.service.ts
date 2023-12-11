@@ -27,6 +27,11 @@ export class ConstantService {
     await this.storeService.setLastFeed(
       categories.data as Database["public"]["Tables"]["Category"]["Row"][]
     );
+    this.storeService.setCategoryIds(
+      (categories.data as Database["public"]["Tables"]["Category"]["Row"][]).map(
+        (category) => category.id
+      )
+    );
 
     const remapApps = apps.data.reduce((acc, cnt: any) => {
       return {

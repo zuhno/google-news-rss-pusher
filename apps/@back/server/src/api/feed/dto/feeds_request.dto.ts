@@ -3,3 +3,7 @@ export class FeedsQueryDto {
   readonly limit: number;
   readonly categoryId: number;
 }
+
+export class FeedsLimitedAllQueryDto {
+  readonly limit: number;
+}

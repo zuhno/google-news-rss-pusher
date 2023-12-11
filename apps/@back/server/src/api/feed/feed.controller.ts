@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from "@nestjs/common";
 
 import { FeedService } from "./feed.service";
-import { FeedsQueryDto } from "./dto/feeds_request.dto";
+import { FeedsLimitedAllQueryDto, FeedsQueryDto } from "./dto/feeds_request.dto";
 
 @Controller()
 export class FeedController {
@@ -10,5 +10,10 @@ export class FeedController {
   @Get()
   async getFeeds(@Query() query: FeedsQueryDto) {
     return this.feedService.getFeeds({ ...query });
+  }
+
+  @Get("/all")
+  async getFeedsLimitedAll(@Query() query: FeedsLimitedAllQueryDto) {
+    return this.feedService.getFeedsLimitedAll({ ...query });
   }
 }

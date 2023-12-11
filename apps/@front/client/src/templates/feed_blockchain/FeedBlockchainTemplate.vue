@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onUnmounted, ref, watchEffect } from "vue";
 import { response } from "http-api-type";
+import { useQuery } from "@tanstack/vue-query";
 
 import apis from "@/apis";
 import { useConstantStore } from "@/store";
@@ -12,50 +13,53 @@ interface Data {
   querylastKey: number | null;
   feeds: response.GetFeedsResponse["list"];
   hasNext: boolean;
-  isLoading: boolean;
   categoryId: number | null;
   appByCategoryId: response.GetConstantsResponse["apps"][number];
 }
+
+const controller = new AbortController();
 
 const localState = ref<Data>({
   clientId: import.meta.env.VITE_SLACK_CLIENT_ID,
   querylastKey: null,
   feeds: [],
   hasNext: false,
-  isLoading: false,
   categoryId: null,
   appByCategoryId: [],
 });
 const constantStore = useConstantStore();
 
-async function fetchList() {
-  localState.value.isLoading = true;
+localState.value.categoryId = constantStore.categories.find(
+  (category) => category.title === "블록체인"
+)!.id;
+localState.value.appByCategoryId = constantStore.apps[localState.value.categoryId] || [];
 
-  try {
-    const { data } = await apis.get.getFeeds({
+const { isFetching, data, error, refetch } = useQuery({
+  queryKey: ["getFeeds", localState.value.categoryId, localState.value.querylastKey],
+  queryFn: async () => {
+    return apis.get.getFeeds({
+      signal: controller.signal,
       params: {
         lastKey: localState.value.querylastKey,
         limit: 10,
         categoryId: localState.value.categoryId!,
       },
     });
-    localState.value.hasNext = data.hasNext;
-    if (data.lastKey) localState.value.querylastKey = data.lastKey;
-    if (data.list.length > 0) localState.value.feeds = [...localState.value.feeds, ...data.list];
-  } catch (error) {
-    console.error(error);
-  } finally {
-    localState.value.isLoading = false;
+  },
+});
+
+watchEffect(() => {
+  if (!error.value && data.value) {
+    localState.value.hasNext = data.value.data.hasNext;
+
+    if (data.value.data.lastKey) localState.value.querylastKey = data.value.data.lastKey;
+    if (data.value.data.list.length > 0)
+      localState.value.feeds = [...localState.value.feeds, ...data.value.data.list];
   }
-}
+});
 
-onMounted(async () => {
-  localState.value.categoryId = constantStore.categories.find(
-    (category) => category.title === "블록체인"
-  )!.id;
-  localState.value.appByCategoryId = constantStore.apps[localState.value.categoryId] || [];
-
-  await fetchList();
+onUnmounted(() => {
+  controller.abort();
 });
 </script>
 
@@ -72,8 +76,8 @@ onMounted(async () => {
     <div class="content">
       <FeedList :feeds="localState.feeds" />
 
-      <button v-if="localState.hasNext" @click="fetchList()">
-        <div v-if="localState.isLoading">
+      <button v-if="localState.hasNext" @click="refetch()">
+        <div v-if="isFetching">
           <i class="pi pi-spin pi-spinner" style="font-size: 1rem"></i>
         </div>
         <div v-else>More</div>

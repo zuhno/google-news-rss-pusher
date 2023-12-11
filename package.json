@@ -18,7 +18,8 @@
     "@front/client": "cd apps/@front/client && pnpm",
     "@back/server": "cd apps/@back/server && pnpm",
     "@batch/scrap": "cd apps/@batch/scrap && pnpm",
-    "@batch/broadcast": "cd apps/@batch/broadcast && pnpm"
+    "@batch/broadcast": "cd apps/@batch/broadcast && pnpm",
+    "supabase-type": "cd packages/supabase-type && pnpm"
   },
   "devDependencies": {
     "prettier": "^3.0.3",

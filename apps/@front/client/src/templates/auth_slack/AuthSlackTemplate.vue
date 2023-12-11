@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import apis from "@/apis";
-import { isAxiosError } from "axios";
+import { isAxiosError, type AxiosRequestConfig } from "axios";
 import type { response } from "http-api-type";
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useMutation } from "@tanstack/vue-query";
+
+import apis from "@/apis";
 
 interface InstalledData extends response.PostOAuth2SlackAccessResponse {}
 interface ErrorData {
   message: string;
 }
+
+const controller = new AbortController();
 
 const route = useRoute();
 const router = useRouter();
@@ -16,12 +20,17 @@ const router = useRouter();
 const installedData = ref<InstalledData | null>(null);
 const errorData = ref<ErrorData | null>(null);
 
+const { mutateAsync } = useMutation({
+  mutationFn: async (config: AxiosRequestConfig<{ code: string }>) =>
+    apis.post.postSlackAccess({ ...config, signal: controller.signal }),
+});
+
 onMounted(async () => {
   const code = route.query.code;
   if (typeof code !== "string" || !code) return;
 
   try {
-    const { data } = await apis.post.postSlackAccess({ data: { code } });
+    const { data } = await mutateAsync({ data: { code } });
 
     if (!data || !data.channelId) return;
 
@@ -42,6 +51,10 @@ onMounted(async () => {
       router.replace("/");
     }, 4000);
   }
+});
+
+onUnmounted(() => {
+  controller.abort();
 });
 </script>
 

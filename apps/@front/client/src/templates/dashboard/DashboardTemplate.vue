@@ -1,30 +1,25 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import type { response } from "http-api-type";
+import { onUnmounted } from "vue";
+import { useQuery } from "@tanstack/vue-query";
 
 import apis from "@/apis";
 import { useConstantStore } from "@/store";
 import FeedList from "@/components/FeedList.vue";
 
-interface Data {
-  feedsByCategory: Record<number, response.GetFeedsResponse["list"]>;
-  linkMap: Record<number, string>;
-}
+const controller = new AbortController();
 
-const localState = ref<Data>({
-  feedsByCategory: {},
-  linkMap: { 1: "/real-estate", 2: "blockchain" },
-});
+const linkMap: { [categoryId: number]: string } = { 1: "/real-estate", 2: "blockchain" };
+
 const constantStore = useConstantStore();
 
-onMounted(async () => {
-  for (const category of constantStore.categories) {
-    const { data } = await apis.get.getFeeds({ params: { categoryId: category.id, limit: 4 } });
-    localState.value.feedsByCategory = {
-      ...localState.value.feedsByCategory,
-      [category.id]: data.list,
-    };
-  }
+const { isLoading, data, error } = useQuery({
+  queryKey: ["getFeedsLimitedAll"],
+  queryFn: () => apis.get.getFeedsLimitedAll({ signal: controller.signal, params: { limit: 4 } }),
+  refetchOnMount: false,
+});
+
+onUnmounted(() => {
+  controller.abort();
 });
 </script>
 
@@ -34,9 +29,9 @@ onMounted(async () => {
       <div>
         <p>
           <span>{{ category.title }}</span>
-          <router-link :to="localState.linkMap[category.id]"><button>...more</button></router-link>
+          <router-link :to="linkMap[category.id]"><button>...more</button></router-link>
         </p>
-        <FeedList :feeds="localState.feedsByCategory[category.id]" />
+        <FeedList :feeds="data?.data[category.id]" />
       </div>
     </template>
   </section>

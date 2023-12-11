@@ -7,6 +7,7 @@ import { Database } from "supabase-type";
 export class StoreService {
   private readonly logger = new Logger(StoreService.name);
   private lastFeed: Record<number, number> = {};
+  private categoryIds: number[] = [];
 
   constructor(private readonly supabaseService: SupabaseService) {}
 
@@ -38,5 +39,13 @@ export class StoreService {
 
   getLastFeed() {
     return this.lastFeed;
+  }
+
+  setCategoryIds(ids: number[]) {
+    this.categoryIds = ids;
+  }
+
+  getCategoryIds() {
+    return this.categoryIds;
   }
 }
