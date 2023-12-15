@@ -1,224 +1,233 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export interface Database {
   public: {
     Tables: {
       App: {
         Row: {
-          authorize_link: string;
-          category_id: number;
-          created_at: string;
-          from: Database["public"]["Enums"]["AppFrom"];
-          id: string;
-          updated_at: string;
-        };
+          authorize_link: string
+          category_id: number
+          created_at: string
+          from: Database["public"]["Enums"]["AppFrom"]
+          id: string
+          updated_at: string
+        }
         Insert: {
-          authorize_link: string;
-          category_id: number;
-          created_at?: string;
-          from: Database["public"]["Enums"]["AppFrom"];
-          id: string;
-          updated_at?: string;
-        };
+          authorize_link: string
+          category_id: number
+          created_at?: string
+          from: Database["public"]["Enums"]["AppFrom"]
+          id: string
+          updated_at?: string
+        }
         Update: {
-          authorize_link?: string;
-          category_id?: number;
-          created_at?: string;
-          from?: Database["public"]["Enums"]["AppFrom"];
-          id?: string;
-          updated_at?: string;
-        };
+          authorize_link?: string
+          category_id?: number
+          created_at?: string
+          from?: Database["public"]["Enums"]["AppFrom"]
+          id?: string
+          updated_at?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "App_category_id_fkey";
-            columns: ["category_id"];
-            isOneToOne: false;
-            referencedRelation: "Category";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
+            foreignKeyName: "App_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "Category"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       Category: {
         Row: {
-          id: number;
-          title: string;
-        };
+          id: number
+          title: string
+        }
         Insert: {
-          id: number;
-          title: string;
-        };
+          id: number
+          title: string
+        }
         Update: {
-          id?: number;
-          title?: string;
-        };
-        Relationships: [];
-      };
+          id?: number
+          title?: string
+        }
+        Relationships: []
+      }
       Feed: {
         Row: {
-          category_id: number;
-          created_at: string;
-          id: number;
-          link: string | null;
-          publisher: string | null;
-          title: string | null;
-          updated_at: string;
-        };
+          category_id: number
+          created_at: string
+          id: number
+          link: string | null
+          preview_url: string | null
+          publisher: string | null
+          title: string | null
+          updated_at: string
+        }
         Insert: {
-          category_id: number;
-          created_at?: string;
-          id?: number;
-          link?: string | null;
-          publisher?: string | null;
-          title?: string | null;
-          updated_at?: string;
-        };
+          category_id: number
+          created_at?: string
+          id?: number
+          link?: string | null
+          preview_url?: string | null
+          publisher?: string | null
+          title?: string | null
+          updated_at?: string
+        }
         Update: {
-          category_id?: number;
-          created_at?: string;
-          id?: number;
-          link?: string | null;
-          publisher?: string | null;
-          title?: string | null;
-          updated_at?: string;
-        };
+          category_id?: number
+          created_at?: string
+          id?: number
+          link?: string | null
+          preview_url?: string | null
+          publisher?: string | null
+          title?: string | null
+          updated_at?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "Feed_category_id_fkey";
-            columns: ["category_id"];
-            isOneToOne: false;
-            referencedRelation: "Category";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
+            foreignKeyName: "Feed_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "Category"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       Interval: {
         Row: {
-          time: number;
-        };
+          time: number
+        }
         Insert: {
-          time: number;
-        };
+          time: number
+        }
         Update: {
-          time?: number;
-        };
-        Relationships: [];
-      };
+          time?: number
+        }
+        Relationships: []
+      }
       Release: {
         Row: {
-          app_id: string;
-          created_at: string;
-          interval_time: number;
-          last_feed_id: number;
-          updated_at: string;
-        };
+          app_id: string
+          created_at: string
+          interval_time: number
+          last_feed_id: number
+          updated_at: string
+        }
         Insert: {
-          app_id: string;
-          created_at?: string;
-          interval_time: number;
-          last_feed_id: number;
-          updated_at?: string;
-        };
+          app_id: string
+          created_at?: string
+          interval_time: number
+          last_feed_id: number
+          updated_at?: string
+        }
         Update: {
-          app_id?: string;
-          created_at?: string;
-          interval_time?: number;
-          last_feed_id?: number;
-          updated_at?: string;
-        };
+          app_id?: string
+          created_at?: string
+          interval_time?: number
+          last_feed_id?: number
+          updated_at?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "Release_app_id_fkey";
-            columns: ["app_id"];
-            isOneToOne: false;
-            referencedRelation: "App";
-            referencedColumns: ["id"];
+            foreignKeyName: "Release_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "App"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "Release_interval_time_fkey";
-            columns: ["interval_time"];
-            isOneToOne: false;
-            referencedRelation: "Interval";
-            referencedColumns: ["time"];
+            foreignKeyName: "Release_interval_time_fkey"
+            columns: ["interval_time"]
+            isOneToOne: false
+            referencedRelation: "Interval"
+            referencedColumns: ["time"]
           },
           {
-            foreignKeyName: "Release_last_feed_id_fkey";
-            columns: ["last_feed_id"];
-            isOneToOne: false;
-            referencedRelation: "Feed";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
+            foreignKeyName: "Release_last_feed_id_fkey"
+            columns: ["last_feed_id"]
+            isOneToOne: false
+            referencedRelation: "Feed"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       Subscriber: {
         Row: {
-          active: string;
-          app_id: string;
-          ch_id: string;
-          ch_name: string | null;
-          ch_url: string | null;
-          created_at: string;
-          deactive_reason: Database["public"]["Enums"]["Reason"] | null;
-          interval_time: number;
-          team_id: string | null;
-          updated_at: string;
-        };
+          active: string
+          app_id: string
+          ch_id: string
+          ch_name: string | null
+          ch_url: string | null
+          created_at: string
+          deactive_reason: Database["public"]["Enums"]["Reason"] | null
+          interval_time: number
+          team_id: string | null
+          updated_at: string
+        }
         Insert: {
-          active: string;
-          app_id: string;
-          ch_id: string;
-          ch_name?: string | null;
-          ch_url?: string | null;
-          created_at?: string;
-          deactive_reason?: Database["public"]["Enums"]["Reason"] | null;
-          interval_time: number;
-          team_id?: string | null;
-          updated_at?: string;
-        };
+          active: string
+          app_id: string
+          ch_id: string
+          ch_name?: string | null
+          ch_url?: string | null
+          created_at?: string
+          deactive_reason?: Database["public"]["Enums"]["Reason"] | null
+          interval_time: number
+          team_id?: string | null
+          updated_at?: string
+        }
         Update: {
-          active?: string;
-          app_id?: string;
-          ch_id?: string;
-          ch_name?: string | null;
-          ch_url?: string | null;
-          created_at?: string;
-          deactive_reason?: Database["public"]["Enums"]["Reason"] | null;
-          interval_time?: number;
-          team_id?: string | null;
-          updated_at?: string;
-        };
+          active?: string
+          app_id?: string
+          ch_id?: string
+          ch_name?: string | null
+          ch_url?: string | null
+          created_at?: string
+          deactive_reason?: Database["public"]["Enums"]["Reason"] | null
+          interval_time?: number
+          team_id?: string | null
+          updated_at?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "Subscriber_app_id_fkey";
-            columns: ["app_id"];
-            isOneToOne: false;
-            referencedRelation: "App";
-            referencedColumns: ["id"];
+            foreignKeyName: "Subscriber_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "App"
+            referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "Subscriber_interval_time_fkey";
-            columns: ["interval_time"];
-            isOneToOne: false;
-            referencedRelation: "Interval";
-            referencedColumns: ["time"];
-          },
-        ];
-      };
-    };
+            foreignKeyName: "Subscriber_interval_time_fkey"
+            columns: ["interval_time"]
+            isOneToOne: false
+            referencedRelation: "Interval"
+            referencedColumns: ["time"]
+          }
+        ]
+      }
+    }
     Views: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Functions: {
-      [_ in never]: never;
-    };
+      [_ in never]: never
+    }
     Enums: {
-      AppFrom: "SLACK";
-      DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "NULL" | "UNKOWN";
-      Reason: "NOT_FOUND" | "USER_REQUEST" | "UNKOWN";
-    };
+      AppFrom: "SLACK"
+      DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "NULL" | "UNKOWN"
+      Reason: "NOT_FOUND" | "USER_REQUEST" | "UNKOWN"
+    }
     CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
+      [_ in never]: never
+    }
+  }
 }
 
 export type Tables<
@@ -228,68 +237,75 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R;
+      Row: infer R
     }
     ? R
     : never
   : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
       Database["public"]["Views"])
-  ? (Database["public"]["Tables"] & Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R;
+  ? (Database["public"]["Tables"] &
+      Database["public"]["Views"])[PublicTableNameOrOptions] extends {
+      Row: infer R
     }
     ? R
     : never
-  : never;
+  : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends keyof Database["public"]["Tables"] | { schema: keyof Database },
+  PublicTableNameOrOptions extends
+    | keyof Database["public"]["Tables"]
+    | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I;
+      Insert: infer I
     }
     ? I
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
   ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I;
+      Insert: infer I
     }
     ? I
     : never
-  : never;
+  : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends keyof Database["public"]["Tables"] | { schema: keyof Database },
+  PublicTableNameOrOptions extends
+    | keyof Database["public"]["Tables"]
+    | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U;
+      Update: infer U
     }
     ? U
     : never
   : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
   ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U;
+      Update: infer U
     }
     ? U
     : never
-  : never;
+  : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends keyof Database["public"]["Enums"] | { schema: keyof Database },
+  PublicEnumNameOrOptions extends
+    | keyof Database["public"]["Enums"]
+    | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never = never
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-  : never;
+  : never
