@@ -8,6 +8,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "cheerio": "1.0.0-rc.12",
     "dotenv": "^16.3.1",
     "esbuild": "^0.19.8",
     "fast-xml-parser": "^4.3.2",
@@ -16,7 +17,7 @@
   "devDependencies": {
     "@types/node": "^20.10.1",
     "@types/node-schedule": "^2.1.4",
-    "ts-node-dev": "^2.0.0",
-    "supabase-type": "workspace:*"
+    "supabase-type": "workspace:*",
+    "ts-node-dev": "^2.0.0"
   }
 }

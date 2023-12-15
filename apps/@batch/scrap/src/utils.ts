@@ -1,7 +1,8 @@
 import type { AxiosStatic } from "axios";
+import * as cheerio from "cheerio";
 
 import type { IRssResponseItem } from "./types";
-import { excludeTitleRegex } from "./constants";
+import { excludeTitleRegex, metaPropNamesForPreviewImage } from "./constants";
 
 // ! unexport
 const _textMatchRate = (text1: string, text2: string) => {
@@ -22,6 +23,16 @@ const _textMatchRate = (text1: string, text2: string) => {
   }
 
   return Number((sameArr.length / originArr.length).toFixed(2));
+};
+
+// ! unexport
+const getRootLink = (link: string) => {
+  const removeProtocolLink = link.replace(/(https:\/\/|http:\/\/)/, "");
+  const end = removeProtocolLink.indexOf("/");
+  const domain = removeProtocolLink.slice(0, end);
+  const protocol = link.match(/(https:\/\/|http:\/\/)/)[0];
+
+  return protocol + domain;
 };
 
 export const rawUnduplicatedRatio = (texts: string[], target: string) => {
@@ -64,5 +75,35 @@ export const getRealLink = async (originLink: string, axiosGet: AxiosStatic["get
     return match[1];
   } catch (error) {
     return originLink;
+  }
+};
+
+export const getOpengraphImage = async (link: string, axiosGet: AxiosStatic["get"]) => {
+  try {
+    const { data } = await axiosGet(link).catch(async () => {
+      const rootLink = getRootLink(link);
+      return await axiosGet(rootLink);
+    });
+
+    const $ = cheerio.load(data);
+
+    let imageUrl: undefined | string;
+    for (const propName of metaPropNamesForPreviewImage) {
+      imageUrl = $(`meta[property='${propName}']`).prop("content");
+      if (!!imageUrl) break;
+    }
+
+    if (imageUrl?.startsWith("https://") || imageUrl?.startsWith("http://")) {
+      return imageUrl;
+    } else if (imageUrl?.startsWith("/")) {
+      const rootLink = getRootLink(link);
+
+      return rootLink + imageUrl;
+    } else {
+      return;
+    }
+  } catch (error) {
+    console.log("getOpengraphImage() error : ", error.message);
+    return;
   }
 };

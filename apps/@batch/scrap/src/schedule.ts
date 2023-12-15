@@ -4,6 +4,7 @@ import { XMLParser } from "fast-xml-parser";
 
 import {
   extractValidTitle,
+  getOpengraphImage,
   getRealLink,
   rawUnduplicatedFeeds,
   rawUnduplicatedRatio,
@@ -21,6 +22,14 @@ const supabaseServiceRoleClient = createClient<Database>(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+const axiosInstance = axios.create({
+  headers: {
+    "User-Agent":
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Content-Type": "text/html",
+  },
+});
 
 const clippedNews = async (prevTitles: string[], categoryTitle: string) => {
   const newFeeds: IRssResponseItem[] = [];
@@ -89,12 +98,14 @@ export const job = async () => {
 
       const query = [];
       for (const feed of newFeeds) {
-        const realLink = await getRealLink(feed.link, axios.get);
+        const realLink = await getRealLink(feed.link, axiosInstance.get);
+        const opengraphImage = await getOpengraphImage(realLink, axiosInstance.get);
 
         query.push({
           title: feed.title,
           publisher: feed.source || "-",
           link: realLink,
+          preview_url: opengraphImage,
           category_id: category.id,
         });
       }
