@@ -42,7 +42,7 @@ section {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 50px;
   justify-content: space-around;
 
   div {

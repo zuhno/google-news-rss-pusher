@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, ref, watchEffect } from "vue";
+import { onUnmounted, reactive, watch } from "vue";
 import { response } from "http-api-type";
 import { useQuery } from "@tanstack/vue-query";
 
@@ -19,7 +19,7 @@ interface Data {
 
 const controller = new AbortController();
 
-const localState = ref<Data>({
+const localState = reactive<Data>({
   clientId: import.meta.env.VITE_SLACK_CLIENT_ID,
   querylastKey: null,
   feeds: [],
@@ -29,34 +29,34 @@ const localState = ref<Data>({
 });
 const constantStore = useConstantStore();
 
-localState.value.categoryId = constantStore.categories.find(
+localState.categoryId = constantStore.categories.find(
   (category) => category.title === "블록체인"
 )!.id;
-localState.value.appByCategoryId = constantStore.apps[localState.value.categoryId] || [];
+localState.appByCategoryId = constantStore.apps[localState.categoryId] || [];
 
-const { isFetching, data, error, refetch } = useQuery({
-  queryKey: ["getFeeds", localState.value.categoryId, localState.value.querylastKey],
+const { isFetching, data, refetch } = useQuery({
+  queryKey: ["getFeeds", localState.categoryId, localState.querylastKey],
   queryFn: async () => {
     return apis.get.getFeeds({
       signal: controller.signal,
       params: {
-        lastKey: localState.value.querylastKey,
+        lastKey: localState.querylastKey,
         limit: 10,
-        categoryId: localState.value.categoryId!,
+        categoryId: localState.categoryId!,
       },
     });
   },
 });
 
-watchEffect(() => {
-  if (!error.value && data.value) {
-    localState.value.hasNext = data.value.data.hasNext;
-
-    if (data.value.data.lastKey) localState.value.querylastKey = data.value.data.lastKey;
-    if (data.value.data.list.length > 0)
-      localState.value.feeds = [...localState.value.feeds, ...data.value.data.list];
+watch(
+  () => data.value,
+  (newValue) => {
+    if (!newValue) return;
+    localState.hasNext = newValue.data.hasNext;
+    localState.querylastKey = newValue.data.lastKey || null;
+    localState.feeds = [...localState.feeds, ...(newValue.data.list || [])];
   }
-});
+);
 
 onUnmounted(() => {
   controller.abort();
@@ -103,6 +103,7 @@ section {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 70px;
 
     button {
       width: fit-content;

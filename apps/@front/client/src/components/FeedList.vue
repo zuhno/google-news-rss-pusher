@@ -20,13 +20,25 @@ function dateFormatting(date: string) {
 <template>
   <ul>
     <li v-for="feed in feeds" :key="feed.id">
-      <a :href="feed.link!" target="_blank" rel="noreferer">
-        <span>{{ feed.title }}</span>
-        <i class="pi pi-external-link" style="font-size: 0.8rem"></i>
-      </a>
       <div>
-        <span>📰 {{ feed.publisher }}</span>
-        <span>{{ dateFormatting(feed.created_at) }}</span>
+        <a :href="feed.link!" target="_blank" rel="noreferer">
+          <template v-if="feed.preview_url">
+            <img :src="feed.preview_url" alt="" />
+          </template>
+          <template v-else>
+            <img src="/no-image.png" alt="" />
+          </template>
+        </a>
+        <div>
+          <a :href="feed.link!" target="_blank" rel="noreferer">
+            <span>{{ feed.title }}</span>
+            <i class="pi pi-external-link" style="font-size: 0.8rem"></i>
+          </a>
+          <div>
+            <span>📰 {{ feed.publisher }}</span>
+            <span>{{ dateFormatting(feed.created_at) }}</span>
+          </div>
+        </div>
       </div>
     </li>
   </ul>
@@ -35,7 +47,6 @@ function dateFormatting(date: string) {
 <style scoped lang="scss">
 ul {
   width: 100%;
-  margin: 20px 0;
   display: grid;
   gap: 35px;
 
@@ -49,31 +60,56 @@ ul {
         width: 100%;
         height: 1px;
         background-color: rgb(225, 225, 225);
+        margin-top: 30px;
       }
     }
 
-    a {
-      width: fit-content;
+    & > div {
       display: flex;
-      gap: 10px;
-      transition: 0.2s;
-      font-weight: 700;
-      margin-bottom: 10px;
+      gap: 20px;
 
-      @media (hover: hover) {
-        &:hover {
-          color: gray;
+      img {
+        width: 180px;
+        aspect-ratio: 1 / 0.7;
+        object-fit: contain;
+        transition: opacity 0.2s;
+
+        @media (hover: hover) {
+          &:hover {
+            opacity: 0.6;
+          }
         }
       }
-    }
 
-    div {
-      margin-bottom: 30px;
-      display: flex;
-      justify-content: space-between;
+      & > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 5px 0;
 
-      span {
-        font-size: 14px;
+        a {
+          width: fit-content;
+          display: flex;
+          gap: 10px;
+          transition: 0.2s;
+          font-weight: 700;
+
+          @media (hover: hover) {
+            &:hover {
+              color: gray;
+            }
+          }
+        }
+
+        div {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+
+          span {
+            font-size: 14px;
+          }
+        }
       }
     }
   }
