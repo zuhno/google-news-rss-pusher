@@ -5,6 +5,7 @@ import { RouterModule } from "@nestjs/core";
 import { OAuth2Module } from "./api/oauth2/oauth2.module";
 import { FeedModule } from "./api/feed/feed.module";
 import { ConstantModule } from "./api/constant/constant.module";
+import { CommunityModule } from "./api/community/community.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ConstantModule } from "./api/constant/constant.module";
     OAuth2Module,
     FeedModule,
     ConstantModule,
+    CommunityModule,
     // Router
     RouterModule.register([
       {
@@ -29,6 +31,10 @@ import { ConstantModule } from "./api/constant/constant.module";
       {
         path: "constants",
         module: ConstantModule,
+      },
+      {
+        path: "community",
+        module: CommunityModule,
       },
     ]),
   ],
