@@ -9,6 +9,10 @@ export class SlackService {
   private readonly logger = new Logger(SlackService.name);
   public readonly ACTION_IDS = {
     UPDATE_INTERVAL_TIME: "update_interval_time",
+    UPDATE_DEACTIVE_Y: "update_deactive_y",
+    UPDATE_DEACTIVE_N: "update_deactive_n",
+    UPDATE_REACTIVE_Y: "update_reactive_y",
+    UPDATE_REACTIVE_N: "update_reactive_n",
   };
 
   constructor(
@@ -58,7 +62,7 @@ export class SlackService {
             type: "header",
             text: {
               type: "plain_text",
-              text: "뉴스피드 받는 시간 수정",
+              text: "뉴스 피드 받는 시간 수정",
               emoji: true,
             },
           },
@@ -103,6 +107,112 @@ export class SlackService {
               ],
               action_id: this.ACTION_IDS.UPDATE_INTERVAL_TIME,
             },
+          },
+        ],
+      },
+      { headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  postUpdateActiveToDeactive(responseUrl: string) {
+    return this.httpService.post(
+      responseUrl,
+      {
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "뉴스 피드 구독 취소",
+              emoji: true,
+            },
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: "정말 구독을 취소하시겠습니까?",
+            },
+          },
+          {
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "예",
+                  emoji: true,
+                },
+                style: "primary",
+                value: "N",
+                action_id: this.ACTION_IDS.UPDATE_DEACTIVE_Y,
+              },
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "아니오",
+                  emoji: true,
+                },
+                style: "danger",
+                value: "Y",
+                action_id: this.ACTION_IDS.UPDATE_DEACTIVE_N,
+              },
+            ],
+          },
+        ],
+      },
+      { headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  postUpdateDeactiveToActive(responseUrl: string) {
+    return this.httpService.post(
+      responseUrl,
+      {
+        blocks: [
+          {
+            type: "header",
+            text: {
+              type: "plain_text",
+              text: "뉴스 피드 다시 구독",
+              emoji: true,
+            },
+          },
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: "정말 구독을 다시 시작하시겠습니까?",
+            },
+          },
+          {
+            type: "actions",
+            elements: [
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "예",
+                  emoji: true,
+                },
+                style: "primary",
+                value: "Y",
+                action_id: this.ACTION_IDS.UPDATE_REACTIVE_Y,
+              },
+              {
+                type: "button",
+                text: {
+                  type: "plain_text",
+                  text: "아니오",
+                  emoji: true,
+                },
+                style: "danger",
+                value: "N",
+                action_id: this.ACTION_IDS.UPDATE_REACTIVE_N,
+              },
+            ],
           },
         ],
       },
