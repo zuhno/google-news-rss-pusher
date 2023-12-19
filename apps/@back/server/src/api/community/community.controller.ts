@@ -7,7 +7,7 @@ import {
 
 @Controller()
 export class CommunityController {
-  constructor(private communityService: CommunityService) {}
+  constructor(private readonly communityService: CommunityService) {}
 
   @Post("/slack/command")
   postSlackCommand(@Body() body: CommunitySlackCommandBodyDto) {

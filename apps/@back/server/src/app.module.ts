@@ -6,6 +6,7 @@ import { OAuth2Module } from "./api/oauth2/oauth2.module";
 import { FeedModule } from "./api/feed/feed.module";
 import { ConstantModule } from "./api/constant/constant.module";
 import { CommunityModule } from "./api/community/community.module";
+import { NoticeModule } from "./api/notice/notice.module";
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CommunityModule } from "./api/community/community.module";
     FeedModule,
     ConstantModule,
     CommunityModule,
+    NoticeModule,
     // Router
     RouterModule.register([
       {
@@ -36,6 +38,7 @@ import { CommunityModule } from "./api/community/community.module";
         path: "community",
         module: CommunityModule,
       },
+      { path: "notices", module: NoticeModule },
     ]),
   ],
   controllers: [],

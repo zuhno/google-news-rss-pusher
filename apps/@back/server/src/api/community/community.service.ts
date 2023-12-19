@@ -13,8 +13,8 @@ export class CommunityService {
   private readonly ACTION_IDS: SlackService["ACTION_IDS"];
 
   constructor(
-    private supabaseService: SupabaseService,
-    private slackService: SlackService
+    private readonly supabaseService: SupabaseService,
+    private readonly slackService: SlackService
   ) {
     this.ACTION_IDS = slackService.ACTION_IDS;
   }
