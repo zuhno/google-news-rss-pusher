@@ -33,6 +33,8 @@ export class StoreService {
         continue;
       }
 
+      if (!feed.value.data[0]) continue;
+
       this.lastFeed[feed.value.data[0].category_id] = feed.value.data[0].id;
     }
   }

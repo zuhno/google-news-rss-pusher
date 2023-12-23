@@ -8,7 +8,7 @@ import FeedList from "@/components/FeedList.vue";
 
 const controller = new AbortController();
 
-const linkMap: { [categoryId: number]: string } = { 1: "/real-estate", 2: "blockchain" };
+const linkMap: { [categoryId: number]: string } = { 1: "/real-estate", 2: "/blockchain" };
 
 const constantStore = useConstantStore();
 
@@ -26,7 +26,7 @@ onUnmounted(() => {
 <template>
   <section>
     <template v-for="category in constantStore.categories" :key="category.id">
-      <div>
+      <div v-if="linkMap[category.id]">
         <p>
           <span>{{ category.title }}</span>
           <router-link :to="linkMap[category.id]"><button>...more</button></router-link>

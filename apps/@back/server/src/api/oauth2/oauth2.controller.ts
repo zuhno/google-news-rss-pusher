@@ -11,4 +11,7 @@ export class OAuth2Controller {
   async postSlackAccess(@Body() body: OAuth2SlackAccessBodyDto) {
     return this.oauth2Service.postSlackAccess(body.code);
   }
+
+  @Post("/google")
+  async postGoogle() {}
 }
