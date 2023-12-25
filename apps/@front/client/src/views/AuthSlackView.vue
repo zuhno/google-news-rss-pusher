@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AuthSlack from "@/templates/auth_slack";
+import AuthSlack from "@/templates/auth/slack";
 </script>
 
 <template>

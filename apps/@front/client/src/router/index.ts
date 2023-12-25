@@ -22,7 +22,17 @@ const router = createRouter({
     {
       path: "/auth",
       name: "auth",
-      component: () => import("@/views/AuthSlackView.vue"),
+      component: () => import("@/components/layout/PassThrough.vue"),
+      children: [
+        {
+          path: "slack",
+          component: () => import("@/views/AuthSlackView.vue"),
+        },
+        {
+          path: "google",
+          component: () => import("@/views/AuthGoogleView.vue"),
+        },
+      ],
     },
   ],
 });

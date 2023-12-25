@@ -37,35 +37,42 @@ header {
   height: 70px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 50px;
+  box-sizing: border-box;
   background-color: white;
 
-  .logo {
-    margin-right: 50px;
+  & > div {
+    display: flex;
+    align-items: center;
 
-    a {
-      font-size: 20px;
-      font-weight: 900;
-    }
-  }
+    .logo {
+      margin-right: 50px;
 
-  nav {
-    display: inherit;
-    gap: 20px;
-
-    a {
-      padding: 10px 20px;
-      border-radius: 5px;
-      transition: all 0.2s;
-
-      &.active {
-        background-color: black;
-        color: white;
+      a {
+        font-size: 20px;
+        font-weight: 900;
       }
+    }
 
-      &:hover {
-        &:not(.active) {
-          background-color: whitesmoke;
+    nav {
+      display: inherit;
+      gap: 20px;
+
+      a {
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: all 0.2s;
+
+        &.active {
+          background-color: black;
+          color: white;
+        }
+
+        &:hover {
+          &:not(.active) {
+            background-color: whitesmoke;
+          }
         }
       }
     }
