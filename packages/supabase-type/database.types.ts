@@ -160,40 +160,43 @@ export interface Database {
       }
       Subscriber: {
         Row: {
-          active: string
+          active: boolean
           app_id: string
           ch_id: string
           ch_name: string | null
           ch_url: string | null
           created_at: string
-          deactive_reason: Database["public"]["Enums"]["Reason"] | null
+          deactive_reason: Database["public"]["Enums"]["DeactiveReason"] | null
           interval_time: number
           team_id: string | null
           updated_at: string
+          user_id: number | null
         }
         Insert: {
-          active: string
+          active?: boolean
           app_id: string
           ch_id: string
           ch_name?: string | null
           ch_url?: string | null
           created_at?: string
-          deactive_reason?: Database["public"]["Enums"]["Reason"] | null
+          deactive_reason?: Database["public"]["Enums"]["DeactiveReason"] | null
           interval_time: number
           team_id?: string | null
           updated_at?: string
+          user_id?: number | null
         }
         Update: {
-          active?: string
+          active?: boolean
           app_id?: string
           ch_id?: string
           ch_name?: string | null
           ch_url?: string | null
           created_at?: string
-          deactive_reason?: Database["public"]["Enums"]["Reason"] | null
+          deactive_reason?: Database["public"]["Enums"]["DeactiveReason"] | null
           interval_time?: number
           team_id?: string | null
           updated_at?: string
+          user_id?: number | null
         }
         Relationships: [
           {
@@ -209,6 +212,75 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "Interval"
             referencedColumns: ["time"]
+          },
+          {
+            foreignKeyName: "Subscriber_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "User"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      User: {
+        Row: {
+          active: boolean
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          id: number
+          nick_name: string | null
+          platform: Database["public"]["Enums"]["SocialPlatform"] | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: number
+          nick_name?: string | null
+          platform?: Database["public"]["Enums"]["SocialPlatform"] | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: number
+          nick_name?: string | null
+          platform?: Database["public"]["Enums"]["SocialPlatform"] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      UserRole: {
+        Row: {
+          created_at: string
+          role: Database["public"]["Enums"]["MemberRole"] | null
+          updated_at: string
+          user_id: number
+        }
+        Insert: {
+          created_at?: string
+          role?: Database["public"]["Enums"]["MemberRole"] | null
+          updated_at?: string
+          user_id: number
+        }
+        Update: {
+          created_at?: string
+          role?: Database["public"]["Enums"]["MemberRole"] | null
+          updated_at?: string
+          user_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "UserRole_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "User"
+            referencedColumns: ["id"]
           }
         ]
       }
@@ -221,8 +293,10 @@ export interface Database {
     }
     Enums: {
       AppFrom: "SLACK"
-      DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "NULL" | "UNKOWN"
+      DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "BAN" | "UNKOWN"
+      MemberRole: "OWNER" | "ADMIN" | "USER_BASIC"
       Reason: "NOT_FOUND" | "USER_REQUEST" | "UNKOWN"
+      SocialPlatform: "GOOGLE"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -37,7 +37,7 @@ export class OAuth2Service {
         ch_id: result.data.incoming_webhook?.channel_id,
         ch_name: result.data.incoming_webhook?.channel,
         ch_url: result.data.incoming_webhook?.url,
-        active: "Y",
+        active: true,
         interval_time: 3,
         app_id: result.data.app_id,
         team_id: result.data.team?.id,

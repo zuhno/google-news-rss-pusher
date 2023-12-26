@@ -78,13 +78,13 @@ export class CommunityService {
           .eq("ch_id", channel.id)
           .single();
 
-        if (deactiveSubscriber.active === "Y") {
+        if (deactiveSubscriber.active) {
           if (this.ACTION_IDS.UPDATE_DEACTIVE_Y) {
             // update user state
             await this.supabaseService
               .getClient()
               .serviceRole.from("Subscriber")
-              .update({ active: actions[0].value })
+              .update({ active: false })
               .eq("app_id", api_app_id)
               .eq("ch_id", channel.id);
           }
@@ -122,13 +122,13 @@ export class CommunityService {
           .eq("ch_id", channel.id)
           .single();
 
-        if (reactiveSubscriber.active === "N") {
+        if (!reactiveSubscriber.active) {
           // update user state
           if (this.ACTION_IDS.UPDATE_REACTIVE_Y) {
             await this.supabaseService
               .getClient()
               .serviceRole.from("Subscriber")
-              .update({ active: actions[0].value })
+              .update({ active: true })
               .eq("app_id", api_app_id)
               .eq("ch_id", channel.id);
           }

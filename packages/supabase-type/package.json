@@ -4,12 +4,13 @@
   "private": true,
   "main": "index.ts",
   "scripts": {
-    "gen": "supabase gen types typescript --project-id=$PROJECT_REF --schema=public > ./database.types.ts"
+    "gen": "dotenv -e .env -- cross-var supabase gen types typescript --project-id=%PROJECT_ID% --schema=public > ./database.types.ts"
   },
   "dependencies": {
     "supabase": "^1.115.4"
   },
   "devDependencies": {
-    "env-cmd": "^10.1.0"
+    "cross-var": "^1.1.0",
+    "dotenv-cli": "^7.3.0"
   }
 }
