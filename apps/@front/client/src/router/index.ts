@@ -28,10 +28,6 @@ const router = createRouter({
           path: "slack",
           component: () => import("@/views/AuthSlackView.vue"),
         },
-        {
-          path: "google",
-          component: () => import("@/views/AuthGoogleView.vue"),
-        },
       ],
     },
   ],

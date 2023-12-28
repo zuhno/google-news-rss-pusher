@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 
 import { SupabaseService } from "../supabase/supabase.service";
 import { Database } from "supabase-type";
@@ -9,9 +9,20 @@ export class StoreService {
   private lastFeed: Record<number, number> = {};
   private categoryIds: number[] = [];
 
-  constructor(private readonly supabaseService: SupabaseService) {}
+  constructor(private readonly supabaseService: SupabaseService) {
+    // initial fetch
+    (async () => {
+      const categories = await this.supabaseService.getClient().anon.from("Category").select("*");
 
-  async setLastFeed(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
+      if (categories.error)
+        throw new HttpException(categories.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+
+      await this.setLastFeed(categories.data);
+      this.setCategoryIds(categories.data);
+    })();
+  }
+
+  private async setLastFeed(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
     const feedsByCategory = await Promise.allSettled(
       categories.map((category) =>
         this.supabaseService
@@ -39,12 +50,12 @@ export class StoreService {
     }
   }
 
-  getLastFeed() {
-    return this.lastFeed;
+  private setCategoryIds(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
+    this.categoryIds = categories.map((category) => category.id) || [];
   }
 
-  setCategoryIds(ids: number[]) {
-    this.categoryIds = ids;
+  getLastFeed() {
+    return this.lastFeed;
   }
 
   getCategoryIds() {

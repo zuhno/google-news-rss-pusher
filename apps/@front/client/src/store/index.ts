@@ -20,7 +20,7 @@ export const useConstantStore = defineStore("constant", () => {
       categories.value = data.categories;
       apps.value = data.apps;
     } catch (error) {
-      console.error(error);
+      console.error("initFetch Error : ", error);
     } finally {
       isRootLoading.value = false;
     }

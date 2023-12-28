@@ -57,4 +57,27 @@ export class OAuth2Service {
       notificationInterval: data.interval_time,
     };
   }
+
+  async postGoogleAccess(code: string) {
+    const params = new URLSearchParams();
+    params.append("code", code);
+    params.append("client_id", this.configService.get("GOOGLE_OAUTH_CLIENT_ID"));
+    params.append("client_secret", this.configService.get("GOOGLE_OAUTH_CLIENT_SECRET"));
+    params.append("redirect_uri", this.configService.get("GOOGLE_OAUTH_REDIRECT_URI"));
+    params.append("grant_type", "authorization_code");
+
+    try {
+      const result = await firstValueFrom(
+        this.httpService.post("https://oauth2.googleapis.com/token", params.toString(), {
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        })
+      );
+
+      console.log("postGoogleAccess result : ", result.data);
+    } catch (error) {
+      console.log("error : ", error);
+    }
+
+    return {};
+  }
 }

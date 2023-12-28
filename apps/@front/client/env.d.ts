@@ -3,6 +3,7 @@
 interface ImportMetaEnv {
   readonly VITE_SLACK_CLIENT_ID: string;
   readonly VITE_SERVER_DOMAIN: string;
+  readonly VITE_GOOGLE_CLIENT_ID: string;
   // more env variables...
 }
 

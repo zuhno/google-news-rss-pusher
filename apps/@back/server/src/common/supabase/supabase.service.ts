@@ -13,7 +13,6 @@ export class SupabaseService {
   constructor(private readonly configService: ConfigService) {}
 
   getClient() {
-    this.logger.log("getting supabase client...");
     if (this.anonClientInstance && this.serviceRoleClientInstance) {
       return { anon: this.anonClientInstance, serviceRole: this.serviceRoleClientInstance };
     }

@@ -84,7 +84,7 @@ export class CommunityService {
             await this.supabaseService
               .getClient()
               .serviceRole.from("Subscriber")
-              .update({ active: false })
+              .update({ active: actions[0].value })
               .eq("app_id", api_app_id)
               .eq("ch_id", channel.id);
           }
@@ -128,7 +128,7 @@ export class CommunityService {
             await this.supabaseService
               .getClient()
               .serviceRole.from("Subscriber")
-              .update({ active: true })
+              .update({ active: actions[0].value })
               .eq("app_id", api_app_id)
               .eq("ch_id", channel.id);
           }

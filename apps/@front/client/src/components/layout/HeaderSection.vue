@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import { GoogleLogin, type CallbackTypes } from "vue3-google-login";
+
+import GoogleLoginButton from "../GoogleLoginButton.vue";
+
 const router = useRouter();
 
 const isActive = (path: string) => {
   return path === router.currentRoute.value.path ? "active" : null;
-};
-
-const googleLoginCallback: CallbackTypes.CodeResponseCallback = (response) => {
-  console.log("response : ", response);
 };
 </script>
 
@@ -24,7 +22,7 @@ const googleLoginCallback: CallbackTypes.CodeResponseCallback = (response) => {
         <router-link :class="isActive('/blockchain')" to="/blockchain">블록체인뉴스</router-link>
       </nav>
     </div>
-    <GoogleLogin :callback="googleLoginCallback" />
+    <GoogleLoginButton />
   </header>
 </template>
 

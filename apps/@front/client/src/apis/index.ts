@@ -28,5 +28,7 @@ export default {
   post: {
     postSlackAccess: (config: AxiosRequestConfig<{ code: string }>) =>
       instance.post<response.PostOAuth2SlackAccessResponse>("/oauth2/slack", config.data, config),
+    postGoogleAccess: (config: AxiosRequestConfig<{ code: string }>) =>
+      instance.post<response.PostOAuth2SlackAccessResponse>("/oauth2/google", config.data, config),
   },
 };
