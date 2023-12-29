@@ -20,6 +20,8 @@ const handleOnSuccess = async (response: ImplicitFlowSuccessResponse) => {
 
   try {
     const { data } = await mutateAsync({ data: { code: response.code } });
+
+    console.log("data: ", data);
   } catch (err) {
     console.error("err : ", err);
   }
@@ -32,7 +34,6 @@ const handleOnError = (errorResponse: ImplicitFlowErrorResponse) => {
 const { isReady, login } = useCodeClient({
   onSuccess: handleOnSuccess,
   onError: handleOnError,
-  // other options
 });
 </script>
 

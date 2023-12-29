@@ -7,3 +7,10 @@ export class PostOAuth2SlackAccessResponse {
   readonly channelUrl: Database["public"]["Tables"]["Subscriber"]["Row"]["ch_url"];
   readonly notificationInterval: Database["public"]["Tables"]["Subscriber"]["Row"]["interval_time"];
 }
+
+export class PostOAuth2GoogleAccessResponse {
+  readonly id: Database["public"]["Tables"]["User"]["Row"]["id"];
+  readonly email: Database["public"]["Tables"]["User"]["Row"]["email"];
+  readonly nickName: Database["public"]["Tables"]["User"]["Row"]["nick_name"];
+  readonly avatarUrl: Database["public"]["Tables"]["User"]["Row"]["avatar_url"];
+}

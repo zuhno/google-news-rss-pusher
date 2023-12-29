@@ -16,15 +16,4 @@ export class OAuth2Controller {
   async postGoogleAccess(@Body() body: OAuth2GoogleAccessBodyDto) {
     return this.oauth2Service.postGoogleAccess(body.code);
   }
-
-  @Get("/test")
-  async getGoogletest(@Query() query) {
-    console.log("get : ", query);
-    return {};
-  }
-  @Post("/test")
-  async postGoogletest(@Query() query) {
-    console.log("post : ", query);
-    return {};
-  }
 }

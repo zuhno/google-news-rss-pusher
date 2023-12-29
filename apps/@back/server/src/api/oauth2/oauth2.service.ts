@@ -2,10 +2,14 @@ import { HttpService } from "@nestjs/axios";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { firstValueFrom } from "rxjs";
+import { PostgrestSingleResponse } from "@supabase/supabase-js";
 
 import { SlackService } from "@/common/slack/slack.service";
 import { SupabaseService } from "@/common/supabase/supabase.service";
-import { OAuth2SlackAccessResponseDto } from "./dto/oauth2_response.dto";
+import {
+  OAuth2GoogleAccessResponseDto,
+  OAuth2SlackAccessResponseDto,
+} from "./dto/oauth2_response.dto";
 
 @Injectable()
 export class OAuth2Service {
@@ -58,26 +62,63 @@ export class OAuth2Service {
     };
   }
 
-  async postGoogleAccess(code: string) {
-    const params = new URLSearchParams();
-    params.append("code", code);
-    params.append("client_id", this.configService.get("GOOGLE_OAUTH_CLIENT_ID"));
-    params.append("client_secret", this.configService.get("GOOGLE_OAUTH_CLIENT_SECRET"));
-    params.append("redirect_uri", this.configService.get("GOOGLE_OAUTH_REDIRECT_URI"));
-    params.append("grant_type", "authorization_code");
+  async postGoogleAccess(code: string): Promise<OAuth2GoogleAccessResponseDto> {
+    const token = await firstValueFrom(
+      this.httpService.post("https://oauth2.googleapis.com/token", {
+        code,
+        client_id: this.configService.get("GOOGLE_OAUTH_CLIENT_ID"),
+        client_secret: this.configService.get("GOOGLE_OAUTH_CLIENT_SECRET"),
+        redirect_uri: this.configService.get("GOOGLE_OAUTH_REDIRECT_URI"),
+        grant_type: "authorization_code",
+      })
+    );
 
-    try {
-      const result = await firstValueFrom(
-        this.httpService.post("https://oauth2.googleapis.com/token", params.toString(), {
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    const userInfo = await firstValueFrom(
+      this.httpService.get("https://www.googleapis.com/oauth2/v2/userinfo", {
+        headers: { Authorization: `${token.data.token_type} ${token.data.access_token}` },
+      })
+    );
+
+    if (!userInfo.data.email)
+      throw new HttpException("Google OAuth2 Processing Error", HttpStatus.INTERNAL_SERVER_ERROR);
+
+    let user = await this.supabaseService
+      .getClient()
+      .anon.from("User")
+      .select("*")
+      .eq("email", userInfo.data.email)
+      .single();
+
+    console.log(user.data);
+
+    if (user.error) {
+      if (user.error.code !== "PGRST116")
+        throw new HttpException(user.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+
+      // The result contains 0 rows
+      const { email, name, picture } = userInfo.data;
+
+      user = await this.supabaseService
+        .getClient()
+        .serviceRole.from("User")
+        .insert({
+          email,
+          nick_name: name,
+          platform: "GOOGLE",
+          avatar_url: picture,
+          active: true,
         })
-      );
-
-      console.log("postGoogleAccess result : ", result.data);
-    } catch (error) {
-      console.log("error : ", error);
+        .select("*")
+        .single();
     }
 
-    return {};
+    // TODO: JWT token
+
+    return {
+      id: user.data.id,
+      email: user.data.email,
+      nickName: user.data.nick_name,
+      avatarUrl: user.data.avatar_url,
+    };
   }
 }
