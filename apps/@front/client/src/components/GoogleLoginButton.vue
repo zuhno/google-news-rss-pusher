@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import apis from "@/apis";
 import { useMutation } from "@tanstack/vue-query";
 import type { AxiosRequestConfig } from "axios";
 import {
@@ -7,6 +6,9 @@ import {
   type ImplicitFlowSuccessResponse,
   type ImplicitFlowErrorResponse,
 } from "vue3-google-signin";
+
+import apis from "@/apis";
+import { useConstantStore } from "@/store";
 
 const controller = new AbortController();
 
@@ -31,9 +33,12 @@ const handleOnError = (errorResponse: ImplicitFlowErrorResponse) => {
   console.log("Error: ", errorResponse);
 };
 
+const constantStore = useConstantStore();
+
 const { isReady, login } = useCodeClient({
   onSuccess: handleOnSuccess,
   onError: handleOnError,
+  redirect_uri: constantStore.googleClientInfo.redirectUri,
 });
 </script>
 

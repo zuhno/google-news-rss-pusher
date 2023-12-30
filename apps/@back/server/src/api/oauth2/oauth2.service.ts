@@ -2,12 +2,13 @@ import { HttpService } from "@nestjs/axios";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { firstValueFrom } from "rxjs";
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
+import { google } from "googleapis";
 
 import { SlackService } from "@/common/slack/slack.service";
 import { SupabaseService } from "@/common/supabase/supabase.service";
 import {
   OAuth2GoogleAccessResponseDto,
+  OAuth2GoogleClientInfoResponseDto,
   OAuth2SlackAccessResponseDto,
 } from "./dto/oauth2_response.dto";
 
@@ -62,22 +63,25 @@ export class OAuth2Service {
     };
   }
 
+  getGoogleClientInfo(): OAuth2GoogleClientInfoResponseDto {
+    return {
+      clientId: this.configService.get("GOOGLE_OAUTH_CLIENT_ID"),
+      redirectUri: this.configService.get("GOOGLE_OAUTH_REDIRECT_URI"),
+    };
+  }
+
   async postGoogleAccess(code: string): Promise<OAuth2GoogleAccessResponseDto> {
-    const token = await firstValueFrom(
-      this.httpService.post("https://oauth2.googleapis.com/token", {
-        code,
-        client_id: this.configService.get("GOOGLE_OAUTH_CLIENT_ID"),
-        client_secret: this.configService.get("GOOGLE_OAUTH_CLIENT_SECRET"),
-        redirect_uri: this.configService.get("GOOGLE_OAUTH_REDIRECT_URI"),
-        grant_type: "authorization_code",
-      })
+    const oauth2Client = new google.auth.OAuth2(
+      this.configService.get("GOOGLE_OAUTH_CLIENT_ID"),
+      this.configService.get("GOOGLE_OAUTH_CLIENT_SECRET"),
+      this.configService.get("GOOGLE_OAUTH_REDIRECT_URI")
     );
 
-    const userInfo = await firstValueFrom(
-      this.httpService.get("https://www.googleapis.com/oauth2/v2/userinfo", {
-        headers: { Authorization: `${token.data.token_type} ${token.data.access_token}` },
-      })
-    );
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    const oauth2 = google.oauth2({ auth: oauth2Client, version: "v2" });
+    const userInfo = await oauth2.userinfo.get();
 
     if (!userInfo.data.email)
       throw new HttpException("Google OAuth2 Processing Error", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -89,13 +93,11 @@ export class OAuth2Service {
       .eq("email", userInfo.data.email)
       .single();
 
-    console.log(user.data);
-
     if (user.error) {
       if (user.error.code !== "PGRST116")
         throw new HttpException(user.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
-      // The result contains 0 rows
+      // PGRST116 : the result contains 0 rows
       const { email, name, picture } = userInfo.data;
 
       user = await this.supabaseService

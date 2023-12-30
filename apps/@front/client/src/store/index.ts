@@ -7,18 +7,25 @@ interface State {
   categories: response.GetConstantsResponse["categories"];
   apps: response.GetConstantsResponse["apps"];
   isRootLoading: boolean;
+  googleClientInfo: response.GetOAuth2GoogleClientInfoResponse;
 }
 
 export const useConstantStore = defineStore("constant", () => {
   const categories = ref<State["categories"]>([]);
   const apps = ref<State["apps"]>({});
+  const googleClientInfo = ref<State["googleClientInfo"]>({ clientId: "", redirectUri: "" });
   const isRootLoading = ref<State["isRootLoading"]>(true);
 
   const initFetch = async () => {
     try {
-      const { data } = await apis.get.getConstants();
-      categories.value = data.categories;
-      apps.value = data.apps;
+      const [_constants, _googleClientInfo] = await Promise.all([
+        apis.get.getConstants(),
+        apis.get.getGoogleClientInfo(),
+      ]);
+
+      categories.value = _constants.data.categories;
+      apps.value = _constants.data.apps;
+      googleClientInfo.value = _googleClientInfo.data;
     } catch (error) {
       console.error("initFetch Error : ", error);
     } finally {
@@ -26,5 +33,5 @@ export const useConstantStore = defineStore("constant", () => {
     }
   };
 
-  return { categories, apps, isRootLoading, initFetch };
+  return { categories, apps, isRootLoading, googleClientInfo, initFetch };
 });

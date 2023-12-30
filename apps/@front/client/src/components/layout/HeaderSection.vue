@@ -2,8 +2,10 @@
 import { useRouter } from "vue-router";
 
 import GoogleLoginButton from "../GoogleLoginButton.vue";
+import { useConstantStore } from "@/store";
 
 const router = useRouter();
+const constantStore = useConstantStore();
 
 const isActive = (path: string) => {
   return path === router.currentRoute.value.path ? "active" : null;
@@ -22,7 +24,9 @@ const isActive = (path: string) => {
         <router-link :class="isActive('/blockchain')" to="/blockchain">블록체인뉴스</router-link>
       </nav>
     </div>
-    <GoogleLoginButton />
+    <template v-if="!constantStore.isRootLoading">
+      <GoogleLoginButton />
+    </template>
   </header>
 </template>
 

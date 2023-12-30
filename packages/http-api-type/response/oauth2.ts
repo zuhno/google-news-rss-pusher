@@ -14,3 +14,8 @@ export class PostOAuth2GoogleAccessResponse {
   readonly nickName: Database["public"]["Tables"]["User"]["Row"]["nick_name"];
   readonly avatarUrl: Database["public"]["Tables"]["User"]["Row"]["avatar_url"];
 }
+
+export class GetOAuth2GoogleClientInfoResponse {
+  readonly clientId: string;
+  readonly redirectUri: string;
+}

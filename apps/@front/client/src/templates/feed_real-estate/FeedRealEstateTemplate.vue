@@ -9,7 +9,6 @@ import SlackBtn from "@/components/SlackBtn.vue";
 import FeedList from "@/components/FeedList.vue";
 
 interface Data {
-  clientId: string;
   querylastKey: number | null;
   feeds: response.GetFeedsResponse["list"];
   hasNext: boolean;
@@ -20,7 +19,6 @@ interface Data {
 const controller = new AbortController();
 
 const localState = reactive<Data>({
-  clientId: import.meta.env.VITE_SLACK_CLIENT_ID,
   querylastKey: null,
   feeds: [],
   hasNext: false,

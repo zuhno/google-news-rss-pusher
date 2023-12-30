@@ -24,6 +24,8 @@ export default {
     ) => instance.get<response.GetFeedsLimitedAllResponse>("/feeds/all", config),
     getConstants: (config?: AxiosRequestConfig) =>
       instance.get<response.GetConstantsResponse>("/constants", config),
+    getGoogleClientInfo: (config?: AxiosRequestConfig) =>
+      instance.get<response.GetOAuth2GoogleClientInfoResponse>("/oauth2/google", config),
   },
   post: {
     postSlackAccess: (config: AxiosRequestConfig<{ code: string }>) =>

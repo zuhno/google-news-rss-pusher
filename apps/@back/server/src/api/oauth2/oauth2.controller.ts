@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post } from "@nestjs/common";
 
 import { OAuth2Service } from "./oauth2.service";
 import { OAuth2GoogleAccessBodyDto, OAuth2SlackAccessBodyDto } from "./dto/oauth2_request.dto";
@@ -10,6 +10,11 @@ export class OAuth2Controller {
   @Post("/slack")
   async postSlackAccess(@Body() body: OAuth2SlackAccessBodyDto) {
     return this.oauth2Service.postSlackAccess(body.code);
+  }
+
+  @Get("/google")
+  getGoogleClientInfo() {
+    return this.oauth2Service.getGoogleClientInfo();
   }
 
   @Post("/google")

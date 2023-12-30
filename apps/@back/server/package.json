@@ -25,6 +25,7 @@
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
+    "googleapis": "^129.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
@@ -41,16 +42,16 @@
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "http-api-type": "workspace:*",
     "jest": "^29.5.0",
     "prettier": "^3.0.0",
     "source-map-support": "^0.5.21",
+    "supabase-type": "workspace:*",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.2.0",
-    "supabase-type": "workspace:*",
-    "http-api-type": "workspace:*"
+    "tsconfig-paths": "^4.2.0"
   },
   "jest": {
     "moduleFileExtensions": [
