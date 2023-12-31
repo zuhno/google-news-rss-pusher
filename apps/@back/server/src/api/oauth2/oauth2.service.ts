@@ -1,8 +1,10 @@
 import { HttpService } from "@nestjs/axios";
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
 import { firstValueFrom } from "rxjs";
 import { google } from "googleapis";
+import { Database } from "supabase-type";
 
 import { SlackService } from "@/common/slack/slack.service";
 import { SupabaseService } from "@/common/supabase/supabase.service";
@@ -18,8 +20,20 @@ export class OAuth2Service {
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly supabaseService: SupabaseService,
-    private readonly slackService: SlackService
+    private readonly slackService: SlackService,
+    private readonly jwtService: JwtService
   ) {}
+
+  private async setUserToken(
+    user: Pick<Database["public"]["Tables"]["User"]["Row"], "id" | "email">
+  ) {
+    const accessPayload = { id: user.id, email: user.email };
+    const accessToken = this.jwtService.signAsync(accessPayload, { expiresIn: "1h" });
+    const refreshPayload = { ...accessPayload, accessToken: accessToken };
+    const refreshToken = this.jwtService.signAsync(refreshPayload, { expiresIn: "1h" });
+
+    return { accessToken, refreshToken };
+  }
 
   async postSlackAccess(code: string): Promise<OAuth2SlackAccessResponseDto> {
     const formData = new FormData();
@@ -114,7 +128,9 @@ export class OAuth2Service {
         .single();
     }
 
-    // TODO: JWT token
+    const { accessToken, refreshToken } = await this.setUserToken(user.data);
+
+    console.log("accessToken : ", accessToken, "\naccessToken : ", refreshToken);
 
     return {
       id: user.data.id,
