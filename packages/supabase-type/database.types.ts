@@ -255,6 +255,33 @@ export interface Database {
         }
         Relationships: []
       }
+      UserAuth: {
+        Row: {
+          access_token: string
+          created_at: string
+          refresh_token: string
+          request_config: string
+          updated_at: string
+          userId: number
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          refresh_token: string
+          request_config: string
+          updated_at?: string
+          userId?: number
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          refresh_token?: string
+          request_config?: string
+          updated_at?: string
+          userId?: number
+        }
+        Relationships: []
+      }
       UserRole: {
         Row: {
           created_at: string

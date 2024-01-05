@@ -28,7 +28,7 @@ export class OAuth2Service {
     user: Pick<Database["public"]["Tables"]["User"]["Row"], "id" | "email">
   ) {
     const accessPayload = { id: user.id, email: user.email };
-    const accessToken = this.jwtService.signAsync(accessPayload, { expiresIn: "1h" });
+    const accessToken = this.jwtService.signAsync(accessPayload, { expiresIn: "10m" });
     const refreshPayload = { ...accessPayload, accessToken: accessToken };
     const refreshToken = this.jwtService.signAsync(refreshPayload, { expiresIn: "1h" });
 
@@ -126,6 +126,11 @@ export class OAuth2Service {
         })
         .select("*")
         .single();
+
+      await this.supabaseService.getClient().serviceRole.from("UserRole").insert({
+        user_id: user.data.id,
+        role: "USER_BASIC",
+      });
     }
 
     const { accessToken, refreshToken } = await this.setUserToken(user.data);
