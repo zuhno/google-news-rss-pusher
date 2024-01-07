@@ -91,7 +91,7 @@ export class OAuth2Service {
     };
   }
 
-  async postGoogleAccess(code: string): Promise<OAuth2GoogleAccessResponseDto> {
+  async postGoogleAccess(code: string) {
     const oauth2Client = new google.auth.OAuth2(
       this.configService.get("GOOGLE_OAUTH_CLIENT_ID"),
       this.configService.get("GOOGLE_OAUTH_CLIENT_SECRET"),
@@ -159,6 +159,7 @@ export class OAuth2Service {
     return {
       accessToken: newAuth.data.access_token,
       refreshToken: newAuth.data.refresh_token,
+      userInfo: user.data,
     };
   }
 }

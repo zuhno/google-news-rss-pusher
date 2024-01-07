@@ -30,7 +30,7 @@ const constantStore = useConstantStore();
 localState.categoryId = constantStore.categories.find(
   (category) => category.title === "블록체인"
 )!.id;
-localState.appByCategoryId = constantStore.apps[localState.categoryId] || [];
+localState.appByCategoryId = constantStore.apps?.[localState.categoryId] || [];
 
 const { isFetching, data, refetch } = useQuery({
   queryKey: ["getFeeds", localState.categoryId, localState.querylastKey],

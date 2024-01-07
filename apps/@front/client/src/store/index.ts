@@ -1,20 +1,22 @@
 import apis from "@/apis";
 import { defineStore } from "pinia";
-import type { response } from "http-api-type";
+import { response } from "http-api-type";
 import { ref } from "vue";
 
-interface State {
+interface ConstantState {
   categories: response.GetConstantsResponse["categories"];
   apps: response.GetConstantsResponse["apps"];
   isRootLoading: boolean;
   googleClientInfo: response.GetOAuth2GoogleClientInfoResponse;
-}
+};
+
+interface UserState extends response.PostOAuth2GoogleAccessResponse {};
 
 export const useConstantStore = defineStore("constant", () => {
-  const categories = ref<State["categories"]>([]);
-  const apps = ref<State["apps"]>({});
-  const googleClientInfo = ref<State["googleClientInfo"]>({ clientId: "", redirectUri: "" });
-  const isRootLoading = ref<State["isRootLoading"]>(true);
+  const categories = ref<ConstantState["categories"]>([]);
+  const apps = ref<ConstantState["apps"]|null>(null);
+  const googleClientInfo = ref<ConstantState["googleClientInfo"]|null>(null);
+  const isRootLoading = ref<ConstantState["isRootLoading"]>(true);
 
   const initFetch = async () => {
     try {
@@ -33,5 +35,16 @@ export const useConstantStore = defineStore("constant", () => {
     }
   };
 
+ 
   return { categories, apps, isRootLoading, googleClientInfo, initFetch };
 });
+
+export const useUserStore = defineStore("user", () => {
+  const info = ref<UserState | null>(null);
+
+  const setInfo = (userInfo: response.PostOAuth2GoogleAccessResponse) => {
+    info.value = userInfo;
+  };
+
+  return { info, setInfo };
+})
