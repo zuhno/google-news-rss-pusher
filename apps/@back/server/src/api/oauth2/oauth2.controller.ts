@@ -1,11 +1,16 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post, Res } from "@nestjs/common";
 
 import { OAuth2Service } from "./oauth2.service";
 import { OAuth2GoogleAccessBodyDto, OAuth2SlackAccessBodyDto } from "./dto/oauth2_request.dto";
+import { Response } from "express";
+import { StoreService } from "@/common/store/store.service";
 
 @Controller()
 export class OAuth2Controller {
-  constructor(private readonly oauth2Service: OAuth2Service) {}
+  constructor(
+    private readonly oauth2Service: OAuth2Service,
+    private readonly storeService: StoreService
+  ) {}
 
   @Post("/slack")
   async postSlackAccess(@Body() body: OAuth2SlackAccessBodyDto) {
@@ -18,7 +23,16 @@ export class OAuth2Controller {
   }
 
   @Post("/google")
-  async postGoogleAccess(@Body() body: OAuth2GoogleAccessBodyDto) {
-    return this.oauth2Service.postGoogleAccess(body.code);
+  async postGoogleAccess(
+    @Body() body: OAuth2GoogleAccessBodyDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { accessToken, refreshToken } = await this.oauth2Service.postGoogleAccess(body.code);
+    const { keys, policies } = this.storeService.getCookieConfig();
+
+    res.cookie(keys.accessToken, accessToken, { ...policies });
+    res.cookie(keys.refreshToken, refreshToken, { ...policies });
+
+    return true;
   }
 }

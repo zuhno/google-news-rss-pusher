@@ -2,12 +2,24 @@ import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 
 import { SupabaseService } from "../supabase/supabase.service";
 import { Database } from "supabase-type";
+import { CookieOptions } from "express";
 
 @Injectable()
 export class StoreService {
   private readonly logger = new Logger(StoreService.name);
   private lastFeed: Record<number, number> = {};
   private categoryIds: number[] = [];
+  private cookieConfig = {
+    keys: {
+      accessToken: "gnrp_access_token",
+      refreshToken: "gnrp_access_token",
+    },
+    policies: {
+      httpOnly: true,
+      sameSite: "strict",
+      path: "/",
+    } as CookieOptions,
+  };
 
   constructor(private readonly supabaseService: SupabaseService) {
     // initial fetch
@@ -60,5 +72,9 @@ export class StoreService {
 
   getCategoryIds() {
     return this.categoryIds;
+  }
+
+  getCookieConfig() {
+    return this.cookieConfig;
   }
 }

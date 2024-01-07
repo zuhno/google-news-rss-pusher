@@ -28,9 +28,16 @@ export class OAuth2Service {
     user: Pick<Database["public"]["Tables"]["User"]["Row"], "id" | "email">
   ) {
     const accessPayload = { id: user.id, email: user.email };
-    const accessToken = this.jwtService.signAsync(accessPayload, { expiresIn: "10m" });
+    const accessToken = await this.jwtService.signAsync(accessPayload, {
+      secret: process.env.GOOGLE_OAUTH_JWT_SECRET,
+      expiresIn: "10m",
+    });
+
     const refreshPayload = { ...accessPayload, accessToken: accessToken };
-    const refreshToken = this.jwtService.signAsync(refreshPayload, { expiresIn: "1h" });
+    const refreshToken = await this.jwtService.signAsync(refreshPayload, {
+      secret: process.env.GOOGLE_OAUTH_JWT_SECRET,
+      expiresIn: "1h",
+    });
 
     return { accessToken, refreshToken };
   }
@@ -134,14 +141,24 @@ export class OAuth2Service {
     }
 
     const { accessToken, refreshToken } = await this.setUserToken(user.data);
+    const newAuth = await this.supabaseService
+      .getClient()
+      .serviceRole.from("UserAuth")
+      .upsert({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+        userId: user.data.id,
+        request_config: "", // TODO: ip, user-agent, etc... whatever you want.
+      })
+      .select("access_token, refresh_token")
+      .single();
 
-    console.log("accessToken : ", accessToken, "\naccessToken : ", refreshToken);
+    if (newAuth.error)
+      throw new HttpException(user.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
     return {
-      id: user.data.id,
-      email: user.data.email,
-      nickName: user.data.nick_name,
-      avatarUrl: user.data.avatar_url,
+      accessToken: newAuth.data.access_token,
+      refreshToken: newAuth.data.refresh_token,
     };
   }
 }

@@ -6,7 +6,11 @@ export interface AxiosRequestConfigWithParam<P, D = any> extends AxiosRequestCon
   params: P;
 }
 
-const instance = axios.create({ baseURL: import.meta.env.VITE_SERVER_DOMAIN, timeout: 10000 });
+const instance = axios.create({
+  baseURL: import.meta.env.VITE_SERVER_DOMAIN,
+  timeout: 10000,
+  withCredentials: true,
+});
 
 export default {
   get: {

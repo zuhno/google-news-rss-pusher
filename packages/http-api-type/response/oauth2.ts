@@ -9,10 +9,8 @@ export class PostOAuth2SlackAccessResponse {
 }
 
 export class PostOAuth2GoogleAccessResponse {
-  readonly id: Database["public"]["Tables"]["User"]["Row"]["id"];
-  readonly email: Database["public"]["Tables"]["User"]["Row"]["email"];
-  readonly nickName: Database["public"]["Tables"]["User"]["Row"]["nick_name"];
-  readonly avatarUrl: Database["public"]["Tables"]["User"]["Row"]["avatar_url"];
+  readonly accessToken: string;
+  readonly refreshToken: string;
 }
 
 export class GetOAuth2GoogleClientInfoResponse {
