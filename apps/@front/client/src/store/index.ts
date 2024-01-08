@@ -10,12 +10,12 @@ interface ConstantState {
   googleClientInfo: response.GetOAuth2GoogleClientInfoResponse;
 };
 
-interface UserState extends response.PostOAuth2GoogleAccessResponse {};
+interface UserState extends response.PostOAuth2GoogleAccessResponse { };
 
 export const useConstantStore = defineStore("constant", () => {
   const categories = ref<ConstantState["categories"]>([]);
-  const apps = ref<ConstantState["apps"]|null>(null);
-  const googleClientInfo = ref<ConstantState["googleClientInfo"]|null>(null);
+  const apps = ref<ConstantState["apps"] | null>(null);
+  const googleClientInfo = ref<ConstantState["googleClientInfo"] | null>(null);
   const isRootLoading = ref<ConstantState["isRootLoading"]>(true);
 
   const initFetch = async () => {
@@ -35,7 +35,6 @@ export const useConstantStore = defineStore("constant", () => {
     }
   };
 
- 
   return { categories, apps, isRootLoading, googleClientInfo, initFetch };
 });
 

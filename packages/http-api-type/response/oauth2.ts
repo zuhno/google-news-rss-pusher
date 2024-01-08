@@ -12,6 +12,7 @@ export class PostOAuth2GoogleAccessResponse {
   readonly email: Database["public"]["Tables"]["User"]["Row"]["email"];
   readonly nickName: Database["public"]["Tables"]["User"]["Row"]["nick_name"];
   readonly avatarUrl: Database["public"]["Tables"]["User"]["Row"]["avatar_url"];
+  readonly accessToken: string;
 };
 
 export class GetOAuth2GoogleClientInfoResponse {

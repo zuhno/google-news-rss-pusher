@@ -9,7 +9,6 @@ import { Database } from "supabase-type";
 import { SlackService } from "@/common/slack/slack.service";
 import { SupabaseService } from "@/common/supabase/supabase.service";
 import {
-  OAuth2GoogleAccessResponseDto,
   OAuth2GoogleClientInfoResponseDto,
   OAuth2SlackAccessResponseDto,
 } from "./dto/oauth2_response.dto";
@@ -22,7 +21,7 @@ export class OAuth2Service {
     private readonly supabaseService: SupabaseService,
     private readonly slackService: SlackService,
     private readonly jwtService: JwtService
-  ) {}
+  ) { }
 
   private async setUserToken(
     user: Pick<Database["public"]["Tables"]["User"]["Row"], "id" | "email">

@@ -11,7 +11,7 @@ export class OAuth2Controller {
   constructor(
     private readonly oauth2Service: OAuth2Service,
     private readonly storeService: StoreService
-  ) {}
+  ) { }
 
   @Post("/slack")
   async postSlackAccess(@Body() body: OAuth2SlackAccessBodyDto) {
@@ -31,13 +31,13 @@ export class OAuth2Controller {
     const { accessToken, refreshToken, userInfo } = await this.oauth2Service.postGoogleAccess(body.code);
     const { keys, policies } = this.storeService.getCookieConfig();
 
-    res.cookie(keys.accessToken, accessToken, { ...policies });
     res.cookie(keys.refreshToken, refreshToken, { ...policies });
 
     return {
       email: userInfo.email,
       nickName: userInfo.nick_name,
-      avatarUrl: userInfo.avatar_url
+      avatarUrl: userInfo.avatar_url,
+      accessToken: accessToken
     };
   }
 }
