@@ -25,8 +25,6 @@ const supabaseServiceRoleClient = createClient<Database>(
 
 const axiosInstance = axios.create({
   headers: {
-    "User-Agent":
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Content-Type": "text/html",
   },
 });
@@ -93,7 +91,7 @@ export const job = async () => {
 
       if (newFeeds.length === 0) {
         console.log(`There is no clipping '${category.title}' news`);
-        return;
+        continue;
       }
 
       const query = [];

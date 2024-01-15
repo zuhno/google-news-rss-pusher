@@ -13,6 +13,8 @@ export interface Database {
         Row: {
           authorize_link: string
           category_id: number
+          client_id: string | null
+          client_secret: string | null
           created_at: string
           from: Database["public"]["Enums"]["AppFrom"]
           id: string
@@ -21,6 +23,8 @@ export interface Database {
         Insert: {
           authorize_link: string
           category_id: number
+          client_id?: string | null
+          client_secret?: string | null
           created_at?: string
           from: Database["public"]["Enums"]["AppFrom"]
           id: string
@@ -29,6 +33,8 @@ export interface Database {
         Update: {
           authorize_link?: string
           category_id?: number
+          client_id?: string | null
+          client_secret?: string | null
           created_at?: string
           from?: Database["public"]["Enums"]["AppFrom"]
           id?: string

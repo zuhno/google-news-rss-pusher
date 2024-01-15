@@ -21,9 +21,9 @@ export class OAuth2Service {
     private readonly supabaseService: SupabaseService,
     private readonly slackService: SlackService,
     private readonly jwtService: JwtService
-  ) { }
+  ) {}
 
-  private async setUserToken(
+  private async _setUserToken(
     user: Pick<Database["public"]["Tables"]["User"]["Row"], "id" | "email">
   ) {
     const accessPayload = { id: user.id, email: user.email };
@@ -41,11 +41,21 @@ export class OAuth2Service {
     return { accessToken, refreshToken };
   }
 
-  async postSlackAccess(code: string): Promise<OAuth2SlackAccessResponseDto> {
+  async postSlackAccess(code: string, category: string): Promise<OAuth2SlackAccessResponseDto> {
+    const app = await this.supabaseService
+      .getClient()
+      .anon.from("App")
+      .select("client_id, client_secret")
+      .eq("category_id", parseInt(category))
+      .eq("from", "SLACK")
+      .single();
+
+    if (app.error) throw new HttpException(app.error.message, HttpStatus.NOT_FOUND);
+
     const formData = new FormData();
     formData.append("code", code);
-    formData.append("client_id", this.configService.get("SLACK_CLIENT_ID"));
-    formData.append("client_secret", this.configService.get("SLACK_CLIENT_SECRET"));
+    formData.append("client_id", app.data.client_id);
+    formData.append("client_secret", app.data.client_secret);
 
     const result = await firstValueFrom(
       this.httpService.post("https://slack.com/api/oauth.v2.access", formData, {
@@ -139,7 +149,7 @@ export class OAuth2Service {
       });
     }
 
-    const { accessToken, refreshToken } = await this.setUserToken(user.data);
+    const { accessToken, refreshToken } = await this._setUserToken(user.data);
     const newAuth = await this.supabaseService
       .getClient()
       .serviceRole.from("UserAuth")

@@ -23,17 +23,20 @@ export class CommunityService {
     // TODO: Error handling, Exception handling
     switch (body.command) {
       // update interval time
-      case "/update":
+      case "/update-real_estate":
+      case "/update-blockchain":
         await firstValueFrom(this.slackService.postUpdateInterval(body.response_url));
         break;
 
       // update active to N
-      case "/deactive":
+      case "/deactive-real_estate":
+      case "/deactive-blockchain":
         await firstValueFrom(this.slackService.postUpdateActiveToDeactive(body.response_url));
         break;
 
       // update active to Y
-      case "/reactive":
+      case "/reactive-real_estate":
+      case "/reactive-blockchain":
         await firstValueFrom(this.slackService.postUpdateDeactiveToActive(body.response_url));
         break;
 

@@ -23,7 +23,7 @@ function dateFormatting(date: string) {
       <div>
         <a :href="feed.link!" target="_blank" rel="noreferer">
           <template v-if="feed.preview_url">
-            <img :src="feed.preview_url" alt="" />
+            <img :src="feed.preview_url" alt="" onerror="this.src='/no-image.png'" />
           </template>
           <template v-else>
             <img src="/no-image.png" alt="" />

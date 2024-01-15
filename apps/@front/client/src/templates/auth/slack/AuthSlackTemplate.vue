@@ -21,16 +21,16 @@ const installedData = ref<InstalledData | null>(null);
 const errorData = ref<ErrorData | null>(null);
 
 const { mutateAsync } = useMutation({
-  mutationFn: async (config: AxiosRequestConfig<{ code: string }>) =>
+  mutationFn: async (config: AxiosRequestConfig<{ code: string; category: string }>) =>
     apis.post.postSlackAccess({ ...config, signal: controller.signal }),
 });
 
 onMounted(async () => {
-  const code = route.query.code;
-  if (typeof code !== "string" || !code) return;
+  const { code, category } = route.query;
+  if (typeof code !== "string" || typeof category !== "string" || !code || !category) return;
 
   try {
-    const { data } = await mutateAsync({ data: { code } });
+    const { data } = await mutateAsync({ data: { code, category } });
 
     if (!data || !data.channelId) return;
 

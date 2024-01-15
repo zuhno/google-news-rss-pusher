@@ -2,7 +2,7 @@ import type { AxiosStatic } from "axios";
 import * as cheerio from "cheerio";
 
 import type { IRssResponseItem } from "./types";
-import { excludeTitleRegex, metaPropNamesForPreviewImage } from "./constants";
+import { excludeTitleRegex, metaPropNamesForPreviewImage, userAgents } from "./constants";
 
 // ! unexport
 const _textMatchRate = (text1: string, text2: string) => {
@@ -33,6 +33,10 @@ const getRootLink = (link: string) => {
   const protocol = link.match(/(https:\/\/|http:\/\/)/)[0];
 
   return protocol + domain;
+};
+
+const getRandomUserAgent = () => {
+  return userAgents[Math.floor(Math.random() * userAgents.length)];
 };
 
 export const rawUnduplicatedRatio = (texts: string[], target: string) => {
@@ -67,7 +71,9 @@ export const extractValidTitle = (title: string, source?: string) =>
 
 export const getRealLink = async (originLink: string, axiosGet: AxiosStatic["get"]) => {
   try {
-    const { data } = await axiosGet(originLink);
+    const { data } = await axiosGet(originLink, {
+      headers: { "User-Agent": getRandomUserAgent() },
+    });
 
     const match = String(data).match(/<a[^>]*>(.*?)<\/a>/);
 
@@ -80,7 +86,9 @@ export const getRealLink = async (originLink: string, axiosGet: AxiosStatic["get
 
 export const getOpengraphImage = async (link: string, axiosGet: AxiosStatic["get"]) => {
   try {
-    const { data } = await axiosGet(link).catch(async () => {
+    const { data } = await axiosGet(link, {
+      headers: { "User-Agent": getRandomUserAgent() },
+    }).catch(async () => {
       const rootLink = getRootLink(link);
       return await axiosGet(rootLink);
     });

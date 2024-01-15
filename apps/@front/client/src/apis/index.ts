@@ -32,7 +32,7 @@ export default {
       instance.get<response.GetOAuth2GoogleClientInfoResponse>("/oauth2/google", config),
   },
   post: {
-    postSlackAccess: (config: AxiosRequestConfig<{ code: string }>) =>
+    postSlackAccess: (config: AxiosRequestConfig<{ code: string; category: string }>) =>
       instance.post<response.PostOAuth2SlackAccessResponse>("/oauth2/slack", config.data, config),
     postGoogleAccess: (config: AxiosRequestConfig<{ code: string }>) =>
       instance.post<response.PostOAuth2GoogleAccessResponse>("/oauth2/google", config.data, config),

@@ -11,11 +11,11 @@ export class OAuth2Controller {
   constructor(
     private readonly oauth2Service: OAuth2Service,
     private readonly storeService: StoreService
-  ) { }
+  ) {}
 
   @Post("/slack")
   async postSlackAccess(@Body() body: OAuth2SlackAccessBodyDto) {
-    return this.oauth2Service.postSlackAccess(body.code);
+    return this.oauth2Service.postSlackAccess(body.code, body.category);
   }
 
   @Get("/google")
@@ -28,7 +28,9 @@ export class OAuth2Controller {
     @Body() body: OAuth2GoogleAccessBodyDto,
     @Res({ passthrough: true }) res: Response
   ): Promise<response.PostOAuth2GoogleAccessResponse> {
-    const { accessToken, refreshToken, userInfo } = await this.oauth2Service.postGoogleAccess(body.code);
+    const { accessToken, refreshToken, userInfo } = await this.oauth2Service.postGoogleAccess(
+      body.code
+    );
     const { keys, policies } = this.storeService.getCookieConfig();
 
     res.cookie(keys.refreshToken, refreshToken, { ...policies });
@@ -37,7 +39,7 @@ export class OAuth2Controller {
       email: userInfo.email,
       nickName: userInfo.nick_name,
       avatarUrl: userInfo.avatar_url,
-      accessToken: accessToken
+      accessToken: accessToken,
     };
   }
 }
