@@ -5,3 +5,7 @@ export class GetUserResponse {
   readonly nickName: Database["public"]["Tables"]["User"]["Row"]["nick_name"];
   readonly avatarUrl: Database["public"]["Tables"]["User"]["Row"]["avatar_url"];
 }
+
+export class PostUserLogoutResponse {
+  readonly count: number;
+}

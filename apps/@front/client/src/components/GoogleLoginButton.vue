@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from "vue";
 import { useMutation } from "@tanstack/vue-query";
 import type { AxiosRequestConfig } from "axios";
 import {
@@ -6,11 +7,11 @@ import {
   type ImplicitFlowSuccessResponse,
   type ImplicitFlowErrorResponse,
 } from "vue3-google-signin";
-import { useUserStore } from "@/store";
 
 import apis from "@/apis";
-import { useConstantStore } from "@/store";
-import { onMounted } from "vue";
+import { useConstantStore, useUserStore } from "@/store";
+import { storage } from "@/constants";
+import LogoutButton from "./LogoutButton.vue";
 
 const controller = new AbortController();
 
@@ -28,9 +29,8 @@ const handleOnSuccess = async (response: ImplicitFlowSuccessResponse) => {
 
   try {
     const { data } = await googleAccessMutate.mutateAsync({ data: { code: response.code } });
-    userStore.setInfo(data);
-    localStorage.setItem("gnrp_access_token", data.accessToken);
-    localStorage.setItem("isLoggedIn", "true");
+    userStore.setUser(data);
+    localStorage.setItem(storage.IS_LOGGED_IN, "true");
   } catch (err) {
     console.error("err : ", err);
   }
@@ -46,22 +46,21 @@ const { isReady, login } = useCodeClient({
   redirect_uri: constantStore.googleClientInfo?.redirectUri,
 });
 
-onMounted(() => {
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-  if (isLoggedIn) {
-    // TODO: fetch userInfo
-  }
+onUnmounted(() => {
+  controller.abort();
 });
 </script>
 
 <template>
-  <template v-if="!userStore.info">
-    <button :disabled="!isReady" @click="() => login()">Login with Google</button>
+  <template v-if="!userStore.user">
+    <button :disabled="!isReady" @click="login">Login with Google</button>
   </template>
   <template v-else>
-    <div class="profile">
-      <img :src="userStore.info.avatarUrl!" alt="" />
-      <span>{{ userStore.info.nickName }}</span>
+    <div>
+      <div class="profile">
+        <img :src="userStore.user.avatarUrl!" alt="" />
+        <span>{{ userStore.user.nickName }}</span>
+      </div>
     </div>
   </template>
 </template>
@@ -70,6 +69,7 @@ onMounted(() => {
 button {
   outline: none;
   border: none;
+  cursor: pointer;
 }
 
 .profile {

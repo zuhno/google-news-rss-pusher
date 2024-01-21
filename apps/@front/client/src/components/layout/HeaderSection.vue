@@ -3,6 +3,7 @@ import { useRouter } from "vue-router";
 
 import GoogleLoginButton from "../GoogleLoginButton.vue";
 import { useConstantStore } from "@/store";
+import LogoutButton from "../LogoutButton.vue";
 
 const router = useRouter();
 const constantStore = useConstantStore();
@@ -25,7 +26,11 @@ const isActive = (path: string) => {
       </nav>
     </div>
     <template v-if="!constantStore.isRootLoading">
-      <GoogleLoginButton />
+      <div>
+        <LogoutButton />
+
+        <GoogleLoginButton />
+      </div>
     </template>
   </header>
 </template>

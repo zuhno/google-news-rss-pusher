@@ -21,6 +21,7 @@ import { UserModule } from "./api/user/user.module";
     ConstantModule,
     CommunityModule,
     NoticeModule,
+    UserModule,
     // Router
     RouterModule.register([
       {

@@ -2,15 +2,16 @@ import apis from "@/apis";
 import { defineStore } from "pinia";
 import { response } from "http-api-type";
 import { ref } from "vue";
+import { storage } from "@/constants";
 
 interface ConstantState {
   categories: response.GetConstantsResponse["categories"];
   apps: response.GetConstantsResponse["apps"];
   isRootLoading: boolean;
   googleClientInfo: response.GetOAuth2GoogleClientInfoResponse;
-};
+}
 
-interface UserState extends response.PostOAuth2GoogleAccessResponse { };
+interface UserState extends response.PostOAuth2GoogleAccessResponse {}
 
 export const useConstantStore = defineStore("constant", () => {
   const categories = ref<ConstantState["categories"]>([]);
@@ -29,7 +30,7 @@ export const useConstantStore = defineStore("constant", () => {
       apps.value = _constants.data.apps;
       googleClientInfo.value = _googleClientInfo.data;
     } catch (error) {
-      console.error("initFetch Error : ", error);
+      console.error("initFetch#constant Error : ", error);
     } finally {
       isRootLoading.value = false;
     }
@@ -39,11 +40,26 @@ export const useConstantStore = defineStore("constant", () => {
 });
 
 export const useUserStore = defineStore("user", () => {
-  const info = ref<UserState | null>(null);
+  const user = ref<UserState | null>(null);
 
-  const setInfo = (userInfo: response.PostOAuth2GoogleAccessResponse) => {
-    info.value = userInfo;
+  const setUser = (userInfo: response.PostOAuth2GoogleAccessResponse) => {
+    user.value = userInfo;
   };
 
-  return { info, setInfo };
-})
+  const resetUser = () => {
+    user.value = null;
+    localStorage.removeItem(storage.IS_LOGGED_IN);
+  };
+
+  const initFetch = async () => {
+    try {
+      const { data } = await apis.get.getUser();
+      user.value = data;
+    } catch (error) {
+      localStorage.removeItem(storage.IS_LOGGED_IN);
+      console.error("initFetch#user Error : ", error);
+    }
+  };
+
+  return { user, setUser, resetUser, initFetch };
+});

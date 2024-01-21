@@ -5,7 +5,7 @@ import { FeedsLimitedAllQueryDto, FeedsQueryDto } from "./dto/feeds_request.dto"
 
 @Controller()
 export class FeedController {
-  constructor(private readonly feedService: FeedService) { }
+  constructor(private readonly feedService: FeedService) {}
 
   @Get()
   async getFeeds(@Query() query: FeedsQueryDto) {
@@ -14,7 +14,6 @@ export class FeedController {
 
   @Get("/all")
   async getFeedsLimitedAll(@Query() query: FeedsLimitedAllQueryDto) {
-    console.log(1);
     return this.feedService.getFeedsLimitedAll({ ...query });
   }
 }

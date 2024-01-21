@@ -83,7 +83,10 @@ export class userAuthMiddleware implements NestMiddleware {
     const accessPayload = await this._verify(accessToken);
 
     // pass if access token is verified
-    if (accessPayload) next();
+    if (accessPayload) {
+      next();
+      return;
+    }
 
     // if access token is unverified, check verify refresh token
     const refreshPayload = await this._verify(refreshToken);

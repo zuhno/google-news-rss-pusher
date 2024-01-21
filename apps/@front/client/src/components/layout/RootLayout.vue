@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { useConstantStore } from "@/store";
 import { onMounted } from "vue";
 
+import { storage } from "@/constants";
+import { useConstantStore, useUserStore } from "@/store";
+
 const constantStore = useConstantStore();
+const userStore = useUserStore();
 
 onMounted(async () => {
-  await constantStore.initFetch();
+  const promises = [constantStore.initFetch()];
+  const isLoggedIn = localStorage.getItem(storage.IS_LOGGED_IN);
+
+  if (isLoggedIn === "true") {
+    promises.push(userStore.initFetch());
+  }
+
+  await Promise.allSettled(promises);
 });
 </script>
 
