@@ -12,13 +12,17 @@ export class StoreService {
   private cookieConfig = {
     keys: {
       accessToken: "gnrp_access_token",
-      refreshToken: "gnrp_access_token",
+      refreshToken: "gnrp_refresh_token",
     },
     policies: {
       httpOnly: true,
       sameSite: "strict",
       path: "/",
     } as CookieOptions,
+    expiresIn: {
+      accessToken: "30m",
+      refreshToken: "24h",
+    },
   };
 
   constructor(private readonly supabaseService: SupabaseService) {

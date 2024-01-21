@@ -33,13 +33,13 @@ export class OAuth2Controller {
     );
     const { keys, policies } = this.storeService.getCookieConfig();
 
+    res.cookie(keys.accessToken, accessToken, { ...policies });
     res.cookie(keys.refreshToken, refreshToken, { ...policies });
 
     return {
       email: userInfo.email,
       nickName: userInfo.nick_name,
       avatarUrl: userInfo.avatar_url,
-      accessToken: accessToken,
     };
   }
 }

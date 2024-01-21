@@ -12,6 +12,7 @@ import {
   OAuth2GoogleClientInfoResponseDto,
   OAuth2SlackAccessResponseDto,
 } from "./dto/oauth2_response.dto";
+import { StoreService } from "@/common/store/store.service";
 
 @Injectable()
 export class OAuth2Service {
@@ -20,22 +21,25 @@ export class OAuth2Service {
     private readonly httpService: HttpService,
     private readonly supabaseService: SupabaseService,
     private readonly slackService: SlackService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly storeService: StoreService
   ) {}
 
   private async _setUserToken(
     user: Pick<Database["public"]["Tables"]["User"]["Row"], "id" | "email">
   ) {
+    const { expiresIn } = this.storeService.getCookieConfig();
+
     const accessPayload = { id: user.id, email: user.email };
     const accessToken = await this.jwtService.signAsync(accessPayload, {
-      secret: process.env.GOOGLE_OAUTH_JWT_SECRET,
-      expiresIn: "10m",
+      secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
+      expiresIn: expiresIn.accessToken,
     });
 
     const refreshPayload = { ...accessPayload, accessToken: accessToken };
     const refreshToken = await this.jwtService.signAsync(refreshPayload, {
-      secret: process.env.GOOGLE_OAUTH_JWT_SECRET,
-      expiresIn: "1h",
+      secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
+      expiresIn: expiresIn.refreshToken,
     });
 
     return { accessToken, refreshToken };

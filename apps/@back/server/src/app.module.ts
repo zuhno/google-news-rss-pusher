@@ -7,6 +7,7 @@ import { FeedModule } from "./api/feed/feed.module";
 import { ConstantModule } from "./api/constant/constant.module";
 import { CommunityModule } from "./api/community/community.module";
 import { NoticeModule } from "./api/notice/notice.module";
+import { UserModule } from "./api/user/user.module";
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { NoticeModule } from "./api/notice/notice.module";
         module: CommunityModule,
       },
       { path: "notices", module: NoticeModule },
+      { path: "users", module: UserModule },
     ]),
   ],
   controllers: [],
