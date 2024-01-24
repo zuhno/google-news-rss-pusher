@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onUnmounted } from "vue";
 import { useMutation } from "@tanstack/vue-query";
 import type { AxiosRequestConfig } from "axios";
 import {
@@ -11,7 +11,6 @@ import {
 import apis from "@/apis";
 import { useConstantStore, useUserStore } from "@/store";
 import { storage } from "@/constants";
-import LogoutButton from "./LogoutButton.vue";
 
 const controller = new AbortController();
 

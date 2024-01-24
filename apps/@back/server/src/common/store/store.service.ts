@@ -14,11 +14,15 @@ export class StoreService {
       accessToken: "gnrp_access_token",
       refreshToken: "gnrp_refresh_token",
     },
-    policies: {
-      httpOnly: true,
-      sameSite: "strict",
-      path: "/",
-    } as CookieOptions,
+    policies: (process.env.NODE_ENV === "development"
+      ? {
+          httpOnly: false,
+          sameSite: "none",
+          path: "/",
+          secure: true,
+          domain: "localhost",
+        }
+      : { httpOnly: true, sameSite: "strict", path: "/" }) as CookieOptions,
     expiresIn: {
       accessToken: "30m",
       refreshToken: "24h",
