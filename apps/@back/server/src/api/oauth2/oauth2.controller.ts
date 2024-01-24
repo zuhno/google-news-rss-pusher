@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post, Res } from "@nestjs/common";
-
+import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
+import { Request } from "express";
 import { OAuth2Service } from "./oauth2.service";
 import { OAuth2GoogleAccessBodyDto, OAuth2SlackAccessBodyDto } from "./dto/oauth2_request.dto";
 import { Response } from "express";
@@ -14,8 +14,14 @@ export class OAuth2Controller {
   ) {}
 
   @Post("/slack")
-  async postSlackAccess(@Body() body: OAuth2SlackAccessBodyDto) {
-    return this.oauth2Service.postSlackAccess(body.code, body.category);
+  async postSlackAccess(@Body() body: OAuth2SlackAccessBodyDto, @Req() req: Request) {
+    const { keys } = this.storeService.getCookieConfig();
+    const accessToken = req.cookies[keys.accessToken];
+
+    // The reason for not checking the validity of the accessToken is that
+    // although adding an app to Slack does not enforce login,
+    // user information is stored wherever possible for tracking purposes.
+    return this.oauth2Service.postSlackAccess(body.code, body.category, accessToken);
   }
 
   @Get("/google")

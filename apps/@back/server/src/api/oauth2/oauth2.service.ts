@@ -25,6 +25,10 @@ export class OAuth2Service {
     private readonly storeService: StoreService
   ) {}
 
+  async _decoded(token: string) {
+    return this.jwtService.decode(token, { json: true });
+  }
+
   private async _setUserToken(
     user: Pick<Database["public"]["Tables"]["User"]["Row"], "id" | "email">
   ) {
@@ -45,7 +49,11 @@ export class OAuth2Service {
     return { accessToken, refreshToken };
   }
 
-  async postSlackAccess(code: string, category: string): Promise<OAuth2SlackAccessResponseDto> {
+  async postSlackAccess(
+    code: string,
+    category: string,
+    accessToken?: string
+  ): Promise<OAuth2SlackAccessResponseDto> {
     const app = await this.supabaseService
       .getClient()
       .anon.from("App")
@@ -69,6 +77,11 @@ export class OAuth2Service {
 
     if (!result.data) throw new HttpException("UNAUTHORIZED", HttpStatus.UNAUTHORIZED);
 
+    let userId = null;
+    if (accessToken) {
+      ({ id: userId } = await this._decoded(accessToken));
+    }
+
     const { data, error } = await this.supabaseService
       .getClient()
       .serviceRole.from("Subscriber")
@@ -78,6 +91,7 @@ export class OAuth2Service {
         ch_url: result.data.incoming_webhook?.url,
         active: true,
         interval_time: 3,
+        user_id: userId,
         app_id: result.data.app_id,
         team_id: result.data.team?.id,
       })
