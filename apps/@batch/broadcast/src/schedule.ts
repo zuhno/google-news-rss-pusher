@@ -74,7 +74,7 @@ export const job = async (intervalTime: IntervalTimeEnum) => {
             if (error.response.status === constants.HTTP_STATUS_NOT_FOUND) {
               await supabaseServiceRoleClient
                 .from("Subscriber")
-                .update({ active: "N", deactive_reason: "NOT_FOUND" })
+                .update({ active: false, deactive_reason: "NOT_FOUND" })
                 .eq("app_id", subscriber.app_id)
                 .eq("ch_id", subscriber.ch_id);
             }

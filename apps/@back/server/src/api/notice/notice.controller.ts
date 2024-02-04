@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { NoticeService } from "./notice.service";
 
 @Controller()
@@ -11,7 +11,7 @@ export class NoticeController {
   }
 
   @Post()
-  postNotice() {
-    return this.noticeService.postNotice();
+  postNotice(@Body() body: any) {
+    return this.noticeService.postNotice(body);
   }
 }

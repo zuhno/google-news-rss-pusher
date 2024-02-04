@@ -19,8 +19,8 @@ export class NoticeModule {
     // for authorized admin account
     consumer
       .apply(userAuthMiddleware)
-      .forRoutes({ path: "notices", method: RequestMethod.GET })
+      .forRoutes({ path: "notices", method: RequestMethod.POST })
       .apply(adminRoleMiddleware)
-      .forRoutes({ path: "notices", method: RequestMethod.GET });
+      .forRoutes({ path: "notices", method: RequestMethod.POST });
   }
 }

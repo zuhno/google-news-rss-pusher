@@ -9,5 +9,7 @@ export class NoticeService {
     console.log(query);
   }
 
-  async postNotice() {}
+  async postNotice(body: any) {
+    console.log(body);
+  }
 }

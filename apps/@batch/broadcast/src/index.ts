@@ -1,4 +1,4 @@
-import { RecurrenceRule, gracefulShutdown, scheduleJob, scheduledJobs } from "node-schedule";
+import { RecurrenceRule, gracefulShutdown, scheduleJob } from "node-schedule";
 import "dotenv/config";
 
 import { job } from "./schedule";

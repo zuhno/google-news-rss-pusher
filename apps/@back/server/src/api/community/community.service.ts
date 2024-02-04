@@ -21,23 +21,29 @@ export class CommunityService {
 
   async postSlackCommand(body: CommunitySlackCommandBodyDto) {
     // TODO: Error handling, Exception handling
+    const appName = body.command.split("-")[1].replace(/_/g, " ").toUpperCase();
+
     switch (body.command) {
       // update interval time
       case "/update-real_estate":
       case "/update-blockchain":
-        await firstValueFrom(this.slackService.postUpdateInterval(body.response_url));
+        await firstValueFrom(this.slackService.postUpdateInterval(body.response_url, appName));
         break;
 
       // update active to N
       case "/deactive-real_estate":
       case "/deactive-blockchain":
-        await firstValueFrom(this.slackService.postUpdateActiveToDeactive(body.response_url));
+        await firstValueFrom(
+          this.slackService.postUpdateActiveToDeactive(body.response_url, appName)
+        );
         break;
 
       // update active to Y
       case "/reactive-real_estate":
       case "/reactive-blockchain":
-        await firstValueFrom(this.slackService.postUpdateDeactiveToActive(body.response_url));
+        await firstValueFrom(
+          this.slackService.postUpdateDeactiveToActive(body.response_url, appName)
+        );
         break;
 
       default:
