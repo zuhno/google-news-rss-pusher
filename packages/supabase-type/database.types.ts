@@ -6,49 +6,41 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       App: {
         Row: {
-          authorize_link: string
-          category_id: number
+          authorize_link: string | null
           client_id: string | null
           client_secret: string | null
           created_at: string
           from: Database["public"]["Enums"]["AppFrom"]
           id: string
+          name: string | null
           updated_at: string
         }
         Insert: {
-          authorize_link: string
-          category_id: number
+          authorize_link?: string | null
           client_id?: string | null
           client_secret?: string | null
           created_at?: string
           from: Database["public"]["Enums"]["AppFrom"]
           id: string
+          name?: string | null
           updated_at?: string
         }
         Update: {
-          authorize_link?: string
-          category_id?: number
+          authorize_link?: string | null
           client_id?: string | null
           client_secret?: string | null
           created_at?: string
           from?: Database["public"]["Enums"]["AppFrom"]
           id?: string
+          name?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "App_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "Category"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       Category: {
         Row: {
@@ -168,6 +160,7 @@ export interface Database {
         Row: {
           active: boolean
           app_id: string
+          categories: number[]
           ch_id: string
           ch_name: string | null
           ch_url: string | null
@@ -181,6 +174,7 @@ export interface Database {
         Insert: {
           active?: boolean
           app_id: string
+          categories?: number[]
           ch_id: string
           ch_name?: string | null
           ch_url?: string | null
@@ -194,6 +188,7 @@ export interface Database {
         Update: {
           active?: boolean
           app_id?: string
+          categories?: number[]
           ch_id?: string
           ch_name?: string | null
           ch_url?: string | null
