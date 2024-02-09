@@ -28,7 +28,7 @@ const { mutateAsync } = useMutation({
 
 onMounted(async () => {
   const { code } = route.query;
-  const category = localStorage.getItem(storage.CATEGORY);
+  const category = sessionStorage.getItem(storage.CATEGORY);
   if (typeof code !== "string" || typeof category !== "string" || !code || !category) return;
 
   try {
@@ -41,7 +41,8 @@ onMounted(async () => {
     let message = "";
 
     if (isAxiosError(error)) {
-      if (error.response?.data.statusCode === 400) message = "이미 등록된 채널입니다.";
+      if (error.response?.data.statusCode === 409)
+        message = "선택한 뉴스 피드가 이미 추가되었습니다.";
       else message = error.response?.data.message;
 
       errorData.value = { message };

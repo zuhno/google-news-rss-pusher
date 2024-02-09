@@ -25,22 +25,19 @@ export class CommunityService {
 
     switch (body.command) {
       // update interval time
-      case "/update-real_estate":
-      case "/update-blockchain":
+      case "/interval":
         await firstValueFrom(this.slackService.postUpdateInterval(body.response_url, appName));
         break;
 
       // update active to N
-      case "/deactive-real_estate":
-      case "/deactive-blockchain":
+      case "/deactive":
         await firstValueFrom(
           this.slackService.postUpdateActiveToDeactive(body.response_url, appName)
         );
         break;
 
       // update active to Y
-      case "/reactive-real_estate":
-      case "/reactive-blockchain":
+      case "/reactive":
         await firstValueFrom(
           this.slackService.postUpdateDeactiveToActive(body.response_url, appName)
         );

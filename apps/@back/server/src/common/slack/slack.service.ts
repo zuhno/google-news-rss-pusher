@@ -20,15 +20,22 @@ export class SlackService {
     private readonly configService: ConfigService
   ) {}
 
-  postInitMessage(webhookUrl: string): Observable<AxiosResponse<any, any>> {
+  postInitMessage(webhookUrl: string, categoryTitle: string): Observable<AxiosResponse<any, any>> {
     this.logger.log(`send initial message to ${webhookUrl}`);
+
+    let text = "";
+
+    if (categoryTitle) {
+      text = `${categoryTitle} 뉴스 피드가 추가로 전송됩니다.`;
+    } else {
+      text = `<${this.configService.get(
+        "CLIENT_DOMAIN"
+      )}|*Google News Rss Pusher*> 을 설치해주셔서 감사합니다.\n피드는 9시, 12시, 15시, 18시, 21시에 전송됩니다.`;
+    }
+
     return this.httpService.post(
       webhookUrl,
-      {
-        text: `<${this.configService.get(
-          "CLIENT_DOMAIN"
-        )}|*Google News Rss Pusher*> 을 설치해주셔서 감사합니다. 피드는 기본적으로 3배수 시간으로 전송됩니다.`,
-      },
+      { text },
       { headers: { "Content-Type": "application/json" } }
     );
   }

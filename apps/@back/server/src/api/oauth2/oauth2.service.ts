@@ -51,17 +51,26 @@ export class OAuth2Service {
 
   async postSlackAccess(
     code: string,
-    category: string,
+    categoryId: string,
     accessToken?: string
   ): Promise<OAuth2SlackAccessResponseDto> {
-    const app = await this.supabaseService
-      .getClient()
-      .anon.from("App")
-      .select("client_id, client_secret")
-      .eq("from", "SLACK")
-      .single();
+    const [app, category] = await Promise.all([
+      this.supabaseService
+        .getClient()
+        .anon.from("App")
+        .select("client_id, client_secret")
+        .eq("from", "SLACK")
+        .single(),
+      this.supabaseService
+        .getClient()
+        .anon.from("Category")
+        .select("id, title")
+        .eq("id", parseInt(categoryId))
+        .single(),
+    ]);
 
-    if (app.error) throw new HttpException(app.error.message, HttpStatus.NOT_FOUND);
+    if (app.error || category.error)
+      throw new HttpException(app.error.message || category.error.message, HttpStatus.NOT_FOUND);
 
     const formData = new FormData();
     formData.append("code", code);
@@ -89,13 +98,19 @@ export class OAuth2Service {
       .eq("app_id", result.data.app_id)
       .single();
 
+    const categories = Array.from(
+      new Set([...(existSubscriber.data?.categories ?? []), category.data.id])
+    ).sort();
+
+    if (JSON.stringify(existSubscriber.data?.categories) === JSON.stringify(categories))
+      throw new HttpException("already exist category.", HttpStatus.CONFLICT);
+
     let payload: Database["public"]["Tables"]["Subscriber"]["Update"] = {
       ch_id: result.data.incoming_webhook?.channel_id,
       app_id: result.data.app_id,
       interval_time: existSubscriber.data?.interval_time,
-      categories: Array.from(
-        new Set([...(existSubscriber.data?.categories ?? []), parseInt(category)])
-      ).sort(),
+      categories,
+      ...(userId && { user_id: userId }),
     };
 
     if (existSubscriber.error) {
@@ -108,7 +123,6 @@ export class OAuth2Service {
         ch_name: result.data.incoming_webhook?.channel,
         ch_url: result.data.incoming_webhook?.url,
         active: true,
-        user_id: userId,
         interval_time: 3,
         team_id: result.data.team?.id,
       };
@@ -124,7 +138,10 @@ export class OAuth2Service {
     if (newSubscriber.error)
       throw new HttpException(newSubscriber.error.message, HttpStatus.BAD_REQUEST);
 
-    await firstValueFrom(this.slackService.postInitMessage(result.data.incoming_webhook?.url));
+    const categoryTitle = categories.length > 1 ? category.data.title : "";
+    await firstValueFrom(
+      this.slackService.postInitMessage(result.data.incoming_webhook?.url, categoryTitle)
+    );
 
     return {
       active: newSubscriber.data.active,

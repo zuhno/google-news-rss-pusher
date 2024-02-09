@@ -58,7 +58,7 @@ watch(
 );
 
 onMounted(() => {
-  localStorage.setItem(storage.CATEGORY, String(localState.categoryId));
+  sessionStorage.setItem(storage.CATEGORY, String(localState.categoryId));
 });
 
 onUnmounted(() => {
