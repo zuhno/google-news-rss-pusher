@@ -9,27 +9,21 @@ export class ConstantService {
   constructor(private readonly supabaseService: SupabaseService) {}
 
   async getConstant(): Promise<ConstantsResponseDto> {
-    const queries = [
+    const [categories, apps] = await Promise.all([
       this.supabaseService.getClient().anon.from("Category").select("*"),
-      this.supabaseService.getClient().anon.from("App").select("authorize_link, from, category_id"),
-    ];
+      this.supabaseService.getClient().anon.from("App").select("authorize_link, from"),
+    ]);
 
-    const [categories, apps] = await Promise.all(queries);
+    if (categories.error || apps.error)
+      throw new HttpException(
+        categories.error.message || apps.error.message,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
 
-    if (categories.error)
-      throw new HttpException(categories.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    if (apps.error) throw new HttpException(apps.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-
-    const remapApps = apps.data.reduce((acc, cnt: any) => {
+    const remapApps = categories.data.reduce((acc, cnt: any) => {
       return {
         ...acc,
-        [cnt.category_id]: [
-          ...(acc[cnt.category_id] || []),
-          {
-            from: cnt.from,
-            authorizeLink: cnt.authorize_link,
-          },
-        ],
+        [cnt.id]: apps.data.map((app) => ({ from: app.from, authorizeLink: app.authorize_link })),
       };
     }, {});
 

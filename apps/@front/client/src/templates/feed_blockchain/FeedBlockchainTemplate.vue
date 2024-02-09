@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onUnmounted, reactive, watch } from "vue";
+import { onMounted, onUnmounted, reactive, watch } from "vue";
 import { response } from "http-api-type";
 import { useQuery } from "@tanstack/vue-query";
 
@@ -7,6 +7,7 @@ import apis from "@/apis";
 import { useConstantStore } from "@/store";
 import SlackBtn from "@/components/SlackBtn.vue";
 import FeedList from "@/components/FeedList.vue";
+import { storage } from "@/constants";
 
 interface Data {
   querylastKey: number | null;
@@ -55,6 +56,10 @@ watch(
     localState.feeds = [...localState.feeds, ...(newValue.data.list || [])];
   }
 );
+
+onMounted(() => {
+  localStorage.setItem(storage.CATEGORY, String(localState.categoryId));
+});
 
 onUnmounted(() => {
   controller.abort();

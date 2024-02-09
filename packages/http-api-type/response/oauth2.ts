@@ -6,6 +6,7 @@ export class PostOAuth2SlackAccessResponse {
   readonly channelName: Database["public"]["Tables"]["Subscriber"]["Row"]["ch_name"];
   readonly channelUrl: Database["public"]["Tables"]["Subscriber"]["Row"]["ch_url"];
   readonly notificationInterval: Database["public"]["Tables"]["Subscriber"]["Row"]["interval_time"];
+  readonly categories: Database["public"]["Tables"]["Subscriber"]["Row"]["categories"];
 }
 
 export class PostOAuth2GoogleAccessResponse {

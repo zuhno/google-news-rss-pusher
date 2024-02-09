@@ -6,6 +6,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useMutation } from "@tanstack/vue-query";
 
 import apis from "@/apis";
+import { storage } from "@/constants";
 
 interface InstalledData extends response.PostOAuth2SlackAccessResponse {}
 interface ErrorData {
@@ -26,7 +27,8 @@ const { mutateAsync } = useMutation({
 });
 
 onMounted(async () => {
-  const { code, category } = route.query;
+  const { code } = route.query;
+  const category = localStorage.getItem(storage.CATEGORY);
   if (typeof code !== "string" || typeof category !== "string" || !code || !category) return;
 
   try {

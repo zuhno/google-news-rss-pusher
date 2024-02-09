@@ -58,7 +58,6 @@ export class OAuth2Service {
       .getClient()
       .anon.from("App")
       .select("client_id, client_secret")
-      .eq("category_id", parseInt(category))
       .eq("from", "SLACK")
       .single();
 
@@ -82,32 +81,58 @@ export class OAuth2Service {
       ({ id: userId } = await this._decoded(accessToken));
     }
 
-    const { data, error } = await this.supabaseService
+    const existSubscriber = await this.supabaseService
       .getClient()
-      .serviceRole.from("Subscriber")
-      .insert({
-        ch_id: result.data.incoming_webhook?.channel_id,
+      .anon.from("Subscriber")
+      .select("interval_time ,categories")
+      .eq("ch_id", result.data.incoming_webhook?.channel_id)
+      .eq("app_id", result.data.app_id)
+      .single();
+
+    let payload: Database["public"]["Tables"]["Subscriber"]["Update"] = {
+      ch_id: result.data.incoming_webhook?.channel_id,
+      app_id: result.data.app_id,
+      interval_time: existSubscriber.data?.interval_time,
+      categories: Array.from(
+        new Set([...(existSubscriber.data?.categories ?? []), parseInt(category)])
+      ).sort(),
+    };
+
+    if (existSubscriber.error) {
+      if (existSubscriber.error.code !== "PGRST116")
+        throw new HttpException(existSubscriber.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+
+      // PGRST116 : the result contains 0 rows
+      payload = {
+        ...payload,
         ch_name: result.data.incoming_webhook?.channel,
         ch_url: result.data.incoming_webhook?.url,
         active: true,
-        interval_time: 3,
         user_id: userId,
-        app_id: result.data.app_id,
+        interval_time: 3,
         team_id: result.data.team?.id,
-      })
+      };
+    }
+
+    const newSubscriber = await this.supabaseService
+      .getClient()
+      .serviceRole.from("Subscriber")
+      .upsert(payload as Database["public"]["Tables"]["Subscriber"]["Insert"])
       .select()
       .single();
 
-    if (error?.message) throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    if (newSubscriber.error)
+      throw new HttpException(newSubscriber.error.message, HttpStatus.BAD_REQUEST);
 
     await firstValueFrom(this.slackService.postInitMessage(result.data.incoming_webhook?.url));
 
     return {
-      active: data.active,
-      channelId: data.ch_id,
-      channelName: data.ch_name,
-      channelUrl: data.ch_url,
-      notificationInterval: data.interval_time,
+      active: newSubscriber.data.active,
+      channelId: newSubscriber.data.ch_id,
+      channelName: newSubscriber.data.ch_name,
+      channelUrl: newSubscriber.data.ch_url,
+      notificationInterval: newSubscriber.data.interval_time,
+      categories: newSubscriber.data.categories,
     };
   }
 

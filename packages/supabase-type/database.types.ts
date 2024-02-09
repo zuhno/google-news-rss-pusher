@@ -112,21 +112,21 @@ export type Database = {
       }
       Release: {
         Row: {
-          app_id: string
+          category_id: number
           created_at: string
           interval_time: number
           last_feed_id: number
           updated_at: string
         }
         Insert: {
-          app_id: string
+          category_id: number
           created_at?: string
           interval_time: number
           last_feed_id: number
           updated_at?: string
         }
         Update: {
-          app_id?: string
+          category_id?: number
           created_at?: string
           interval_time?: number
           last_feed_id?: number
@@ -134,10 +134,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Release_app_id_fkey"
-            columns: ["app_id"]
+            foreignKeyName: "Release_category_id_fkey"
+            columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: "App"
+            referencedRelation: "Category"
             referencedColumns: ["id"]
           },
           {
@@ -174,7 +174,7 @@ export type Database = {
         Insert: {
           active?: boolean
           app_id: string
-          categories?: number[]
+          categories: number[]
           ch_id: string
           ch_name?: string | null
           ch_url?: string | null

@@ -18,15 +18,7 @@ export class SlackService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService
-  ) {
-    // 기록:
-    // 모달로 앱선택 -> 수정할 데이터 -> 확인 플로우를 진행하지 못하는 이유는
-    // 모달의 경우 요청할때마다 각 앱의 인증토큰을 헤더에 심어야합니다.
-    // 뉴스 피드마다 앱이 생성되는 방식이라 앱이 하나일 경우엔 용이하나 현재 구조와는
-    // 맞지 않는 상태입니다. 왜 이러한 구조를 채택했냐면 슬랙 rate limit 과 여러 카테고리를
-    // 유저에게 제공할 때 슬랙 채널안에서 카테고리가 다르다는걸 식별할 수 없을 것 같기 때문입니다.
-    // 커맨드 수는 n^2 으로 증가됩니다.
-  }
+  ) {}
 
   postInitMessage(webhookUrl: string): Observable<AxiosResponse<any, any>> {
     this.logger.log(`send initial message to ${webhookUrl}`);
