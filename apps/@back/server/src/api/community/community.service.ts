@@ -24,25 +24,10 @@ export class CommunityService {
     const appName = body.command.split("-")[1].replace(/_/g, " ").toUpperCase();
 
     switch (body.command) {
-      // update interval time
-      case "/interval":
-        await firstValueFrom(this.slackService.postUpdateInterval(body.response_url, appName));
+      // update current channel gnrp config 
+      case "/update":
+        await firstValueFrom(this.slackService.postUpdate(body, appName));
         break;
-
-      // update active to N
-      case "/deactive":
-        await firstValueFrom(
-          this.slackService.postUpdateActiveToDeactive(body.response_url, appName)
-        );
-        break;
-
-      // update active to Y
-      case "/reactive":
-        await firstValueFrom(
-          this.slackService.postUpdateDeactiveToActive(body.response_url, appName)
-        );
-        break;
-
       default:
         break;
     }

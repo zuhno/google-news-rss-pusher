@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import { AxiosResponse } from "axios";
 import { Observable } from "rxjs";
+import { CommunitySlackCommandBodyDto } from "@/api/community/dto/community_request.dto";
 
 @Injectable()
 export class SlackService {
@@ -18,7 +19,7 @@ export class SlackService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService
-  ) {}
+  ) { }
 
   postInitMessage(webhookUrl: string, categoryTitle: string): Observable<AxiosResponse<any, any>> {
     this.logger.log(`send initial message to ${webhookUrl}`);
@@ -58,6 +59,10 @@ export class SlackService {
       },
       { headers: { "Content-Type": "application/json" } }
     );
+  }
+
+  postUpdate(commandRequestBody: CommunitySlackCommandBodyDto, appName: string): Observable<AxiosResponse<any, any>> {
+    return this.httpService.post(commandRequestBody.response_url, { type: "modal" });
   }
 
   postUpdateInterval(responseUrl: string, appName: string): Observable<AxiosResponse<any, any>> {
