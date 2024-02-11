@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 
 import { FeedsLimitedAllResponseDto, FeedsResponseDto } from "./dto/feeds_response.dto";
 import { SupabaseService } from "@/common/supabase/supabase.service";
@@ -7,6 +7,8 @@ import { Database } from "supabase-type";
 
 @Injectable()
 export class FeedService {
+  private readonly logger = new Logger(FeedService.name);
+
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly storeService: StoreService

@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 
 import { ConstantsResponseDto } from "./dto/constants_response";
 import { SupabaseService } from "@/common/supabase/supabase.service";
@@ -6,6 +6,8 @@ import { Database } from "supabase-type";
 
 @Injectable()
 export class ConstantService {
+  private readonly logger = new Logger(ConstantService.name);
+
   constructor(private readonly supabaseService: SupabaseService) {}
 
   async getConstant(): Promise<ConstantsResponseDto> {

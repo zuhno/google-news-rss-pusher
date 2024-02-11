@@ -1,5 +1,5 @@
 import { HttpService } from "@nestjs/axios";
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { firstValueFrom } from "rxjs";
@@ -16,6 +16,8 @@ import { StoreService } from "@/common/store/store.service";
 
 @Injectable()
 export class OAuth2Service {
+  private readonly logger = new Logger(OAuth2Service.name);
+
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,

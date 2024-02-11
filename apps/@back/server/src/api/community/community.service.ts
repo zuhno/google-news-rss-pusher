@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { firstValueFrom } from "rxjs";
 
 import { SupabaseService } from "@/common/supabase/supabase.service";
@@ -10,23 +10,18 @@ import {
 
 @Injectable()
 export class CommunityService {
-  private readonly ACTION_IDS: SlackService["ACTION_IDS"];
+  private readonly logger = new Logger(CommunityService.name);
 
   constructor(
     private readonly supabaseService: SupabaseService,
     private readonly slackService: SlackService
-  ) {
-    this.ACTION_IDS = slackService.ACTION_IDS;
-  }
+  ) {}
 
   async postSlackCommand(body: CommunitySlackCommandBodyDto) {
-    // TODO: Error handling, Exception handling
-    const appName = body.command.split("-")[1].replace(/_/g, " ").toUpperCase();
-
     switch (body.command) {
-      // update current channel gnrp config 
-      case "/update":
-        await firstValueFrom(this.slackService.postUpdate(body, appName));
+      // update current channel gnrp config
+      case "/setting":
+        await firstValueFrom(this.slackService.postSetting(body));
         break;
       default:
         break;
@@ -34,121 +29,88 @@ export class CommunityService {
   }
 
   async postSlackCommandHandler(body: CommunitySlackCommandHandlerBodyDto) {
-    // TODO: Error handling, Exception handling
-    const { actions, channel, api_app_id, response_url } = JSON.parse(body.payload);
-    let message = "";
+    const payload = JSON.parse(body.payload);
 
-    switch (actions[0].action_id) {
-      // * update interval time handler
-      case this.ACTION_IDS.UPDATE_INTERVAL_TIME:
-        // update user state
-        await this.supabaseService
-          .getClient()
-          .serviceRole.from("Subscriber")
-          .update({ interval_time: parseInt(actions[0].selected_option.value) })
-          .eq("app_id", api_app_id)
-          .eq("ch_id", channel.id);
+    // handler for from slack modal
+    if (payload.type === "view_submission") {
+      const metadata = JSON.parse(payload.view.private_metadata) as CommunitySlackCommandBodyDto;
 
-        // delete interactive message
-        await firstValueFrom(this.slackService.postDeleteOriginalMessage(response_url));
+      switch (metadata.command) {
+        case "/setting":
+          const selectedFeedOption =
+            payload.view.state.values["select_feed"]["action"]["selected_option"];
+          const selectedActiveOption =
+            payload.view.state.values["select_active"]["action"]["selected_option"];
+          const selectedIntervalOption =
+            payload.view.state.values["select_interval"]["action"]["selected_option"];
 
-        message = `뉴스 피드를 받는 시간이 ${actions[0].selected_option.text.text} 으로 변경되었습니다.`;
+          // current subscriber data
+          const subscriber = await this.supabaseService
+            .getClient()
+            .anon.from("Subscriber")
+            .select("categories, deactive_reason")
+            .eq("ch_id", metadata.channel_id)
+            .eq("app_id", metadata.api_app_id)
+            .limit(1)
+            .single();
 
-        // send a result message to the user
-        await firstValueFrom(this.slackService.postCustomMessage(response_url, message));
-        break;
+          if (subscriber.error)
+            throw new HttpException(subscriber.error.message, HttpStatus.BAD_REQUEST);
 
-      // * update active to N handler
-      case this.ACTION_IDS.UPDATE_DEACTIVE_Y:
-      case this.ACTION_IDS.UPDATE_DEACTIVE_N:
-        const { data: deactiveSubscriber } = await this.supabaseService
-          .getClient()
-          .anon.from("Subscriber")
-          .select("active")
-          .eq("app_id", api_app_id)
-          .eq("ch_id", channel.id)
-          .single();
+          // if BAN subscriber(channel), reject to actions
+          if (subscriber.data.deactive_reason === "BAN") {
+            await firstValueFrom(
+              this.slackService.postCustomMessage(
+                metadata.response_url,
+                `☠️ 차단 목록에 등록된 채널입니다. 관리자에게 문의해주세요. ☠️`
+              )
+            );
 
-        if (deactiveSubscriber.active) {
-          if (this.ACTION_IDS.UPDATE_DEACTIVE_Y) {
-            // update user state
-            await this.supabaseService
-              .getClient()
-              .serviceRole.from("Subscriber")
-              .update({ active: actions[0].value })
-              .eq("app_id", api_app_id)
-              .eq("ch_id", channel.id);
+            break;
           }
 
-          // delete interactive message
-          await firstValueFrom(this.slackService.postDeleteOriginalMessage(response_url));
+          const query = {};
 
-          if (actions[0].action_id === this.ACTION_IDS.UPDATE_DEACTIVE_Y)
-            message = "피드 구독이 취소되었습니다.";
-          if (actions[0].action_id === this.ACTION_IDS.UPDATE_DEACTIVE_N)
-            message = "피드를 계속 구독합니다.";
+          // if select 'feed' & 'active', change which categories, active, deactive_reason fields
+          if (selectedFeedOption && selectedActiveOption) {
+            const category = parseInt(selectedFeedOption.value);
+            const isActive = !!parseInt(selectedActiveOption.value);
 
-          // send a result message to the user
-          await firstValueFrom(this.slackService.postCustomMessage(response_url, message));
-        } else {
-          // delete interactive message
-          await firstValueFrom(this.slackService.postDeleteOriginalMessage(response_url));
-
-          message =
-            "피드 구독중이 아닙니다. 해당 명령어를 사용하려면 `/reactive` 명령어를 먼저 사용해주세요.";
-
-          // send a result message to the user
-          await firstValueFrom(this.slackService.postCustomMessage(response_url, message));
-        }
-        break;
-
-      // * update active to Y handler
-      case this.ACTION_IDS.UPDATE_REACTIVE_Y:
-      case this.ACTION_IDS.UPDATE_REACTIVE_N:
-        const { data: reactiveSubscriber } = await this.supabaseService
-          .getClient()
-          .anon.from("Subscriber")
-          .select("active")
-          .eq("app_id", api_app_id)
-          .eq("ch_id", channel.id)
-          .single();
-
-        if (!reactiveSubscriber.active) {
-          // update user state
-          if (this.ACTION_IDS.UPDATE_REACTIVE_Y) {
-            await this.supabaseService
-              .getClient()
-              .serviceRole.from("Subscriber")
-              .update({ active: actions[0].value })
-              .eq("app_id", api_app_id)
-              .eq("ch_id", channel.id);
+            query["categories"] = isActive
+              ? Array.from(new Set([...subscriber.data.categories, category])).sort()
+              : subscriber.data.categories.filter((_category) => _category !== category);
+            query["active"] = !!query["categories"].length;
+            query["deactive_reason"] = query["active"] ? null : "USER_REQUEST";
           }
 
-          // delete interactive message
-          await firstValueFrom(this.slackService.postDeleteOriginalMessage(response_url));
+          // if select 'interval', change interval_time field
+          if (selectedIntervalOption) {
+            const interval = parseInt(selectedIntervalOption.value);
+            query["interval_time"] = interval;
+          }
 
-          if (actions[0].action_id === this.ACTION_IDS.UPDATE_REACTIVE_Y)
-            message = "피드 구독이 다시 시작되었습니다.";
-          if (actions[0].action_id === this.ACTION_IDS.UPDATE_REACTIVE_N)
-            message = "피드를 계속 구독하지 않습니다.";
+          // no changes
+          if (!Object.keys(query).length) break;
 
-          // send a result message to the user
-          await firstValueFrom(this.slackService.postCustomMessage(response_url, message));
-        } else {
-          // delete interactive message
-          await firstValueFrom(this.slackService.postDeleteOriginalMessage(response_url));
+          const update = await this.supabaseService
+            .getClient()
+            .serviceRole.from("Subscriber")
+            .update(query)
+            .eq("ch_id", metadata.channel_id)
+            .eq("app_id", metadata.api_app_id)
+            .select("*");
 
-          message =
-            "피드를 이미 구독중입니다. 해당 명령어를 사용하려면 `/deactive` 명령어를 먼저 사용해주세요.";
+          if (update.error) throw new HttpException(update.error.message, HttpStatus.BAD_REQUEST);
 
-          // send a result message to the user
-          await firstValueFrom(this.slackService.postCustomMessage(response_url, message));
-        }
+          // all tasks successfully cleared
+          await firstValueFrom(
+            this.slackService.postCustomMessage(metadata.response_url, `변경사항이 적용되었습니다.`)
+          );
 
-        break;
-
-      default:
-        throw new Error("The type of action that is not registered.");
+          break;
+        default:
+          break;
+      }
     }
   }
 }

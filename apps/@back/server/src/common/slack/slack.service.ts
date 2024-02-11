@@ -1,25 +1,35 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
-import { AxiosResponse } from "axios";
-import { Observable } from "rxjs";
-import { CommunitySlackCommandBodyDto } from "@/api/community/dto/community_request.dto";
+import type { AxiosResponse } from "axios";
+import type { Observable } from "rxjs";
+import type { CommunitySlackCommandBodyDto } from "@/api/community/dto/community_request.dto";
+import { SupabaseService } from "../supabase/supabase.service";
 
 @Injectable()
 export class SlackService {
   private readonly logger = new Logger(SlackService.name);
-  public readonly ACTION_IDS = {
-    UPDATE_INTERVAL_TIME: "update_interval_time",
-    UPDATE_DEACTIVE_Y: "update_deactive_y",
-    UPDATE_DEACTIVE_N: "update_deactive_n",
-    UPDATE_REACTIVE_Y: "update_reactive_y",
-    UPDATE_REACTIVE_N: "update_reactive_n",
-  };
+  private accessToken: string;
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService
-  ) { }
+    private readonly configService: ConfigService,
+    private readonly supabaseService: SupabaseService
+  ) {
+    // initial fetch
+    (async () => {
+      const app = await this.supabaseService
+        .getClient()
+        .anon.from("App")
+        .select("access_token")
+        .eq("from", "SLACK")
+        .limit(1)
+        .single();
+
+      if (app.error) throw new HttpException(app.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.accessToken = app.data.access_token;
+    })();
+  }
 
   postInitMessage(webhookUrl: string, categoryTitle: string): Observable<AxiosResponse<any, any>> {
     this.logger.log(`send initial message to ${webhookUrl}`);
@@ -61,180 +71,181 @@ export class SlackService {
     );
   }
 
-  postUpdate(commandRequestBody: CommunitySlackCommandBodyDto, appName: string): Observable<AxiosResponse<any, any>> {
-    return this.httpService.post(commandRequestBody.response_url, { type: "modal" });
-  }
-
-  postUpdateInterval(responseUrl: string, appName: string): Observable<AxiosResponse<any, any>> {
-    return this.httpService.post(
-      responseUrl,
-      {
-        blocks: [
-          {
-            type: "header",
-            text: {
-              type: "plain_text",
-              text: `${appName} - 뉴스 피드 받는 시간 수정`,
-              emoji: true,
-            },
-          },
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: "선택시 시간이 변경되며 해당 블록은 사라집니다.",
-            },
-            accessory: {
-              type: "static_select",
-              placeholder: {
-                type: "plain_text",
-                text: "시간을 선택해주세요",
-                emoji: true,
-              },
-              options: [
-                {
-                  text: {
-                    type: "plain_text",
-                    text: "9h, 12h, 15h, 18h, 21h",
-                    emoji: true,
-                  },
-                  value: "3",
-                },
-                {
-                  text: {
-                    type: "plain_text",
-                    text: "9h, 15h, 21h",
-                    emoji: true,
-                  },
-                  value: "6",
-                },
-                {
-                  text: {
-                    type: "plain_text",
-                    text: "9h, 21h",
-                    emoji: true,
-                  },
-                  value: "12",
-                },
-              ],
-              action_id: this.ACTION_IDS.UPDATE_INTERVAL_TIME,
-            },
-          },
-        ],
-      },
-      { headers: { "Content-Type": "application/json" } }
-    );
-  }
-
-  postUpdateActiveToDeactive(
-    responseUrl: string,
-    appName: string
+  postSetting(
+    commandRequestBody: CommunitySlackCommandBodyDto
   ): Observable<AxiosResponse<any, any>> {
     return this.httpService.post(
-      responseUrl,
+      "https://slack.com/api/views.open",
       {
-        blocks: [
-          {
-            type: "header",
-            text: {
-              type: "plain_text",
-              text: `${appName} - 뉴스 피드 구독 취소`,
-              emoji: true,
-            },
+        trigger_id: commandRequestBody.trigger_id,
+        view: {
+          type: "modal",
+          private_metadata: JSON.stringify(commandRequestBody),
+          submit: {
+            type: "plain_text",
+            text: "확인",
+            emoji: true,
           },
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: "정말 구독을 취소하시겠습니까?",
-            },
+          close: {
+            type: "plain_text",
+            text: "취소",
+            emoji: true,
           },
-          {
-            type: "actions",
-            elements: [
-              {
-                type: "button",
-                text: {
+          title: {
+            type: "plain_text",
+            text: "Google News (rss-pusher)",
+            emoji: true,
+          },
+          blocks: [
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: `안녕하세요 *${commandRequestBody.user_name}* 님 설정을 변경하려면 아래 항목을 변경후 적용하세요.`,
+              },
+            },
+            {
+              type: "divider",
+            },
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: "*피드별 설정*",
+              },
+            },
+            {
+              type: "section",
+              block_id: "select_feed",
+              text: {
+                type: "mrkdwn",
+                text: ">:iphone: *변경할 피드*\n>구독 중인 피드 중에서 선택할 수 있습니다.",
+              },
+              accessory: {
+                type: "static_select",
+                action_id: "action",
+                placeholder: {
                   type: "plain_text",
-                  text: "예",
+                  text: "Choose list",
                   emoji: true,
                 },
-                style: "primary",
-                value: false,
-                action_id: this.ACTION_IDS.UPDATE_DEACTIVE_Y,
+                options: [
+                  {
+                    text: {
+                      type: "plain_text",
+                      text: "부동산",
+                      emoji: true,
+                    },
+                    value: "1",
+                  },
+                  {
+                    text: {
+                      type: "plain_text",
+                      text: "블록체인",
+                      emoji: true,
+                    },
+                    value: "2",
+                  },
+                ],
               },
-              {
-                type: "button",
-                text: {
+            },
+            {
+              type: "section",
+              block_id: "select_active",
+              text: {
+                type: "mrkdwn",
+                text: ">:gear: *활성화 여부*\n>피드를 활성화/비활성화 할 수 있습니다.",
+              },
+              accessory: {
+                type: "static_select",
+                action_id: "action",
+                placeholder: {
                   type: "plain_text",
-                  text: "아니오",
+                  text: "Choose list",
                   emoji: true,
                 },
-                style: "danger",
-                value: true,
-                action_id: this.ACTION_IDS.UPDATE_DEACTIVE_N,
+                options: [
+                  {
+                    text: {
+                      type: "plain_text",
+                      text: "활성화",
+                      emoji: true,
+                    },
+                    value: "1",
+                  },
+                  {
+                    text: {
+                      type: "plain_text",
+                      text: "비활성화",
+                      emoji: true,
+                    },
+                    value: "0",
+                  },
+                ],
               },
-            ],
-          },
-        ],
+            },
+            {
+              type: "divider",
+            },
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: "*채널별 설정*",
+              },
+            },
+            {
+              type: "section",
+              block_id: "select_interval",
+              text: {
+                type: "mrkdwn",
+                text: ">:alarm_clock: *피드 받는 시간*\n>3시간/6시간/12시간 간격으로 받을 수 있습니다.",
+              },
+              accessory: {
+                type: "static_select",
+                action_id: "action",
+                placeholder: {
+                  type: "plain_text",
+                  text: "Choose list",
+                  emoji: true,
+                },
+                options: [
+                  {
+                    text: {
+                      type: "plain_text",
+                      text: "9시, 12시, 15시, 18시, 21시",
+                      emoji: true,
+                    },
+                    value: "3",
+                  },
+                  {
+                    text: {
+                      type: "plain_text",
+                      text: "9시, 15시, 21시",
+                      emoji: true,
+                    },
+                    value: "6",
+                  },
+                  {
+                    text: {
+                      type: "plain_text",
+                      text: "9시, 21시",
+                      emoji: true,
+                    },
+                    value: "12",
+                  },
+                ],
+              },
+            },
+          ],
+        },
       },
-      { headers: { "Content-Type": "application/json" } }
-    );
-  }
-
-  postUpdateDeactiveToActive(
-    responseUrl: string,
-    appName: string
-  ): Observable<AxiosResponse<any, any>> {
-    return this.httpService.post(
-      responseUrl,
       {
-        blocks: [
-          {
-            type: "header",
-            text: {
-              type: "plain_text",
-              text: `${appName} - 뉴스 피드 다시 구독`,
-              emoji: true,
-            },
-          },
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: "정말 구독을 다시 시작하시겠습니까?",
-            },
-          },
-          {
-            type: "actions",
-            elements: [
-              {
-                type: "button",
-                text: {
-                  type: "plain_text",
-                  text: "예",
-                  emoji: true,
-                },
-                style: "primary",
-                value: true,
-                action_id: this.ACTION_IDS.UPDATE_REACTIVE_Y,
-              },
-              {
-                type: "button",
-                text: {
-                  type: "plain_text",
-                  text: "아니오",
-                  emoji: true,
-                },
-                style: "danger",
-                value: false,
-                action_id: this.ACTION_IDS.UPDATE_REACTIVE_N,
-              },
-            ],
-          },
-        ],
-      },
-      { headers: { "Content-Type": "application/json" } }
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.accessToken}`,
+        },
+      }
     );
   }
 }

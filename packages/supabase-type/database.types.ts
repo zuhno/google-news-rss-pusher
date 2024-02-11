@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       App: {
         Row: {
+          access_token: string | null
           authorize_link: string | null
           client_id: string | null
           client_secret: string | null
@@ -21,6 +22,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_token?: string | null
           authorize_link?: string | null
           client_id?: string | null
           client_secret?: string | null
@@ -31,6 +33,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_token?: string | null
           authorize_link?: string | null
           client_id?: string | null
           client_secret?: string | null
