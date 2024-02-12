@@ -13,39 +13,42 @@ interface Data {
   querylastKey: number | null;
   feeds: response.GetFeedsResponse["list"];
   hasNext: boolean;
-  categoryId: number | null;
   appByCategoryId: response.GetConstantsResponse["apps"][number];
 }
 
 const controller = new AbortController();
 
-const { title } = defineProps({ title: String });
+const { id } = defineProps({ id: Number });
 
 const localState = reactive<Data>({
   querylastKey: null,
   feeds: [],
   hasNext: false,
-  categoryId: null,
   appByCategoryId: [],
 });
 const constantStore = useConstantStore();
 
-localState.categoryId = constantStore.categories.find((category) => category.title === title)!.id;
-localState.appByCategoryId = constantStore.apps?.[localState.categoryId] || [];
-
 const { isFetching, data, isLoading, refetch } = useQuery({
-  queryKey: ["getFeeds", localState.categoryId, localState.querylastKey],
-  queryFn: async () => {
-    return apis.get.getFeeds({
+  queryKey: ["getFeeds", id, localState.querylastKey],
+  queryFn: () =>
+    apis.get.getFeeds({
       signal: controller.signal,
       params: {
         lastKey: localState.querylastKey,
         limit: 10,
-        categoryId: localState.categoryId!,
+        categoryId: id!,
       },
-    });
-  },
+    }),
 });
+
+watch(
+  () => ({ apps: constantStore.apps, id }),
+  ({ apps, id }) => {
+    console.log(apps, id);
+    if (!apps || !id) return;
+    localState.appByCategoryId = apps[id] || [];
+  }
+);
 
 watch(
   () => data.value,
@@ -58,7 +61,7 @@ watch(
 );
 
 onMounted(() => {
-  sessionStorage.setItem(storage.CATEGORY, String(localState.categoryId));
+  sessionStorage.setItem(storage.CATEGORY, String(id));
 });
 
 onUnmounted(() => {

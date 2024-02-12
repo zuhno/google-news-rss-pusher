@@ -51,6 +51,8 @@ export class userAuthMiddleware implements NestMiddleware {
 
     if (userAuth.error) throw new HttpException(userAuth.error.message, HttpStatus.BAD_REQUEST);
 
+    this.logger.log(`user_id: ${payload.id}, reissue access token.`);
+
     return accessToken;
   }
 
@@ -65,7 +67,7 @@ export class userAuthMiddleware implements NestMiddleware {
 
       return payload;
     } catch (error) {
-      this.logger.verbose(error.message);
+      this.logger.warn(error.message);
       return false;
     }
   }

@@ -1,12 +1,20 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 
-import { useConstantStore } from "@/store";
+import { useConstantStore, useUserStore } from "@/store";
+import { useCookies } from "@vueuse/integrations/useCookies";
+import { cookie } from "@/constants";
 
+const cookies = useCookies([cookie.LOGGED_IN_USER]);
 const constantStore = useConstantStore();
+const userStore = useUserStore();
 
 onMounted(async () => {
   const promises = [constantStore.initFetch()];
+
+  if (!!cookies.get(cookie.LOGGED_IN_USER)) {
+    promises.push(userStore.initFetch());
+  }
 
   await Promise.allSettled(promises);
 });

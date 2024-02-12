@@ -17,7 +17,9 @@ const vuetify = createVuetify({
   components,
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { refetchOnWindowFocus: false, retry: 3 } },
+});
 
 app.use(router);
 app.use(pinia);

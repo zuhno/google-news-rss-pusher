@@ -30,6 +30,7 @@ export default {
       instance.get<response.GetConstantsResponse>("/constants", config),
     getGoogleClientInfo: (config?: AxiosRequestConfig) =>
       instance.get<response.GetOAuth2GoogleClientInfoResponse>("/oauth2/google", config),
+    getVerify: (config?: AxiosRequestConfig) => instance.get("/users/verify", config),
   },
   post: {
     postSlackAccess: (config: AxiosRequestConfig<{ code: string; category: string }>) =>

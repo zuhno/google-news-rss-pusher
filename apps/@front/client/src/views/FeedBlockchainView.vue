@@ -3,5 +3,5 @@ import FeedTemplate from "@/components/FeedTemplate.vue";
 </script>
 
 <template>
-  <FeedTemplate title="블록체인" />
+  <FeedTemplate :id="2" />
 </template>

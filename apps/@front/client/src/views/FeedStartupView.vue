@@ -3,5 +3,5 @@ import FeedTemplate from "@/components/FeedTemplate.vue";
 </script>
 
 <template>
-  <FeedTemplate title="스타트업" />
+  <FeedTemplate :id="3" />
 </template>

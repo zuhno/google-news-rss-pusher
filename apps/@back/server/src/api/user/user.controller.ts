@@ -1,4 +1,4 @@
-import { Controller, Post, Req, Res } from "@nestjs/common";
+import { Controller, Get, Post, Req, Res } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { Request, Response } from "express";
 import { StoreService } from "@/common/store/store.service";
@@ -10,6 +10,12 @@ export class UserController {
     private readonly userService: UserService,
     private readonly storeService: StoreService
   ) {}
+
+  // verify token
+  @Get("/verify")
+  async getVerify() {
+    return;
+  }
 
   @Post("/logout")
   async PostLogout(
