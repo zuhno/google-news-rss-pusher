@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { response } from "http-api-type";
 import type { PropType } from "vue";
+import FeedItemSkeleton from "./FeedItemSkeleton.vue";
 
-const { feeds } = defineProps({ feeds: Object as PropType<response.GetFeedsResponse["list"]> });
+const { feeds, loading } = defineProps({
+  feeds: Object as PropType<response.GetFeedsResponse["list"]>,
+  loading: Boolean,
+});
 
 function dateFormatting(date: string) {
   const _date = new Date(date);
@@ -19,28 +23,35 @@ function dateFormatting(date: string) {
 
 <template>
   <ul>
-    <li v-for="feed in feeds" :key="feed.id">
-      <div>
-        <a :href="feed.link!" target="_blank" rel="noreferer">
-          <template v-if="feed.preview_url">
-            <img :src="feed.preview_url" alt="" onerror="this.src='/no-image.png'" />
-          </template>
-          <template v-else>
-            <img src="/no-image.png" alt="" />
-          </template>
-        </a>
+    <template v-if="loading">
+      <div v-for="k in 4" :key="k">
+        <FeedItemSkeleton />
+      </div>
+    </template>
+    <template v-else>
+      <li v-for="feed in feeds" :key="feed.id">
         <div>
           <a :href="feed.link!" target="_blank" rel="noreferer">
-            <span>{{ feed.title }}</span>
-            <i class="pi pi-external-link" style="font-size: 0.8rem"></i>
+            <template v-if="feed.preview_url">
+              <img :src="feed.preview_url" alt="" onerror="this.src='/no-image.png'" />
+            </template>
+            <template v-else>
+              <img src="/no-image.png" alt="" />
+            </template>
           </a>
           <div>
-            <span>📰 {{ feed.publisher }}</span>
-            <span>{{ dateFormatting(feed.created_at) }}</span>
+            <a :href="feed.link!" target="_blank" rel="noreferer">
+              <span>{{ feed.title }}</span>
+              <i class="pi pi-external-link" style="font-size: 0.8rem"></i>
+            </a>
+            <div>
+              <span>📰 {{ feed.publisher }}</span>
+              <span>{{ dateFormatting(feed.created_at) }}</span>
+            </div>
           </div>
         </div>
-      </div>
-    </li>
+      </li>
+    </template>
   </ul>
 </template>
 

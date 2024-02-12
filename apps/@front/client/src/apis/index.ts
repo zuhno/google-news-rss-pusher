@@ -30,14 +30,12 @@ export default {
       instance.get<response.GetConstantsResponse>("/constants", config),
     getGoogleClientInfo: (config?: AxiosRequestConfig) =>
       instance.get<response.GetOAuth2GoogleClientInfoResponse>("/oauth2/google", config),
-    getUser: (config?: AxiosRequestConfig) =>
-      instance.get<response.GetUserResponse>("/users", config),
   },
   post: {
     postSlackAccess: (config: AxiosRequestConfig<{ code: string; category: string }>) =>
       instance.post<response.PostOAuth2SlackAccessResponse>("/oauth2/slack", config.data, config),
     postGoogleAccess: (config: AxiosRequestConfig<{ code: string }>) =>
-      instance.post<response.PostOAuth2GoogleAccessResponse>("/oauth2/google", config.data, config),
+      instance.post("/oauth2/google", config.data, config),
     postUserLogout: (config?: AxiosRequestConfig) =>
       instance.post<response.PostUserLogoutResponse>("/users/logout", config?.data, config),
   },

@@ -13,19 +13,29 @@ export class StoreService {
     keys: {
       accessToken: "gnrp_access_token",
       refreshToken: "gnrp_refresh_token",
+      loggedInUser: "gnrp_logged_in_user",
     },
-    policies: (process.env.NODE_ENV === "development"
-      ? {
-          httpOnly: false,
-          sameSite: "none",
-          path: "/",
-          secure: true,
-          domain: "localhost",
-        }
-      : { httpOnly: true, sameSite: "strict", path: "/" }) as CookieOptions,
+    policies: {
+      token: (process.env.NODE_ENV === "development"
+        ? {
+            httpOnly: false,
+            sameSite: "none",
+            path: "/",
+            secure: true,
+            domain: "localhost",
+          }
+        : { httpOnly: true, sameSite: "strict", path: "/", domain: "" }) as CookieOptions,
+      loggedIn: {
+        httpOnly: false,
+        sameSite: "none",
+        path: "/",
+        secure: true,
+        domain: process.env.NODE_ENV === "development" ? "localhost" : "",
+      } as CookieOptions,
+    },
     expiresIn: {
-      accessToken: "30m",
-      refreshToken: "24h",
+      accessToken: 1000 * 60 * 30, // 30m
+      refreshToken: 1000 * 60 * 60 * 24, // 24h
     },
   };
 

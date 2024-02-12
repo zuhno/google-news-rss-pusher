@@ -7,10 +7,11 @@ import {
   type ImplicitFlowSuccessResponse,
   type ImplicitFlowErrorResponse,
 } from "vue3-google-signin";
+import { useCookies } from "@vueuse/integrations/useCookies";
 
 import apis from "@/apis";
-import { useConstantStore, useUserStore } from "@/store";
-import { storage } from "@/constants";
+import { useConstantStore } from "@/store";
+import { cookie } from "@/constants";
 
 const controller = new AbortController();
 
@@ -18,18 +19,15 @@ const googleAccessMutate = useMutation({
   mutationFn: async (config: AxiosRequestConfig<{ code: string }>) =>
     apis.post.postGoogleAccess({ ...config, signal: controller.signal }),
 });
-// const userInfoMutate = useMutation({mutationFn: async()=> apis.get.getUserInfo()});
 
-const userStore = useUserStore();
+const cookies = useCookies([cookie.LOGGED_IN_USER]);
 const constantStore = useConstantStore();
 
 const handleOnSuccess = async (response: ImplicitFlowSuccessResponse) => {
   if (typeof response.code !== "string" || !response.code) return;
 
   try {
-    const { data } = await googleAccessMutate.mutateAsync({ data: { code: response.code } });
-    userStore.setUser(data);
-    localStorage.setItem(storage.IS_LOGGED_IN, "true");
+    await googleAccessMutate.mutateAsync({ data: { code: response.code } });
   } catch (err) {
     console.error("err : ", err);
   }
@@ -51,16 +49,16 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <template v-if="!userStore.user">
-    <button :disabled="!isReady" @click="login">Login with Google</button>
-  </template>
-  <template v-else>
+  <template v-if="!!cookies.get(cookie.LOGGED_IN_USER)">
     <div>
       <div class="profile">
-        <img :src="userStore.user.avatarUrl!" alt="" />
-        <span>{{ userStore.user.nickName }}</span>
+        <img :src="cookies.get(cookie.LOGGED_IN_USER).avatarUrl" alt="" />
+        <span>{{ cookies.get(cookie.LOGGED_IN_USER).nickName }}</span>
       </div>
     </div>
+  </template>
+  <template v-else>
+    <button :disabled="!isReady" @click="login">Login with Google</button>
   </template>
 </template>
 

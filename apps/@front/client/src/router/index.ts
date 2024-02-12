@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
+
+import { feedRoute } from "@/constants";
 import DashboardView from "@/views/DashboardView.vue";
 
 const router = createRouter({
@@ -9,16 +11,12 @@ const router = createRouter({
       name: "dashboard",
       component: DashboardView,
     },
-    {
-      path: "/real-estate",
-      name: "real-estate",
-      component: () => import("@/views/FeedRealEstateView.vue"),
-    },
-    {
-      path: "/blockchain",
-      name: "blockchain",
-      component: () => import("@/views/FeedBlockchainView.vue"),
-    },
+    // feed routes
+    ...Object.values(feedRoute.linkMap).map((link) => ({
+      path: link.path,
+      name: link.path.replace("/", ""),
+      component: link.component,
+    })),
     {
       path: "/auth",
       name: "auth",

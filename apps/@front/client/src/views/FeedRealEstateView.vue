@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import FeedRealEstate from "@/templates/feed_real-estate";
+import FeedTemplate from "@/components/FeedTemplate.vue";
 </script>
 
 <template>
-  <FeedRealEstate />
+  <FeedTemplate title="부동산" />
 </template>

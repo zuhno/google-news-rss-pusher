@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res } from "@nestjs/common";
+import { Controller, Post, Req, Res } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { Request, Response } from "express";
 import { StoreService } from "@/common/store/store.service";
@@ -11,20 +11,6 @@ export class UserController {
     private readonly storeService: StoreService
   ) {}
 
-  @Get()
-  async getUser(@Req() req: Request): Promise<response.GetUserResponse> {
-    const { keys } = this.storeService.getCookieConfig();
-    const accessToken = req.cookies[keys.accessToken];
-
-    const { userInfo } = await this.userService.getUser(accessToken);
-
-    return {
-      email: userInfo.email,
-      nickName: userInfo.nick_name,
-      avatarUrl: userInfo.avatar_url,
-    };
-  }
-
   @Post("/logout")
   async PostLogout(
     @Req() req: Request,
@@ -36,8 +22,9 @@ export class UserController {
     const { count } = await this.userService.postLogout(accessToken);
 
     if (count === 1) {
-      res.clearCookie(keys.accessToken, policies);
-      res.clearCookie(keys.refreshToken, policies);
+      res.clearCookie(keys.accessToken, policies.token);
+      res.clearCookie(keys.refreshToken, policies.token);
+      res.clearCookie(keys.loggedInUser, policies.loggedIn);
     }
 
     return { count };

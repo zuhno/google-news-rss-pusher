@@ -13,21 +13,6 @@ export class UserService {
     return this.jwtService.decode(token, { json: true });
   }
 
-  async getUser(accessToken?: string) {
-    const decoded = await this._decoded(accessToken);
-
-    const user = await this.supabaseService
-      .getClient()
-      .anon.from("User")
-      .select("*")
-      .eq("id", decoded.id)
-      .single();
-
-    if (user.error) throw new HttpException(user.error.message, HttpStatus.NOT_FOUND);
-
-    return { userInfo: user.data };
-  }
-
   async postLogout(accessToken?: string) {
     const decoded = await this._decoded(accessToken);
 

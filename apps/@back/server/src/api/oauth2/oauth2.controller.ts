@@ -4,7 +4,6 @@ import { OAuth2Service } from "./oauth2.service";
 import { OAuth2GoogleAccessBodyDto, OAuth2SlackAccessBodyDto } from "./dto/oauth2_request.dto";
 import { Response } from "express";
 import { StoreService } from "@/common/store/store.service";
-import { response } from "http-api-type";
 
 @Controller()
 export class OAuth2Controller {
@@ -33,19 +32,27 @@ export class OAuth2Controller {
   async postGoogleAccess(
     @Body() body: OAuth2GoogleAccessBodyDto,
     @Res({ passthrough: true }) res: Response
-  ): Promise<response.PostOAuth2GoogleAccessResponse> {
+  ) {
     const { accessToken, refreshToken, userInfo } = await this.oauth2Service.postGoogleAccess(
       body.code
     );
-    const { keys, policies } = this.storeService.getCookieConfig();
+    const { keys, policies, expiresIn } = this.storeService.getCookieConfig();
 
-    res.cookie(keys.accessToken, accessToken, { ...policies });
-    res.cookie(keys.refreshToken, refreshToken, { ...policies });
+    res.cookie(keys.accessToken, accessToken, { ...policies.token, maxAge: expiresIn.accessToken });
+    res.cookie(keys.refreshToken, refreshToken, {
+      ...policies.token,
+      maxAge: expiresIn.refreshToken,
+    });
+    res.cookie(
+      keys.loggedInUser,
+      JSON.stringify({
+        email: userInfo.email,
+        nickName: userInfo.nick_name,
+        avatarUrl: userInfo.avatar_url,
+      }),
+      { ...policies.loggedIn, maxAge: expiresIn.refreshToken }
+    );
 
-    return {
-      email: userInfo.email,
-      nickName: userInfo.nick_name,
-      avatarUrl: userInfo.avatar_url,
-    };
+    return;
   }
 }

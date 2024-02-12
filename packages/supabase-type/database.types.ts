@@ -47,14 +47,17 @@ export type Database = {
       }
       Category: {
         Row: {
+          ban_list: string[] | null
           id: number
           title: string
         }
         Insert: {
+          ban_list?: string[] | null
           id: number
           title: string
         }
         Update: {
+          ban_list?: string[] | null
           id?: number
           title?: string
         }

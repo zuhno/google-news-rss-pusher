@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 
-import GoogleLoginButton from "../GoogleLoginButton.vue";
 import { useConstantStore } from "@/store";
+import { feedRoute } from "@/constants";
+import GoogleLoginButton from "../GoogleLoginButton.vue";
 import LogoutButton from "../LogoutButton.vue";
 
 const router = useRouter();
@@ -20,9 +21,9 @@ const isActive = (path: string) => {
         <router-link to="/"> Google News </router-link>
       </div>
       <nav>
-        <router-link :class="isActive('/')" to="/">대시보드</router-link>
-        <router-link :class="isActive('/real-estate')" to="/real-estate">부동산뉴스</router-link>
-        <router-link :class="isActive('/blockchain')" to="/blockchain">블록체인뉴스</router-link>
+        <template v-for="link in Object.values(feedRoute.linkMap)" :key="link.path">
+          <router-link :class="isActive(link.path)" :to="link.path">{{ link.label }}</router-link>
+        </template>
       </nav>
     </div>
     <template v-if="!constantStore.isRootLoading">

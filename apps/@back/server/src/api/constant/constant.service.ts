@@ -12,7 +12,7 @@ export class ConstantService {
 
   async getConstant(): Promise<ConstantsResponseDto> {
     const [categories, apps] = await Promise.all([
-      this.supabaseService.getClient().anon.from("Category").select("*"),
+      this.supabaseService.getClient().anon.from("Category").select("id, title"),
       this.supabaseService.getClient().anon.from("App").select("authorize_link, from"),
     ]);
 

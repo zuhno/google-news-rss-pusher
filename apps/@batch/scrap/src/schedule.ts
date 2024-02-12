@@ -29,11 +29,13 @@ const axiosInstance = axios.create({
   },
 });
 
-const clippedNews = async (prevTitles: string[], categoryTitle: string) => {
+const clippedNews = async (prevTitles: string[], categoryTitle: string, banList: string[]) => {
   const newFeeds: IRssResponseItem[] = [];
+  const banListStr = banList.map((word) => "-" + word).join(" ");
+  const excludes = banListStr ? " " + banListStr : "";
 
   const { data } = await axios.get(
-    `https://news.google.com/rss/search?q=${categoryTitle}when:1h&hl=ko`
+    `https://news.google.com/rss/search?q=${categoryTitle} when:1h${excludes}&hl=ko&gl=KR&ceid=KR:ko`
   );
 
   const parseData = xml2json.parse(data) as IRssResponse;
@@ -87,7 +89,7 @@ export const job = async () => {
       const prevTitles = prevFeeds.data.map((feed) => feed?.title || "");
 
       // Clip new non-overlapping news against saved feed titles
-      const newFeeds = await clippedNews(prevTitles, category.title);
+      const newFeeds = await clippedNews(prevTitles, category.title, category.ban_list ?? []);
 
       if (newFeeds.length === 0) {
         console.log(`There is no clipping '${category.title}' news`);

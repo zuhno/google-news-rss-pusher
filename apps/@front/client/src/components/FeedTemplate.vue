@@ -5,9 +5,9 @@ import { useQuery } from "@tanstack/vue-query";
 
 import apis from "@/apis";
 import { useConstantStore } from "@/store";
-import SlackBtn from "@/components/SlackBtn.vue";
-import FeedList from "@/components/FeedList.vue";
 import { storage } from "@/constants";
+import SlackBtn from "./SlackBtn.vue";
+import FeedList from "./FeedList.vue";
 
 interface Data {
   querylastKey: number | null;
@@ -19,6 +19,8 @@ interface Data {
 
 const controller = new AbortController();
 
+const { title } = defineProps({ title: String });
+
 const localState = reactive<Data>({
   querylastKey: null,
   feeds: [],
@@ -28,12 +30,10 @@ const localState = reactive<Data>({
 });
 const constantStore = useConstantStore();
 
-localState.categoryId = constantStore.categories.find(
-  (category) => category.title === "블록체인"
-)!.id;
+localState.categoryId = constantStore.categories.find((category) => category.title === title)!.id;
 localState.appByCategoryId = constantStore.apps?.[localState.categoryId] || [];
 
-const { isFetching, data, refetch } = useQuery({
+const { isFetching, data, isLoading, refetch } = useQuery({
   queryKey: ["getFeeds", localState.categoryId, localState.querylastKey],
   queryFn: async () => {
     return apis.get.getFeeds({
@@ -77,7 +77,7 @@ onUnmounted(() => {
     </div>
 
     <div class="content">
-      <FeedList :feeds="localState.feeds" />
+      <FeedList :feeds="localState.feeds" :loading="isLoading" />
 
       <button v-if="localState.hasNext" @click="refetch()">
         <div v-if="isFetching">

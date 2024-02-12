@@ -39,13 +39,13 @@ export class OAuth2Service {
     const accessPayload = { id: user.id, email: user.email };
     const accessToken = await this.jwtService.signAsync(accessPayload, {
       secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
-      expiresIn: expiresIn.accessToken,
+      expiresIn: expiresIn.accessToken / 1000,
     });
 
     const refreshPayload = { ...accessPayload, accessToken: accessToken };
     const refreshToken = await this.jwtService.signAsync(refreshPayload, {
       secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
-      expiresIn: expiresIn.refreshToken,
+      expiresIn: expiresIn.refreshToken / 1000,
     });
 
     return { accessToken, refreshToken };

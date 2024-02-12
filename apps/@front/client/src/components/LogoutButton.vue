@@ -2,23 +2,23 @@
 import { onUnmounted } from "vue";
 import { useMutation } from "@tanstack/vue-query";
 import type { AxiosRequestConfig } from "axios";
+import { useCookies } from "@vueuse/integrations/useCookies";
 
 import apis from "@/apis";
-import { useUserStore } from "@/store";
+import { cookie } from "@/constants";
 
 const controller = new AbortController();
-
-const userStore = useUserStore();
 
 const userLogoutMutate = useMutation({
   mutationFn: async (config?: AxiosRequestConfig) =>
     apis.post.postUserLogout({ ...config, signal: controller.signal }),
 });
 
+const cookies = useCookies([cookie.LOGGED_IN_USER]);
+
 const onLogout = async () => {
   try {
-    const { data } = await userLogoutMutate.mutateAsync({});
-    if (data.count > 0) userStore.resetUser();
+    await userLogoutMutate.mutateAsync({});
   } catch (error) {
     console.log("logout error : ", error);
   }
@@ -30,7 +30,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <template v-if="!!userStore.user">
+  <template v-if="!!cookies.get(cookie.LOGGED_IN_USER)">
     <button @click="onLogout">logout</button>
   </template>
 </template>

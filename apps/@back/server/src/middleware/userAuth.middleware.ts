@@ -75,7 +75,7 @@ export class userAuthMiddleware implements NestMiddleware {
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { keys, policies } = this.storeService.getCookieConfig();
+    const { keys, policies, expiresIn } = this.storeService.getCookieConfig();
 
     const { [keys.accessToken]: accessToken, [keys.refreshToken]: refreshToken } = req.cookies;
 
@@ -95,6 +95,11 @@ export class userAuthMiddleware implements NestMiddleware {
     if (!refreshPayload) {
       const decoded = await this._decode(refreshToken);
       await this._deleteAuth(decoded.id);
+
+      res.clearCookie(keys.accessToken, policies.token);
+      res.clearCookie(keys.refreshToken, policies.token);
+      res.clearCookie(keys.loggedInUser, policies.loggedIn);
+
       throw new UnauthorizedException();
     }
 
@@ -105,7 +110,10 @@ export class userAuthMiddleware implements NestMiddleware {
     });
 
     // set new access token to cookie
-    res.cookie(keys.accessToken, newAccessToken, { ...policies });
+    res.cookie(keys.accessToken, newAccessToken, {
+      ...policies.token,
+      maxAge: expiresIn.accessToken,
+    });
 
     // pass if all conditions clear
     req.cookies[keys.accessToken] = newAccessToken;
