@@ -42,21 +42,16 @@ const { isFetching, data, isLoading, refetch } = useQuery({
 });
 
 watch(
-  () => ({ apps: constantStore.apps, id }),
-  ({ apps, id }) => {
-    console.log(apps, id);
-    if (!apps || !id) return;
-    localState.appByCategoryId = apps[id] || [];
-  }
-);
-
-watch(
-  () => data.value,
-  (newValue) => {
-    if (!newValue) return;
-    localState.hasNext = newValue.data.hasNext;
-    localState.querylastKey = newValue.data.lastKey || null;
-    localState.feeds = [...localState.feeds, ...(newValue.data.list || [])];
+  () => ({ feeds: data.value, constant: constantStore }),
+  ({ feeds, constant }) => {
+    if (feeds) {
+      localState.hasNext = feeds.data.hasNext;
+      localState.querylastKey = feeds.data.lastKey || null;
+      localState.feeds = [...localState.feeds, ...(feeds.data.list || [])];
+    }
+    if (constant.apps) {
+      localState.appByCategoryId = constant.apps?.[id!] || [];
+    }
   }
 );
 
