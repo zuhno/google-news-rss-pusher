@@ -96,12 +96,12 @@ export const job = async () => {
         continue;
       }
 
-      const query = [];
+      const feedQuery = [];
       for (const feed of newFeeds) {
         const realLink = await getRealLink(feed.link, axiosInstance.get);
         const opengraphImage = await getOpengraphImage(realLink, axiosInstance.get);
 
-        query.push({
+        feedQuery.push({
           title: feed.title,
           publisher: feed.source || "-",
           link: realLink,
@@ -111,11 +111,30 @@ export const job = async () => {
       }
 
       // Insert new news data
-      const insertedFeed = await supabaseServiceRoleClient.from("Feed").insert(query).select();
+      const insertedFeeds = await supabaseServiceRoleClient.from("Feed").insert(feedQuery).select();
 
-      if (insertedFeed.error) throw new Error(insertedFeed.error.message);
+      if (insertedFeeds.error) throw new Error(insertedFeeds.error.message);
 
-      console.log(`${insertedFeed.data?.length} new '${category.title}' news has been added.`);
+      const viewQuery = [];
+      for (const insertedFeed of insertedFeeds?.data) {
+        const encodedUrl = btoa(encodeURI(insertedFeed.link));
+        const wrappedLink = `${process.env.SERVER_BASE_URL}/temp/news?id=${insertedFeed?.id}&redirect=${encodedUrl}`;
+
+        viewQuery.push({
+          id: insertedFeed.id,
+          link: wrappedLink,
+          view: 0,
+        });
+      }
+
+      const insertedFeedViews = await supabaseServiceRoleClient
+        .from("FeedView")
+        .insert(viewQuery)
+        .select();
+
+      if (insertedFeedViews.error) throw new Error(insertedFeedViews.error.message);
+
+      console.log(`${insertedFeeds.data?.length} new '${category.title}' news has been added.`);
     }
   } catch (error: unknown) {
     if (axios.isAxiosError<{ message: string }>(error)) {

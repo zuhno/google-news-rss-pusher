@@ -104,6 +104,30 @@ export type Database = {
           }
         ]
       }
+      FeedView: {
+        Row: {
+          created_at: string
+          id: number
+          link: string | null
+          updated_at: string | null
+          view: number
+        }
+        Insert: {
+          created_at?: string
+          id: number
+          link?: string | null
+          updated_at?: string | null
+          view?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          link?: string | null
+          updated_at?: string | null
+          view?: number
+        }
+        Relationships: []
+      }
       Interval: {
         Row: {
           time: number
