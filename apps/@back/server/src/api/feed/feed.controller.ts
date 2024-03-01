@@ -9,11 +9,11 @@ export class FeedController {
 
   @Get()
   async getFeeds(@Query() query: FeedsQueryDto) {
-    return this.feedService.getFeeds({ ...query });
+    return this.feedService.getFeeds(query);
   }
 
   @Get("/all")
   async getFeedsLimitedAll(@Query() query: FeedsLimitedAllQueryDto) {
-    return this.feedService.getFeedsLimitedAll({ ...query });
+    return this.feedService.getFeedsLimitedAll(query);
   }
 }

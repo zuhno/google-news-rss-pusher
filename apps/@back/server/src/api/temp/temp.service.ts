@@ -1,6 +1,7 @@
 import { SupabaseService } from "@/common/supabase/supabase.service";
-import { Injectable, Logger } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { Response } from "express";
+import { TempNewsParamDto, TempNewsQueryDto } from "./dto/temp_request.dto";
 
 @Injectable()
 export class TempService {
@@ -8,16 +9,22 @@ export class TempService {
 
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  async getTempNews(res: Response, { id, redirect }: { id: string; redirect: string }) {
-    await this.supabaseService
+  async getTempNews(res: Response, params: TempNewsParamDto, query: TempNewsQueryDto) {
+    const rpcIncrementField = await this.supabaseService
       .getClient()
-      .serviceRole.from("FeedView")
-      .update({ view: 1 })
-      .eq("id", id);
+      .serviceRole.rpc("increment_field", {
+        table_name: "FeedView",
+        row_id: params.id,
+        field_name: "view",
+        x: 1,
+      });
 
-    this.logger.log(`increase feed views. (id: ${id})`);
+    if (rpcIncrementField?.error)
+      new HttpException(rpcIncrementField?.error?.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
-    const realLink = decodeURI(atob(redirect));
+    this.logger.log(`increase feed views. (id: ${params.id})`);
+
+    const realLink = decodeURI(atob(query.redirect));
     res.redirect(realLink);
   }
 }

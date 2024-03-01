@@ -31,21 +31,24 @@ function dateFormatting(date: string) {
     <template v-else>
       <li v-for="feed in feeds" :key="feed.id">
         <div>
-          <a :href="feed.link!" target="_blank" rel="noreferer">
-            <template v-if="feed.preview_url">
-              <img :src="feed.preview_url" alt="" onerror="this.src='/no-image.png'" />
+          <a :href="feed.count_link!" target="_blank" rel="noreferer">
+            <template v-if="feed.thumbnail">
+              <img :src="feed.thumbnail" alt="" onerror="this.src='/no-image.png'" />
             </template>
             <template v-else>
               <img src="/no-image.png" alt="" />
             </template>
           </a>
           <div>
-            <a :href="feed.link!" target="_blank" rel="noreferer">
+            <a :href="feed.count_link!" target="_blank" rel="noreferer">
               <span>{{ feed.title }}</span>
               <i class="pi pi-external-link" style="font-size: 0.8rem"></i>
             </a>
             <div>
-              <span>📰 {{ feed.publisher }}</span>
+              <p>
+                <span>🗞️ {{ feed.publisher }}</span>
+                <span>👁️‍🗨️ {{ feed.view }}</span>
+              </p>
               <span>{{ dateFormatting(feed.created_at) }}</span>
             </div>
           </div>
@@ -119,6 +122,12 @@ ul {
 
           span {
             font-size: 14px;
+          }
+
+          p {
+            display: flex;
+            align-items: center;
+            gap: 10px;
           }
         }
       }

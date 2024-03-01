@@ -7,7 +7,7 @@ import { CookieOptions } from "express";
 @Injectable()
 export class StoreService {
   private readonly logger = new Logger(StoreService.name);
-  private lastFeed: Record<number, number> = {};
+  private lastFeed: Record<number, { id: string; createdAt: string }> = {};
   private categoryIds: number[] = [];
   private cookieConfig = {
     keys: {
@@ -47,36 +47,41 @@ export class StoreService {
       if (categories.error)
         throw new HttpException(categories.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
-      await this.setLastFeed(categories.data);
+      await this.setFirstFeed(categories.data);
       this.setCategoryIds(categories.data);
     })();
   }
 
-  private async setLastFeed(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
+  private async setFirstFeed(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
     const feedsByCategory = await Promise.allSettled(
       categories.map((category) =>
         this.supabaseService
           .getClient()
           .anon.from("Feed")
-          .select("id, category_id")
+          .select("id, category_id, created_at")
           .eq("category_id", category.id)
+          .order("created_at", { ascending: true })
           .limit(1)
+          .single()
       )
     );
 
     for (const feed of feedsByCategory) {
       if (feed.status === "rejected") {
-        this.logger.error(feed.reason);
+        this.logger.warn(feed.reason);
         continue;
       }
       if (feed.value.error) {
-        this.logger.error(feed.value.error.message);
+        this.logger.warn(feed.value.error.message);
         continue;
       }
 
-      if (!feed.value.data[0]) continue;
+      if (!feed.value.data.id) continue;
 
-      this.lastFeed[feed.value.data[0].category_id] = feed.value.data[0].id;
+      this.lastFeed[feed.value.data.category_id] = {
+        id: feed.value.data.id,
+        createdAt: feed.value.data.created_at,
+      };
     }
   }
 
@@ -84,7 +89,7 @@ export class StoreService {
     this.categoryIds = categories.map((category) => category.id) || [];
   }
 
-  getLastFeed() {
+  getFirstFeed() {
     return this.lastFeed;
   }
 

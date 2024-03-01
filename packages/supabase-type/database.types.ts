@@ -66,31 +66,34 @@ export type Database = {
       Feed: {
         Row: {
           category_id: number
+          count_link: string | null
           created_at: string
-          id: number
+          id: string
           link: string | null
-          preview_url: string | null
           publisher: string | null
+          thumbnail: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
           category_id: number
+          count_link?: string | null
           created_at?: string
-          id?: number
+          id: string
           link?: string | null
-          preview_url?: string | null
           publisher?: string | null
+          thumbnail?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
           category_id?: number
+          count_link?: string | null
           created_at?: string
-          id?: number
+          id?: string
           link?: string | null
-          preview_url?: string | null
           publisher?: string | null
+          thumbnail?: string | null
           title?: string | null
           updated_at?: string
         }
@@ -107,22 +110,19 @@ export type Database = {
       FeedView: {
         Row: {
           created_at: string
-          id: number
-          link: string | null
+          id: string
           updated_at: string | null
           view: number
         }
         Insert: {
           created_at?: string
-          id: number
-          link?: string | null
+          id: string
           updated_at?: string | null
           view?: number
         }
         Update: {
           created_at?: string
-          id?: number
-          link?: string | null
+          id?: string
           updated_at?: string | null
           view?: number
         }
@@ -145,21 +145,21 @@ export type Database = {
           category_id: number
           created_at: string
           interval_time: number
-          last_feed_id: number
+          last_feed_created_at: string | null
           updated_at: string
         }
         Insert: {
           category_id: number
           created_at?: string
           interval_time: number
-          last_feed_id: number
+          last_feed_created_at?: string | null
           updated_at?: string
         }
         Update: {
           category_id?: number
           created_at?: string
           interval_time?: number
-          last_feed_id?: number
+          last_feed_created_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -176,13 +176,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "Interval"
             referencedColumns: ["time"]
-          },
-          {
-            foreignKeyName: "Release_last_feed_id_fkey"
-            columns: ["last_feed_id"]
-            isOneToOne: false
-            referencedRelation: "Feed"
-            referencedColumns: ["id"]
           }
         ]
       }
@@ -347,7 +340,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment:
+        | {
+            Args: {
+              table_name: string
+              row_id: number
+              x: number
+              field_name: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              table_name: string
+              row_id: string
+              x: number
+              field_name: string
+            }
+            Returns: undefined
+          }
+      increment_field: {
+        Args: {
+          table_name: string
+          row_id: string
+          x: number
+          field_name: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       AppFrom: "SLACK"

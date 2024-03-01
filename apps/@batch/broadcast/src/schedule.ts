@@ -53,7 +53,7 @@ const getFeedMap = async (releases: Releases, categories: Categories) => {
       .from("Feed")
       .select("*")
       .eq("category_id", category.id)
-      .order("id", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(1)
       .single();
 
@@ -62,8 +62,8 @@ const getFeedMap = async (releases: Releases, categories: Categories) => {
       continue;
     }
 
-    const releaseByCategory = releases.find((release) => release.category_id === category.id);
-    if (releaseByCategory?.last_feed_id === feed.data.id) continue;
+    const releaseByCategory = releases?.find((release) => release.category_id === category.id);
+    if (releaseByCategory?.last_feed_created_at === feed.data.created_at) continue;
 
     feedMap[category.id] = {
       ...feed.data,
@@ -88,16 +88,17 @@ export const job = async (intervalTime: IntervalTimeEnum) => {
   try {
     const { releases, categories, apps } = await baseFetch(intervalTime);
 
-    if (releases.error || categories.error || apps.error)
-      throw new Error(releases.error.message || categories.error.message || apps.error.message);
-    if (!releases.data?.length || !categories.data?.length || !apps.data?.length) return;
+    if (releases.error) console.log("#release error : ", releases.error.message);
+    if (categories.error || apps.error)
+      throw new Error(categories.error.message || apps.error.message);
+    if (!categories.data?.length || !apps.data?.length) return;
 
     const feedMap = await getFeedMap(releases.data, categories.data);
 
     const releasePayloads = Object.values(feedMap).map((feed) => ({
       interval_time: intervalTime,
       category_id: feed.category_id,
-      last_feed_id: feed.id,
+      last_feed_created_at: feed.created_at,
     }));
 
     if (!releasePayloads.length) return;
@@ -137,9 +138,9 @@ export const job = async (intervalTime: IntervalTimeEnum) => {
     }
   } catch (error) {
     if (error instanceof Error) {
-      console.log("Error : ", error.message);
+      console.log("#Error : ", error.message);
     } else {
-      console.log("Unkown Error : ", error);
+      console.log("#Unkown Error : ", error);
     }
   }
 };

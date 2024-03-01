@@ -9,8 +9,9 @@ import {
   rawUnduplicatedFeeds,
   rawUnduplicatedRatio,
 } from "./utils";
-import type { IRssResponse, IRssResponseItem } from "./types";
+import type { IFeedInsertData, IFeedViewInsertData, IRssResponse, IRssResponseItem } from "./types";
 import type { Database } from "supabase-type";
+import { randomUUID } from "crypto";
 
 const xml2json = new XMLParser();
 
@@ -96,42 +97,38 @@ export const job = async () => {
         continue;
       }
 
-      const feedQuery = [];
+      const feedQuery: IFeedInsertData[] = [];
+      const feedViewQuery: IFeedViewInsertData[] = [];
       for (const feed of newFeeds) {
+        const id = randomUUID();
         const realLink = await getRealLink(feed.link, axiosInstance.get);
         const opengraphImage = await getOpengraphImage(realLink, axiosInstance.get);
 
+        const encodedUrl = btoa(encodeURI(realLink));
+        const countLink = `${process.env.SERVER_BASE_URL}/temp/news/${id}?redirect=${encodedUrl}`;
+
         feedQuery.push({
+          id: id,
           title: feed.title,
           publisher: feed.source || "-",
           link: realLink,
-          preview_url: opengraphImage,
+          count_link: countLink,
+          thumbnail: opengraphImage,
           category_id: category.id,
         });
-      }
 
-      // Insert new news data
-      const insertedFeeds = await supabaseServiceRoleClient.from("Feed").insert(feedQuery).select();
-
-      if (insertedFeeds.error) throw new Error(insertedFeeds.error.message);
-
-      const viewQuery = [];
-      for (const insertedFeed of insertedFeeds?.data) {
-        const encodedUrl = btoa(encodeURI(insertedFeed.link));
-        const wrappedLink = `${process.env.SERVER_BASE_URL}/temp/news?id=${insertedFeed?.id}&redirect=${encodedUrl}`;
-
-        viewQuery.push({
-          id: insertedFeed.id,
-          link: wrappedLink,
+        feedViewQuery.push({
+          id: id,
           view: 0,
         });
       }
 
-      const insertedFeedViews = await supabaseServiceRoleClient
-        .from("FeedView")
-        .insert(viewQuery)
-        .select();
+      const [insertedFeeds, insertedFeedViews] = await Promise.all([
+        supabaseServiceRoleClient.from("Feed").insert(feedQuery).select(),
+        supabaseServiceRoleClient.from("FeedView").insert(feedViewQuery).select(),
+      ]);
 
+      if (insertedFeeds.error) throw new Error(insertedFeeds.error.message);
       if (insertedFeedViews.error) throw new Error(insertedFeedViews.error.message);
 
       console.log(`${insertedFeeds.data?.length} new '${category.title}' news has been added.`);

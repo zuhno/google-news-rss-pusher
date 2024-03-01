@@ -13,4 +13,4 @@ export type FeedMap = Record<
 
 export type Releases = Database["public"]["Tables"]["Release"]["Insert"][];
 
-export type Categories = Database["public"]["Tables"]["Category"]["Row"][];
+export type Categories = Partial<Database["public"]["Tables"]["Category"]["Row"]>[];
