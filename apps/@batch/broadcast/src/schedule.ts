@@ -132,9 +132,9 @@ export const job = async (intervalTime: IntervalTimeEnum) => {
             }
           }
         }
-
-        await sleep(1000);
       }
+
+      await sleep(2000);
     }
   } catch (error) {
     if (error instanceof Error) {
