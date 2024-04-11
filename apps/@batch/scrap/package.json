@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "ts-node-dev -r tsconfig-paths/register --respawn --ignore-watch node_modules --transpile-only ./src/index.ts",
-    "build": "esbuild ./src/index.ts --bundle --platform=node --target=node18 --minify --outdir=dist",
+    "dev": "pnpm dlx env-cmd -f .env.DEV ts-node-dev -r tsconfig-paths/register --respawn --ignore-watch node_modules --transpile-only ./src/index.ts",
+    "build:dev": "pnpm dlx env-cmd -f .env.DEV esbuild ./src/index.ts --bundle --platform=node --target=node18 --minify --outdir=dist",
+    "build:prod": "pnpm dlx env-cmd -f .env.PROD esbuild ./src/index.ts --bundle --platform=node --target=node18 --minify --outdir=dist",
     "start": "node dist/index.js"
   },
   "dependencies": {

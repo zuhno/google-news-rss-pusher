@@ -4,7 +4,6 @@ import { useRouter } from "vue-router";
 import { useConstantStore } from "@/store";
 import { feedRoute } from "@/constants";
 import GoogleLoginButton from "../GoogleLoginButton.vue";
-import LogoutButton from "../LogoutButton.vue";
 
 const router = useRouter();
 const constantStore = useConstantStore();
@@ -18,7 +17,7 @@ const isActive = (path: string) => {
   <header>
     <div>
       <div class="logo">
-        <router-link to="/"> Google News </router-link>
+        <router-link to="/">Google News</router-link>
       </div>
       <nav>
         <template v-for="link in Object.values(feedRoute.linkMap)" :key="link.path">
@@ -28,8 +27,6 @@ const isActive = (path: string) => {
     </div>
     <template v-if="!constantStore.isRootLoading">
       <div>
-        <LogoutButton />
-
         <GoogleLoginButton />
       </div>
     </template>

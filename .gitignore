@@ -2,7 +2,7 @@ node_modules
 *.pem
 config.json
 mkcert
-.env
+.env*
 dist
 
 # Logs

@@ -19,6 +19,10 @@ const googleAccessMutate = useMutation({
   mutationFn: async (config: AxiosRequestConfig<{ code: string }>) =>
     apis.post.postGoogleAccess({ ...config, signal: controller.signal }),
 });
+const userLogoutMutate = useMutation({
+  mutationFn: async (config?: AxiosRequestConfig) =>
+    apis.post.postUserLogout({ ...config, signal: controller.signal }),
+});
 
 const cookies = useCookies([cookie.LOGGED_IN_USER]);
 const constantStore = useConstantStore();
@@ -35,6 +39,14 @@ const handleOnSuccess = async (response: ImplicitFlowSuccessResponse) => {
 
 const handleOnError = (errorResponse: ImplicitFlowErrorResponse) => {
   console.log("Error: ", errorResponse);
+};
+
+const onLogout = async () => {
+  try {
+    await userLogoutMutate.mutateAsync({});
+  } catch (error) {
+    console.log("logout error : ", error);
+  }
 };
 
 const { isReady, login } = useCodeClient({
@@ -54,30 +66,80 @@ onUnmounted(() => {
       <div class="profile">
         <img :src="cookies.get(cookie.LOGGED_IN_USER).avatarUrl" alt="" />
         <span>{{ cookies.get(cookie.LOGGED_IN_USER).nickName }}</span>
+        <v-menu activator="parent">
+          <v-list>
+            <v-list-item v-for="(item, index) in ['Logout']" :key="index" :value="index">
+              <v-list-item-title @click="onLogout">{{ item }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </div>
     </div>
   </template>
   <template v-else>
-    <button :disabled="!isReady" @click="login">Login with Google</button>
+    <button class="login-button--google" :disabled="!isReady" @click="login">Google Login</button>
   </template>
 </template>
 
 <style scoped lang="scss">
-button {
+.login-button--google {
   outline: none;
   border: none;
   cursor: pointer;
+  border-radius: 5rem;
+  background-color: transparent;
+  padding: 8px 12px;
+  transition: all 0.2s linear;
+
+  &:hover {
+    background-color: #000000;
+    color: #ffffff;
+  }
 }
 
 .profile {
   display: flex;
   align-items: center;
+  cursor: pointer;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 5px;
+  user-select: none;
+  transition: all 0.2s linear;
+
+  &:hover {
+    background-color: whitesmoke;
+  }
 
   img {
-    width: 40px;
-    height: 40px;
-    border-radius: 10rem;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
     margin-right: 10px;
+  }
+}
+
+:deep(.v-list) {
+  top: 5px;
+  left: 25px;
+  box-shadow: 0 2px 5px #00000017 !important;
+  width: fit-content !important;
+
+  .v-list-item {
+    min-height: 0 !important;
+    padding: 0;
+    .v-list-item__overlay {
+      background-color: transparent !important;
+    }
+    .v-list-item-title {
+      padding: 5px 15px;
+      color: #000000 !important;
+      text-align: center;
+      transition: all 0.2s linear;
+      &:hover {
+        background-color: #e8e8e8;
+      }
+    }
   }
 }
 </style>

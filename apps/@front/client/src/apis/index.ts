@@ -16,7 +16,7 @@ export default {
   get: {
     getFeeds: (
       config?: AxiosRequestConfigWithParam<{
-        lastKey?: number | null;
+        lastKey?: string | null;
         limit?: number;
         categoryId: number;
       }>

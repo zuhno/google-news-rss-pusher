@@ -3,12 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "dev:https": "HTTPS=true vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "dev": "pnpm dlx env-cmd -f .env.DEV vite",
+    "dev:https": "HTTPS=true pnpm dlx env-cmd -f .env.DEV vite",
+    "build:dev": "pnpm dlx env-cmd -f .env.DEV vite build",
+    "build:prod": "pnpm dlx env-cmd -f .env.PROD vite build",
     "preview": "vite preview",
-    "build-only": "vite build",
-    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {

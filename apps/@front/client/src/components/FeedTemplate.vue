@@ -10,7 +10,7 @@ import SlackBtn from "./SlackBtn.vue";
 import FeedList from "./FeedList.vue";
 
 interface Data {
-  querylastKey: number | null;
+  querylastKey: string | null;
   feeds: response.GetFeedsResponse["list"];
   hasNext: boolean;
   appByCategoryId: response.GetConstantsResponse["apps"][number];
