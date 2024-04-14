@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 jobs:
   build-deploy:
-    if: ${{ github.ref_name == 'develop' }}
+    if: ${{ github.ref_name == 'main' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,12 +27,12 @@ jobs:
         working-directory: ./apps/@front/client
         run: |
           touch .env.DEV
-          echo "VITE_SERVER_DOMAIN=${{ secrets.VITE_SERVER_DOMAIN }}" >> .env.DEV
-          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" >> .env.DEV
+          echo "VITE_SERVER_DOMAIN=${{ secrets.VITE_SERVER_DOMAIN }}" >> .env.PROD
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" >> .env.PROD
 
       - name: build Prod
         working-directory: ./apps/@front/client
-        run: pnpm build:dev
+        run: pnpm build:prod
 
       - name: Publish
         working-directory: ./apps/@front/client
