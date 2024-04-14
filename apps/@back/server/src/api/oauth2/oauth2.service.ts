@@ -216,9 +216,9 @@ export class OAuth2Service {
       .getClient()
       .serviceRole.from("UserAuth")
       .upsert({
+        user_id: user.data.id,
         access_token: accessToken,
         refresh_token: refreshToken,
-        userId: user.data.id,
         request_config: "", // TODO: ip, user-agent, etc... whatever you want.
       })
       .select("access_token, refresh_token")

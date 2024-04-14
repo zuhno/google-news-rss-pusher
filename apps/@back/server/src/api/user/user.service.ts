@@ -20,7 +20,7 @@ export class UserService {
       .getClient()
       .serviceRole.from("UserAuth")
       .delete({ count: "exact" })
-      .eq("userId", decoded.id);
+      .eq("user_id", decoded.id);
 
     if (user.error) throw new HttpException(user.error.message, HttpStatus.BAD_REQUEST);
 

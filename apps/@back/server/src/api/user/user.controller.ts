@@ -27,7 +27,7 @@ export class UserController {
 
     const { count } = await this.userService.postLogout(accessToken);
 
-    if (count === 1) {
+    if (count <= 1) {
       res.clearCookie(keys.accessToken, policies.token);
       res.clearCookie(keys.refreshToken, policies.token);
       res.clearCookie(keys.loggedInUser, policies.loggedIn);

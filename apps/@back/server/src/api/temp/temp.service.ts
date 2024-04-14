@@ -16,11 +16,11 @@ export class TempService {
         table_name: "FeedView",
         row_id: params.id,
         field_name: "view",
-        x: 1,
+        inc_val: 1,
       });
 
     if (rpcIncrementField?.error)
-      new HttpException(rpcIncrementField?.error?.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(rpcIncrementField?.error?.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
     this.logger.log(`increase feed views. (id: ${params.id})`);
 

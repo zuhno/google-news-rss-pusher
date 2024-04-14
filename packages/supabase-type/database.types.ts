@@ -280,7 +280,7 @@ export type Database = {
           refresh_token: string
           request_config: string
           updated_at: string
-          userId: number
+          user_id: number
         }
         Insert: {
           access_token: string
@@ -288,7 +288,7 @@ export type Database = {
           refresh_token: string
           request_config: string
           updated_at?: string
-          userId?: number
+          user_id: number
         }
         Update: {
           access_token?: string
@@ -296,9 +296,17 @@ export type Database = {
           refresh_token?: string
           request_config?: string
           updated_at?: string
-          userId?: number
+          user_id?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "public_UserAuth_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "User"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       UserRole: {
         Row: {
@@ -337,16 +345,16 @@ export type Database = {
       increment_field: {
         Args: {
           table_name: string
-          row_id: string
-          x: number
           field_name: string
+          inc_val: number
+          row_id: string
         }
         Returns: undefined
       }
     }
     Enums: {
       AppFrom: "SLACK"
-      DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "BAN" | "UNKOWN"
+      DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "BAN" | "UNKNOWN"
       MemberRole: "OWNER" | "ADMIN" | "USER_BASIC"
       SocialPlatform: "GOOGLE"
     }

@@ -29,7 +29,7 @@ export class userAuthMiddleware implements NestMiddleware {
       .getClient()
       .serviceRole.from("UserAuth")
       .delete()
-      .eq("userId", id);
+      .eq("user_id", id);
 
     if (userAuth.error) throw new HttpException(userAuth.error.message, HttpStatus.BAD_REQUEST);
   }
@@ -47,7 +47,7 @@ export class userAuthMiddleware implements NestMiddleware {
       .getClient()
       .serviceRole.from("UserAuth")
       .update({ access_token: accessToken })
-      .eq("userId", payload.id);
+      .eq("user_id", payload.id);
 
     if (userAuth.error) throw new HttpException(userAuth.error.message, HttpStatus.BAD_REQUEST);
 
