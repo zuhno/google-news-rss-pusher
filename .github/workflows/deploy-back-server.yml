@@ -1,0 +1,51 @@
+name: Deploy @back/server Production
+on: workflow_dispatch
+
+jobs:
+  build-deploy:
+    if: ${{ github.ref_name == 'main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: .env.PROD setting
+        working-directory: ./apps/@front/client
+        run: |
+          touch .env.PROD
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env.PROD
+          echo "GOOGLE_OAUTH_CLIENT_ID=${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}" >> .env.PROD
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}" >> .env.PROD
+          echo "GOOGLE_OAUTH_REDIRECT_URI=${{ secrets.GOOGLE_OAUTH_REDIRECT_URI }}" >> .env.PROD
+          echo "GOOGLE_OAUTH_JWT_SECRET=${{ secrets.GOOGLE_OAUTH_JWT_SECRET }}" >> .env.PROD
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env.PROD
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env.PROD
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.PROD
+          echo "CLIENT_DOMAIN=${{ secrets.CLIENT_DOMAIN }}" >> .env.PROD
+          echo "ALLOW_ACCESS_ORIGIN=${{ secrets.ALLOW_ACCESS_ORIGIN }}" >> .env.PROD
+
+      - name: build Prod
+        working-directory: ./apps/@back/server
+        run: pnpm build:prod
+
+      # - name: Publish
+      #   working-directory: ./apps/@front/client
+      #   run: pnpm --package=netlify-cli dlx netlify deploy --dir=./apps/@front/client/dist --prod
+      #   env:
+      #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      

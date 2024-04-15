@@ -1,0 +1,52 @@
+# fly.toml app configuration file generated for gnrp-back-server on 2024-04-16T07:26:40+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'gnrp-back-server'
+primary_region = 'nrt'
+kill_signal = 'SIGINT'
+kill_timeout = '5s'
+
+[experimental]
+  auto_rollback = true
+
+[build]
+  dockerfile = '../../../Dockerfile.server'
+
+[env]
+  PORT = '8080'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 8080
+
+[[services.ports]]
+    port = 80
+    handlers = ['http']
+
+[[services.ports]]
+    port = 443
+    handlers = ['tls', 'http']
+
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+
+[[services.tcp_checks]]
+    interval = '15s'
+    timeout = '2s'
+    grace_period = '1s'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
