@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 jobs:
   build-deploy:
-    if: ${{ github.ref_name == 'main' }}
+    if: ${{ github.ref_name == 'develop' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
