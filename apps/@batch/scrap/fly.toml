@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for gnrp-back-server on 2024-04-16T07:26:40+09:00
+# fly.toml app configuration file generated for gnrp-batch-scrap on 2024-04-17T08:00:54+09:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'gnrp-back-server'
+app = 'gnrp-batch-scrap'
 primary_region = 'nrt'
 kill_signal = 'SIGINT'
 kill_timeout = '5s'
@@ -12,7 +12,7 @@ kill_timeout = '5s'
   auto_rollback = true
 
 [build]
-  dockerfile = '../../../Dockerfile.back.server'
+  dockerfile = '../../../Dockerfile.batch.scrap'
 
 [env]
   PORT = '8080'
@@ -29,11 +29,11 @@ kill_timeout = '5s'
   protocol = 'tcp'
   internal_port = 8080
 
-[[services.ports]]
+  [[services.ports]]
     port = 80
     handlers = ['http']
 
-[[services.ports]]
+  [[services.ports]]
     port = 443
     handlers = ['tls', 'http']
 
@@ -41,12 +41,12 @@ kill_timeout = '5s'
     hard_limit = 25
     soft_limit = 20
 
-[[services.tcp_checks]]
+  [[services.tcp_checks]]
     interval = '15s'
     timeout = '2s'
     grace_period = '1s'
 
 [[vm]]
-  memory = '512mb'
+  memory = '256mb'
   cpu_kind = 'shared'
   cpus = 1
