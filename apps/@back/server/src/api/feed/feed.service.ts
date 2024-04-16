@@ -56,7 +56,7 @@ export class FeedService {
     const firstData = this.storeService.getFirstFeed();
 
     const lastCreatedAt = feeds.data.at(-1)?.created_at;
-    const hasNext = firstData[categoryId].createdAt < lastCreatedAt;
+    const hasNext = firstData[categoryId]?.createdAt < lastCreatedAt;
 
     const list = await this._makeFeedListByView(feeds.data);
 
