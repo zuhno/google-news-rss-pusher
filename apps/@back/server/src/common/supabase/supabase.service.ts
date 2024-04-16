@@ -17,7 +17,7 @@ export class SupabaseService {
       return { anon: this.anonClientInstance, serviceRole: this.serviceRoleClientInstance };
     }
 
-    this.logger.log("initialising new supabase client");
+    this.logger.log("initializing new supabase client");
 
     this.anonClientInstance = createClient(
       this.configService.get("SUPABASE_URL"),

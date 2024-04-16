@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { HttpService } from "@nestjs/axios";
 import type { AxiosResponse } from "axios";
@@ -26,8 +26,8 @@ export class SlackService {
         .limit(1)
         .single();
 
-      if (app.error) throw new HttpException(app.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-      this.accessToken = app.data.access_token;
+      if (app.error) this.logger.warn("#app error : " + app.error.message);
+      this.accessToken = app.data?.access_token;
     })();
   }
 

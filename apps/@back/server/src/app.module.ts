@@ -14,7 +14,7 @@ import { TempModule } from "./api/temp/temp.module";
   imports: [
     // Config ENV
     ConfigModule.forRoot({
-      envFilePath: ".env",
+      envFilePath: process.env.NODE_ENV === "production" ? ".env.PROD" : ".env.DEV",
     }),
     // Api Module
     OAuth2Module,

@@ -1,55 +1,80 @@
-import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 
 import { SupabaseService } from "../supabase/supabase.service";
 import { Database } from "supabase-type";
 import { CookieOptions } from "express";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class StoreService {
   private readonly logger = new Logger(StoreService.name);
+
   private lastFeed: Record<number, { id: string; createdAt: string }> = {};
   private categoryIds: number[] = [];
-  private cookieConfig = {
+  private cookieConfig: {
     keys: {
-      accessToken: "gnrp_access_token",
-      refreshToken: "gnrp_refresh_token",
-      loggedInUser: "gnrp_logged_in_user",
-    },
+      accessToken: string;
+      refreshToken: string;
+      loggedInUser: string;
+    };
     policies: {
-      token: (process.env.NODE_ENV === "development"
-        ? {
-            httpOnly: false,
-            sameSite: "none",
-            path: "/",
-            secure: true,
-            domain: "localhost",
-          }
-        : { httpOnly: true, sameSite: "strict", path: "/", domain: "" }) as CookieOptions,
-      loggedIn: {
-        httpOnly: false,
-        sameSite: "none",
-        path: "/",
-        secure: true,
-        domain: process.env.NODE_ENV === "development" ? "localhost" : "",
-      } as CookieOptions,
-    },
+      token: CookieOptions;
+      loggedIn: CookieOptions;
+    };
     expiresIn: {
-      accessToken: 1000 * 60 * 30, // 30m
-      refreshToken: 1000 * 60 * 60 * 24, // 24h
-    },
+      accessToken: number;
+      refreshToken: number;
+    };
   };
 
-  constructor(private readonly supabaseService: SupabaseService) {
-    // initial fetch
-    (async () => {
-      const categories = await this.supabaseService.getClient().anon.from("Category").select("*");
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly supabaseService: SupabaseService
+  ) {
+    this.initialize();
+  }
 
-      if (categories.error)
-        throw new HttpException(categories.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+  private async initialize() {
+    const categories = await this.supabaseService.getClient().anon.from("Category").select("*");
+    if (categories.error) this.logger.warn("#category error : " + categories.error.message);
 
-      await this.setFirstFeed(categories.data);
-      this.setCategoryIds(categories.data);
-    })();
+    this.setFirstFeed(categories.data ?? []);
+    this.setCategoryIds(categories.data ?? []);
+
+    this.cookieConfig = {
+      keys: {
+        accessToken: "gnrp_access_token",
+        refreshToken: "gnrp_refresh_token",
+        loggedInUser: "gnrp_logged_in_user",
+      },
+      policies: {
+        token: (this.configService.get("NODE_ENV") === "development"
+          ? {
+              httpOnly: false,
+              sameSite: "none",
+              path: "/",
+              secure: true,
+              domain: "localhost",
+            }
+          : {
+              httpOnly: true,
+              sameSite: "strict",
+              path: "/",
+              domain: ".zuhno.io",
+            }) as CookieOptions,
+        loggedIn: {
+          httpOnly: false,
+          sameSite: "none",
+          path: "/",
+          secure: true,
+          domain: this.configService.get("NODE_ENV") === "development" ? "localhost" : ".zuhno.io",
+        } as CookieOptions,
+      },
+      expiresIn: {
+        accessToken: 1000 * 60 * 30, // 30m
+        refreshToken: 1000 * 60 * 60 * 24, // 24h
+      },
+    };
   }
 
   private async setFirstFeed(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
@@ -68,11 +93,11 @@ export class StoreService {
 
     for (const feed of feedsByCategory) {
       if (feed.status === "rejected") {
-        this.logger.warn(feed.reason);
+        this.logger.warn("#http error : " + feed.reason);
         continue;
       }
       if (feed.value.error) {
-        this.logger.warn(feed.value.error.message);
+        this.logger.warn("#feed error : " + feed.value.error.message);
         continue;
       }
 
@@ -86,7 +111,7 @@ export class StoreService {
   }
 
   private setCategoryIds(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
-    this.categoryIds = categories.map((category) => category.id) || [];
+    this.categoryIds = categories.map((category) => category.id);
   }
 
   getFirstFeed() {
