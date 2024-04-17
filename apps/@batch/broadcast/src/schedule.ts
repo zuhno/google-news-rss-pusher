@@ -132,6 +132,7 @@ export const job = async (intervalTime: IntervalTimeEnum) => {
             }
           }
         }
+        await sleep(200);
       }
 
       await sleep(2000);

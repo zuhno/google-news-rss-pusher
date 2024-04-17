@@ -42,7 +42,7 @@ export class FeedService {
       .anon.from("Feed")
       .select("*")
       .eq("category_id", categoryId)
-      .order("id", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(limit);
 
     if (lastKey) {
@@ -54,7 +54,6 @@ export class FeedService {
     if (feeds.error) throw new HttpException(feeds.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
     const firstData = this.storeService.getFirstFeed();
-
     const lastCreatedAt = feeds.data.at(-1)?.created_at;
     const hasNext = firstData[categoryId]?.createdAt < lastCreatedAt;
 
