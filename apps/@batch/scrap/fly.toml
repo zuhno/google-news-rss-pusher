@@ -20,9 +20,6 @@ kill_timeout = '5s'
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = true
-  auto_start_machines = true
-  min_machines_running = 0
   processes = ['app']
 
 [[services]]
@@ -43,7 +40,7 @@ kill_timeout = '5s'
 
   [[services.tcp_checks]]
     interval = '15s'
-    timeout = '2s'
+    timeout = '5s'
     grace_period = '1s'
 
 [[vm]]

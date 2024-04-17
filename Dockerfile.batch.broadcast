@@ -14,7 +14,7 @@ RUN rm -rf ./apps/@batch/scrap
 
 WORKDIR /app/apps/@batch/broadcast
 RUN pnpm install
-RUN pnpm build:prod
+RUN pnpm build
 
 EXPOSE 8080
 
