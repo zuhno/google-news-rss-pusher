@@ -11,6 +11,7 @@ export class StoreService {
 
   private lastFeed: Record<number, { id: string; createdAt: string }> = {};
   private categoryIds: number[] = [];
+  private categories: Database["public"]["Tables"]["Category"]["Row"][];
   private cookieConfig: {
     keys: {
       accessToken: string;
@@ -39,7 +40,7 @@ export class StoreService {
     if (categories.error) this.logger.warn("#category error : " + categories.error.message);
 
     this.setFirstFeed(categories.data ?? []);
-    this.setCategoryIds(categories.data ?? []);
+    this.setCategories(categories.data ?? []);
 
     this.cookieConfig = {
       keys: {
@@ -110,8 +111,9 @@ export class StoreService {
     }
   }
 
-  private setCategoryIds(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
+  private setCategories(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
     this.categoryIds = categories.map((category) => category.id);
+    this.categories = categories;
   }
 
   getFirstFeed() {
@@ -120,6 +122,10 @@ export class StoreService {
 
   getCategoryIds() {
     return this.categoryIds;
+  }
+
+  getCategories() {
+    return this.categories;
   }
 
   getCookieConfig() {
