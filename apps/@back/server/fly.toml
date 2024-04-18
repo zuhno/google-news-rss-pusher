@@ -21,7 +21,7 @@ kill_timeout = '5s'
   protocol = 'tcp'
   internal_port = 8080
 
-[[services.ports]]
+  [[services.ports]]
     handlers = ['http']
     port = 80
     force_https = true
@@ -34,7 +34,7 @@ kill_timeout = '5s'
     hard_limit = 25
     soft_limit = 20
 
-[[services.tcp_checks]]
+  [[services.tcp_checks]]
     interval = '15s'
     timeout = '5s'
     grace_period = '1s'
