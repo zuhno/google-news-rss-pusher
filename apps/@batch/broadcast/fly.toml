@@ -17,22 +17,18 @@ kill_timeout = '5s'
 [env]
   PORT = '8080'
 
-[http_service]
-  internal_port = 8080
-  force_https = true
-  processes = ['app']
-
 [[services]]
   protocol = 'tcp'
   internal_port = 8080
 
   [[services.ports]]
-    port = 80
     handlers = ['http']
+    port = 80
+    force_https = true
 
   [[services.ports]]
-    port = 443
     handlers = ['tls', 'http']
+    port = 443
 
   [services.concurrency]
     hard_limit = 25

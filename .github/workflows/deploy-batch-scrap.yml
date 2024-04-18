@@ -11,33 +11,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'pnpm'
-
-      - name: Install Dependencies
-        run: pnpm install
-
       - name: .env.PROD setting
-        working-directory: ./apps/@front/client
+        working-directory: ./apps/@batch/scrap
         run: |
           touch .env.PROD
-          echo "VITE_SERVER_DOMAIN=${{ secrets.VITE_SERVER_DOMAIN }}" >> .env.PROD
-          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" >> .env.PROD
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env.PROD
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env.PROD
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.PROD
+          echo "SERVER_BASE_URL=${{ secrets.SERVER_BASE_URL }}" >> .env.PROD
 
-      # - name: build Prod
-      #   working-directory: ./apps/@front/client
-      #   run: pnpm build:prod
+      - name: setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
 
-      # - name: Publish
-      #   working-directory: ./apps/@front/client
-      #   run: pnpm --package=netlify-cli dlx netlify deploy --dir=./apps/@front/client/dist --prod
-      #   env:
-      #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      - name: Publish
+        run: flyctl deploy --remote-only --config apps/@batch/scrap/fly.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       
