@@ -1,9 +1,10 @@
 import axios from "axios";
 import { constants } from "node:http2";
 import { createClient } from "@supabase/supabase-js";
+import { RecurrenceRule, gracefulShutdown, scheduleJob } from "node-schedule";
 
 import { sleep } from "./utils";
-import type { Categories, FeedMap, IntervalTimeEnum, Releases } from "./types";
+import { Categories, FeedMap, IntervalTimeEnum, Releases } from "./types";
 import type { Database } from "supabase-type";
 
 const supabaseAnonClient = createClient<Database>(
@@ -84,7 +85,7 @@ const baseFetch = async (intervalTime: IntervalTimeEnum) => {
   return { releases, categories, apps };
 };
 
-export const job = async (intervalTime: IntervalTimeEnum) => {
+const job = async (intervalTime: IntervalTimeEnum) => {
   try {
     const { releases, categories, apps } = await baseFetch(intervalTime);
 
@@ -144,4 +145,55 @@ export const job = async (intervalTime: IntervalTimeEnum) => {
       console.log("#Unkown Error : ", error);
     }
   }
+};
+
+const threeTimeJob = () => {
+  const rule = new RecurrenceRule();
+
+  rule.hour = [9, 12, 15, 18, 21];
+  rule.minute = 0;
+
+  // Called every 3 hour
+  scheduleJob(rule, async () => {
+    await job(IntervalTimeEnum.THREE);
+  });
+};
+
+const sixTimeJob = () => {
+  const rule = new RecurrenceRule();
+
+  rule.hour = [9, 15, 21];
+  rule.minute = 0;
+
+  // Called every 6 hour
+  scheduleJob(rule, async () => {
+    await job(IntervalTimeEnum.SIX);
+  });
+};
+
+const twelveTimeJob = () => {
+  const rule = new RecurrenceRule();
+
+  rule.hour = [9, 21];
+  rule.minute = 0;
+
+  // Called every 12 hour
+  scheduleJob(rule, async () => {
+    await job(IntervalTimeEnum.TWELVE);
+  });
+};
+
+export const scheduler = () => {
+  console.log("Scheduler is Running 🥳");
+
+  threeTimeJob();
+  sixTimeJob();
+  twelveTimeJob();
+
+  process.on("SIGINT", function () {
+    gracefulShutdown().then(() => {
+      console.log("succeed graceful shutdown 😎");
+      process.exit(0);
+    });
+  });
 };

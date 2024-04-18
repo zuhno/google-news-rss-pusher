@@ -12,6 +12,7 @@ import {
 import type { IFeedInsertData, IFeedViewInsertData, IRssResponse, IRssResponseItem } from "./types";
 import type { Database } from "supabase-type";
 import { randomUUID } from "crypto";
+import { scheduleJob, gracefulShutdown, RecurrenceRule } from "node-schedule";
 
 const xml2json = new XMLParser();
 
@@ -68,7 +69,7 @@ const clippedNews = async (prevTitles: string[], categoryTitle: string, banList:
   return newFeeds;
 };
 
-export const job = async () => {
+const job = async () => {
   try {
     // Read Category List
     const categories = await supabaseAnonClient.from("Category").select("*");
@@ -142,4 +143,26 @@ export const job = async () => {
       console.log("Unkown Error : ", error);
     }
   }
+};
+
+export const scheduler = () => {
+  const rule = new RecurrenceRule();
+
+  rule.hour = [2, 5, 8, 11, 14, 17, 20, 23];
+  rule.minute = 55;
+
+  console.log("Scheduler is Running 🥳");
+
+  // Called every 55 minutes of every hour
+  scheduleJob(rule, async () => {
+    await job();
+  });
+
+  // Graceful Shutdown
+  process.on("SIGINT", function () {
+    gracefulShutdown().then(() => {
+      console.log("succeed graceful shutdown 😎");
+      process.exit(0);
+    });
+  });
 };
