@@ -1,0 +1,22 @@
+# syntax = docker/dockerfile:1
+FROM node:18.18.2-slim as base
+
+LABEL fly_launch_runtime="NestJS"
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN corepack enable
+
+WORKDIR /app
+COPY . .
+RUN rm -rf ./apps/@batch
+RUN rm -rf ./apps/@front
+
+WORKDIR /app/apps/@back/server
+RUN pnpm install
+RUN pnpm build
+
+EXPOSE 8080
+
+CMD ["pnpm", "start"]

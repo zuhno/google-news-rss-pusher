@@ -3,7 +3,7 @@ import { constants } from "node:http2";
 import { createClient } from "@supabase/supabase-js";
 
 import { sleep } from "./utils";
-import type { IntervalTimeEnum } from "./types";
+import type { Categories, FeedMap, IntervalTimeEnum, Releases } from "./types";
 import type { Database } from "supabase-type";
 
 const supabaseAnonClient = createClient<Database>(
@@ -15,89 +15,133 @@ const supabaseServiceRoleClient = createClient<Database>(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+const subscriber2Inactive = async (appId: string, chId: string) => {
+  await supabaseServiceRoleClient
+    .from("Subscriber")
+    .update({ active: false, deactive_reason: "NOT_FOUND" })
+    .eq("app_id", appId)
+    .eq("ch_id", chId);
+};
+
+const postWebhook = async (chUrl: string, text: string) => {
+  await axios.post(chUrl, { text }, { headers: { "Content-Type": "application/json" } });
+};
+
+const updateRelease = async (payload: Releases) => {
+  const upsertedRelease = await supabaseServiceRoleClient.from("Release").upsert(payload).select();
+  if (upsertedRelease.error) throw new Error(upsertedRelease.error.message);
+};
+
+const makeText = (categoryIds: number[], feedMap: FeedMap) => {
+  return categoryIds
+    .map((category) =>
+      feedMap[category]
+        ? `<${feedMap[category].link}|*${feedMap[category].title}*>\n📍${
+            feedMap[category].category_title || "-"
+          } 🗞️ ${feedMap[category].publisher || "-"}`
+        : ""
+    )
+    .filter((msg) => !!msg)
+    .join("\n");
+};
+
+const getFeedMap = async (releases: Releases, categories: Categories) => {
+  const feedMap: FeedMap = {};
+
+  for (const category of categories) {
+    const feed = await supabaseAnonClient
+      .from("Feed")
+      .select("*")
+      .eq("category_id", category.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (feed.error) {
+      console.log(feed.error.message);
+      continue;
+    }
+
+    const releaseByCategory = releases?.find((release) => release.category_id === category.id);
+    if (releaseByCategory?.last_feed_created_at === feed.data.created_at) continue;
+
+    feedMap[category.id] = {
+      ...feed.data,
+      category_title: category.title,
+    };
+  }
+
+  return feedMap;
+};
+
+const baseFetch = async (intervalTime: IntervalTimeEnum) => {
+  const [releases, categories, apps] = await Promise.all([
+    supabaseAnonClient.from("Release").select("*").eq("interval_time", intervalTime),
+    supabaseAnonClient.from("Category").select("id, title"),
+    supabaseAnonClient.from("App").select("id, from"),
+  ]);
+
+  return { releases, categories, apps };
+};
+
 export const job = async (intervalTime: IntervalTimeEnum) => {
   try {
-    const releases = await supabaseAnonClient
-      .from("Release")
-      .select("*")
-      .eq("interval_time", intervalTime);
+    const { releases, categories, apps } = await baseFetch(intervalTime);
 
-    if (releases.error) throw new Error(releases.error.message);
-    if (releases.data?.length === 0) return;
+    if (releases.error) console.log("#release error : ", releases.error.message);
+    if (categories.error || apps.error)
+      throw new Error(categories.error.message || apps.error.message);
+    if (!categories.data?.length || !apps.data?.length) return;
 
-    for (const release of releases.data) {
-      const app = await supabaseAnonClient
-        .from("App")
-        .select("id, Category ( id, title )")
-        .eq("id", release.app_id)
-        .single();
+    const feedMap = await getFeedMap(releases.data, categories.data);
 
-      if (app.error) throw new Error(app.error.message);
-      if (!app.data) continue;
+    const releasePayloads = Object.values(feedMap).map((feed) => ({
+      interval_time: intervalTime,
+      category_id: feed.category_id,
+      last_feed_created_at: feed.created_at,
+    }));
 
-      const feed = await supabaseAnonClient
-        .from("Feed")
-        .select("*")
-        .eq("category_id", (app.data.Category as any).id)
-        .order("id", { ascending: false })
-        .limit(1)
-        .single();
+    if (!releasePayloads.length) return;
 
-      if (feed.error) throw new Error(feed.error.message);
-      if (!feed.data) continue;
+    await updateRelease(releasePayloads);
 
-      if (release.last_feed_id === feed.data.id) continue;
-
+    for (const app of apps.data) {
       const subscribers = await supabaseAnonClient
         .from("Subscriber")
         .select("*")
-        .eq("active", "Y")
-        .eq("app_id", release.app_id)
+        .eq("active", true)
+        .eq("app_id", app.id)
         .eq("interval_time", intervalTime);
 
-      if (subscribers.error) throw new Error(subscribers.error.message);
-      if (subscribers.data.length === 0) continue;
+      if (subscribers.error) {
+        console.log(subscribers.error.message);
+        continue;
+      }
+      if (!subscribers.data.length) continue;
 
       for (const subscriber of subscribers.data) {
+        const text = makeText(subscriber.categories, feedMap);
+        if (!text) continue;
+
         try {
-          await axios.post(
-            subscriber.ch_url,
-            {
-              text: `<${feed.data.link}|*${feed.data.title}*>\n📍${
-                (app.data.Category as any).title || "-"
-              } 🗞️ ${feed.data.publisher || "-"}`,
-            },
-            { headers: { "Content-Type": "application/json" } }
-          );
+          await postWebhook(subscriber.ch_url, text);
         } catch (error) {
           if (axios.isAxiosError(error)) {
             if (error.response.status === constants.HTTP_STATUS_NOT_FOUND) {
-              await supabaseServiceRoleClient
-                .from("Subscriber")
-                .update({ active: false, deactive_reason: "NOT_FOUND" })
-                .eq("app_id", subscriber.app_id)
-                .eq("ch_id", subscriber.ch_id);
+              await subscriber2Inactive(subscriber.app_id, subscriber.ch_id);
             }
           }
         }
-
-        await sleep(1000);
+        await sleep(200);
       }
-
-      const releaseUpdate = await supabaseServiceRoleClient
-        .from("Release")
-        .update({ last_feed_id: feed.data.id })
-        .eq("app_id", release.app_id)
-        .eq("interval_time", release.interval_time);
-      if (releaseUpdate.error) throw new Error(releaseUpdate.error.message);
 
       await sleep(2000);
     }
   } catch (error) {
     if (error instanceof Error) {
-      console.log("Error : ", error.message);
+      console.log("#Error : ", error.message);
     } else {
-      console.log("Unkown Error : ", error);
+      console.log("#Unkown Error : ", error);
     }
   }
 };

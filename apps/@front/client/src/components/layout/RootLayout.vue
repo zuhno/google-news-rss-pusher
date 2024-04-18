@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 
-import { storage } from "@/constants";
 import { useConstantStore, useUserStore } from "@/store";
+import { useCookies } from "@vueuse/integrations/useCookies";
+import { cookie } from "@/constants";
 
+const cookies = useCookies([cookie.LOGGED_IN_USER]);
 const constantStore = useConstantStore();
 const userStore = useUserStore();
 
 onMounted(async () => {
   const promises = [constantStore.initFetch()];
-  const isLoggedIn = localStorage.getItem(storage.IS_LOGGED_IN);
 
-  if (isLoggedIn === "true") {
+  if (!!cookies.get(cookie.LOGGED_IN_USER)) {
     promises.push(userStore.initFetch());
   }
 
@@ -21,10 +22,7 @@ onMounted(async () => {
 
 <template>
   <article>
-    <div v-if="constantStore.isRootLoading" class="loader">
-      <i class="pi pi-spin pi-spinner" style="font-size: 5rem"></i>
-    </div>
-    <slot v-else></slot>
+    <slot></slot>
   </article>
 </template>
 

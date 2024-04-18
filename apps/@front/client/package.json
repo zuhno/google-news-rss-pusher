@@ -1,23 +1,25 @@
 {
   "name": "@front/client",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "dev:https": "HTTPS=true vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "dev": "pnpm dlx env-cmd -f .env.DEV vite",
+    "dev:https": "HTTPS=true pnpm dlx env-cmd -f .env.DEV vite",
+    "build:dev": "pnpm dlx env-cmd -f .env.DEV vite build",
+    "build:prod": "pnpm dlx env-cmd -f .env.PROD vite build",
     "preview": "vite preview",
-    "build-only": "vite build",
-    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.15.0",
+    "@vueuse/integrations": "^10.7.2",
     "pinia": "^2.1.7",
     "primeicons": "^6.0.1",
+    "universal-cookie": "^6",
     "vue": "^3.4.0",
     "vue-router": "^4.2.5",
-    "vue3-google-signin": "^1.3.2"
+    "vue3-google-signin": "^1.3.2",
+    "vuetify": "^3.5.3"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.6.1",

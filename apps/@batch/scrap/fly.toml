@@ -1,0 +1,45 @@
+# fly.toml app configuration file generated for gnrp-batch-scrap on 2024-04-17T08:00:54+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'gnrp-batch-scrap'
+primary_region = 'nrt'
+kill_signal = 'SIGINT'
+kill_timeout = '5s'
+
+[experimental]
+  auto_rollback = true
+
+[build]
+  dockerfile = '../../../Dockerfile.batch.scrap'
+
+[env]
+  PORT = '8080'
+
+[[services]]
+  protocol = 'tcp'
+  internal_port = 8080
+
+  [[services.ports]]
+    handlers = ['http']
+    port = 80
+    force_https = true
+
+  [[services.ports]]
+    handlers = ['tls', 'http']
+    port = 443
+
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    interval = '15s'
+    timeout = '5s'
+    grace_period = '1s'
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import FeedBlockchain from "@/templates/feed_blockchain";
+import FeedTemplate from "@/components/FeedTemplate.vue";
 </script>
 
 <template>
-  <FeedBlockchain />
+  <FeedTemplate :id="2" />
 </template>

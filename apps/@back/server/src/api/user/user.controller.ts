@@ -11,18 +11,10 @@ export class UserController {
     private readonly storeService: StoreService
   ) {}
 
-  @Get()
-  async getUser(@Req() req: Request): Promise<response.GetUserResponse> {
-    const { keys } = this.storeService.getCookieConfig();
-    const accessToken = req.cookies[keys.accessToken];
-
-    const { userInfo } = await this.userService.getUser(accessToken);
-
-    return {
-      email: userInfo.email,
-      nickName: userInfo.nick_name,
-      avatarUrl: userInfo.avatar_url,
-    };
+  // verify token
+  @Get("/verify")
+  async getVerify() {
+    return;
   }
 
   @Post("/logout")
@@ -35,9 +27,10 @@ export class UserController {
 
     const { count } = await this.userService.postLogout(accessToken);
 
-    if (count === 1) {
-      res.clearCookie(keys.accessToken, policies);
-      res.clearCookie(keys.refreshToken, policies);
+    if (count <= 1) {
+      res.clearCookie(keys.accessToken, policies.token);
+      res.clearCookie(keys.refreshToken, policies.token);
+      res.clearCookie(keys.loggedInUser, policies.loggedIn);
     }
 
     return { count };

@@ -1,5 +1,5 @@
 export class FeedsQueryDto {
-  readonly lastKey: number;
+  readonly lastKey?: string;
   readonly limit: number;
   readonly categoryId: number;
 }

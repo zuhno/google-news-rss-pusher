@@ -6,60 +6,58 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       App: {
         Row: {
-          authorize_link: string
-          category_id: number
+          access_token: string | null
+          authorize_link: string | null
           client_id: string | null
           client_secret: string | null
           created_at: string
           from: Database["public"]["Enums"]["AppFrom"]
           id: string
+          name: string | null
           updated_at: string
         }
         Insert: {
-          authorize_link: string
-          category_id: number
+          access_token?: string | null
+          authorize_link?: string | null
           client_id?: string | null
           client_secret?: string | null
           created_at?: string
           from: Database["public"]["Enums"]["AppFrom"]
           id: string
+          name?: string | null
           updated_at?: string
         }
         Update: {
-          authorize_link?: string
-          category_id?: number
+          access_token?: string | null
+          authorize_link?: string | null
           client_id?: string | null
           client_secret?: string | null
           created_at?: string
           from?: Database["public"]["Enums"]["AppFrom"]
           id?: string
+          name?: string | null
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "App_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "Category"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       Category: {
         Row: {
+          ban_list: string[] | null
           id: number
           title: string
         }
         Insert: {
+          ban_list?: string[] | null
           id: number
           title: string
         }
         Update: {
+          ban_list?: string[] | null
           id?: number
           title?: string
         }
@@ -68,31 +66,34 @@ export interface Database {
       Feed: {
         Row: {
           category_id: number
+          count_link: string | null
           created_at: string
-          id: number
+          id: string
           link: string | null
-          preview_url: string | null
           publisher: string | null
+          thumbnail: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
           category_id: number
+          count_link?: string | null
           created_at?: string
-          id?: number
+          id: string
           link?: string | null
-          preview_url?: string | null
           publisher?: string | null
+          thumbnail?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
           category_id?: number
+          count_link?: string | null
           created_at?: string
-          id?: number
+          id?: string
           link?: string | null
-          preview_url?: string | null
           publisher?: string | null
+          thumbnail?: string | null
           title?: string | null
           updated_at?: string
         }
@@ -103,8 +104,23 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "Category"
             referencedColumns: ["id"]
-          }
+          },
         ]
+      }
+      FeedView: {
+        Row: {
+          id: string
+          view: number
+        }
+        Insert: {
+          id: string
+          view?: number
+        }
+        Update: {
+          id?: string
+          view?: number
+        }
+        Relationships: []
       }
       Interval: {
         Row: {
@@ -120,32 +136,32 @@ export interface Database {
       }
       Release: {
         Row: {
-          app_id: string
+          category_id: number
           created_at: string
           interval_time: number
-          last_feed_id: number
+          last_feed_created_at: string | null
           updated_at: string
         }
         Insert: {
-          app_id: string
+          category_id: number
           created_at?: string
           interval_time: number
-          last_feed_id: number
+          last_feed_created_at?: string | null
           updated_at?: string
         }
         Update: {
-          app_id?: string
+          category_id?: number
           created_at?: string
           interval_time?: number
-          last_feed_id?: number
+          last_feed_created_at?: string | null
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "Release_app_id_fkey"
-            columns: ["app_id"]
+            foreignKeyName: "Release_category_id_fkey"
+            columns: ["category_id"]
             isOneToOne: false
-            referencedRelation: "App"
+            referencedRelation: "Category"
             referencedColumns: ["id"]
           },
           {
@@ -155,19 +171,13 @@ export interface Database {
             referencedRelation: "Interval"
             referencedColumns: ["time"]
           },
-          {
-            foreignKeyName: "Release_last_feed_id_fkey"
-            columns: ["last_feed_id"]
-            isOneToOne: false
-            referencedRelation: "Feed"
-            referencedColumns: ["id"]
-          }
         ]
       }
       Subscriber: {
         Row: {
           active: boolean
           app_id: string
+          categories: number[]
           ch_id: string
           ch_name: string | null
           ch_url: string | null
@@ -181,6 +191,7 @@ export interface Database {
         Insert: {
           active?: boolean
           app_id: string
+          categories: number[]
           ch_id: string
           ch_name?: string | null
           ch_url?: string | null
@@ -194,6 +205,7 @@ export interface Database {
         Update: {
           active?: boolean
           app_id?: string
+          categories?: number[]
           ch_id?: string
           ch_name?: string | null
           ch_url?: string | null
@@ -225,7 +237,7 @@ export interface Database {
             isOneToOne: false
             referencedRelation: "User"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       User: {
@@ -268,7 +280,7 @@ export interface Database {
           refresh_token: string
           request_config: string
           updated_at: string
-          userId: number
+          user_id: number
         }
         Insert: {
           access_token: string
@@ -276,7 +288,7 @@ export interface Database {
           refresh_token: string
           request_config: string
           updated_at?: string
-          userId?: number
+          user_id: number
         }
         Update: {
           access_token?: string
@@ -284,9 +296,17 @@ export interface Database {
           refresh_token?: string
           request_config?: string
           updated_at?: string
-          userId?: number
+          user_id?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "public_UserAuth_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "User"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       UserRole: {
         Row: {
@@ -314,7 +334,7 @@ export interface Database {
             isOneToOne: true
             referencedRelation: "User"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
     }
@@ -322,13 +342,20 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_field: {
+        Args: {
+          table_name: string
+          field_name: string
+          inc_val: number
+          row_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       AppFrom: "SLACK"
-      DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "BAN" | "UNKOWN"
+      DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "BAN" | "UNKNOWN"
       MemberRole: "OWNER" | "ADMIN" | "USER_BASIC"
-      Reason: "NOT_FOUND" | "USER_REQUEST" | "UNKOWN"
       SocialPlatform: "GOOGLE"
     }
     CompositeTypes: {
@@ -337,14 +364,16 @@ export interface Database {
   }
 }
 
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (Database["public"]["Tables"] & Database["public"]["Views"])
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -352,67 +381,67 @@ export type Tables<
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (Database["public"]["Tables"] &
-      Database["public"]["Views"])
-  ? (Database["public"]["Tables"] &
-      Database["public"]["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R
-    }
-    ? R
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
     : never
-  : never
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I
-    }
-    ? I
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
     : never
-  : never
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof Database["public"]["Tables"]
+    | keyof PublicSchema["Tables"]
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof Database["public"]["Tables"]
-  ? Database["public"]["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U
-    }
-    ? U
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
     : never
-  : never
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof Database["public"]["Enums"]
+    | keyof PublicSchema["Enums"]
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never
+    : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
-  ? Database["public"]["Enums"][PublicEnumNameOrOptions]
-  : never
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never

@@ -1,0 +1,29 @@
+name: Deploy @batch/broadcast Production
+on: workflow_dispatch
+
+jobs:
+  build-deploy:
+    if: ${{ github.ref_name == 'main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: .env.PROD setting
+        working-directory: ./apps/@batch/broadcast
+        run: |
+          touch .env.PROD
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env.PROD
+          echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env.PROD
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.PROD
+
+      - name: setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Publish
+        run: flyctl deploy --remote-only --config apps/@batch/broadcast/fly.toml
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      

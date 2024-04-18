@@ -8,12 +8,13 @@ import { ConstantModule } from "./api/constant/constant.module";
 import { CommunityModule } from "./api/community/community.module";
 import { NoticeModule } from "./api/notice/notice.module";
 import { UserModule } from "./api/user/user.module";
+import { TempModule } from "./api/temp/temp.module";
 
 @Module({
   imports: [
     // Config ENV
     ConfigModule.forRoot({
-      envFilePath: ".env",
+      envFilePath: process.env.NODE_ENV === "production" ? ".env.PROD" : ".env.DEV",
     }),
     // Api Module
     OAuth2Module,
@@ -22,6 +23,7 @@ import { UserModule } from "./api/user/user.module";
     CommunityModule,
     NoticeModule,
     UserModule,
+    TempModule,
     // Router
     RouterModule.register([
       {
@@ -42,6 +44,7 @@ import { UserModule } from "./api/user/user.module";
       },
       { path: "notices", module: NoticeModule },
       { path: "users", module: UserModule },
+      { path: "temp", module: TempModule },
     ]),
   ],
   controllers: [],

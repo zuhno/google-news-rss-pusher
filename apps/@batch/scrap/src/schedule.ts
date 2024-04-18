@@ -9,8 +9,9 @@ import {
   rawUnduplicatedFeeds,
   rawUnduplicatedRatio,
 } from "./utils";
-import type { IRssResponse, IRssResponseItem } from "./types";
+import type { IFeedInsertData, IFeedViewInsertData, IRssResponse, IRssResponseItem } from "./types";
 import type { Database } from "supabase-type";
+import { randomUUID } from "crypto";
 
 const xml2json = new XMLParser();
 
@@ -29,11 +30,13 @@ const axiosInstance = axios.create({
   },
 });
 
-const clippedNews = async (prevTitles: string[], categoryTitle: string) => {
+const clippedNews = async (prevTitles: string[], categoryTitle: string, banList: string[]) => {
   const newFeeds: IRssResponseItem[] = [];
+  const banListStr = banList.map((word) => "-" + word).join(" ");
+  const excludes = banListStr ? " " + banListStr : "";
 
   const { data } = await axios.get(
-    `https://news.google.com/rss/search?q=${categoryTitle}when:1h&hl=ko`
+    `https://news.google.com/rss/search?q=${categoryTitle} when:1h${excludes}&hl=ko&gl=KR&ceid=KR:ko`
   );
 
   const parseData = xml2json.parse(data) as IRssResponse;
@@ -87,33 +90,48 @@ export const job = async () => {
       const prevTitles = prevFeeds.data.map((feed) => feed?.title || "");
 
       // Clip new non-overlapping news against saved feed titles
-      const newFeeds = await clippedNews(prevTitles, category.title);
+      const newFeeds = await clippedNews(prevTitles, category.title, category.ban_list ?? []);
 
       if (newFeeds.length === 0) {
         console.log(`There is no clipping '${category.title}' news`);
         continue;
       }
 
-      const query = [];
+      const feedQuery: IFeedInsertData[] = [];
+      const feedViewQuery: IFeedViewInsertData[] = [];
       for (const feed of newFeeds) {
+        const id = randomUUID();
         const realLink = await getRealLink(feed.link, axiosInstance.get);
         const opengraphImage = await getOpengraphImage(realLink, axiosInstance.get);
 
-        query.push({
+        const encodedUrl = btoa(encodeURI(realLink));
+        const countLink = `${process.env.SERVER_BASE_URL}/temp/news/${id}?redirect=${encodedUrl}`;
+
+        feedQuery.push({
+          id: id,
           title: feed.title,
           publisher: feed.source || "-",
           link: realLink,
-          preview_url: opengraphImage,
+          count_link: countLink,
+          thumbnail: opengraphImage,
           category_id: category.id,
+        });
+
+        feedViewQuery.push({
+          id: id,
+          view: 0,
         });
       }
 
-      // Insert new news data
-      const insertedFeed = await supabaseServiceRoleClient.from("Feed").insert(query).select();
+      const [insertedFeeds, insertedFeedViews] = await Promise.all([
+        supabaseServiceRoleClient.from("Feed").insert(feedQuery).select(),
+        supabaseServiceRoleClient.from("FeedView").insert(feedViewQuery).select(),
+      ]);
 
-      if (insertedFeed.error) throw new Error(insertedFeed.error.message);
+      if (insertedFeeds.error) throw new Error(insertedFeeds.error.message);
+      if (insertedFeedViews.error) throw new Error(insertedFeedViews.error.message);
 
-      console.log(`${insertedFeed.data?.length} new '${category.title}' news has been added.`);
+      console.log(`${insertedFeeds.data?.length} new '${category.title}' news has been added.`);
     }
   } catch (error: unknown) {
     if (axios.isAxiosError<{ message: string }>(error)) {

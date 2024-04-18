@@ -1,10 +1,8 @@
-import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
-import { Request } from "express";
+import { Body, Controller, Get, Headers, Ip, Post, Req, Res } from "@nestjs/common";
+import { Request, Response } from "express";
 import { OAuth2Service } from "./oauth2.service";
 import { OAuth2GoogleAccessBodyDto, OAuth2SlackAccessBodyDto } from "./dto/oauth2_request.dto";
-import { Response } from "express";
 import { StoreService } from "@/common/store/store.service";
-import { response } from "http-api-type";
 
 @Controller()
 export class OAuth2Controller {
@@ -32,20 +30,35 @@ export class OAuth2Controller {
   @Post("/google")
   async postGoogleAccess(
     @Body() body: OAuth2GoogleAccessBodyDto,
+    @Ip() ip: Request["ip"],
+    @Headers() headers: Request["headers"],
     @Res({ passthrough: true }) res: Response
-  ): Promise<response.PostOAuth2GoogleAccessResponse> {
+  ) {
+    const requestConfig = JSON.stringify({
+      ...(ip && { ipAddr: ip }),
+      ...(headers["user-agent"] && { userAgent: headers["user-agent"] }),
+    });
     const { accessToken, refreshToken, userInfo } = await this.oauth2Service.postGoogleAccess(
-      body.code
+      body.code,
+      requestConfig
     );
-    const { keys, policies } = this.storeService.getCookieConfig();
+    const { keys, policies, expiresIn } = this.storeService.getCookieConfig();
 
-    res.cookie(keys.accessToken, accessToken, { ...policies });
-    res.cookie(keys.refreshToken, refreshToken, { ...policies });
+    res.cookie(keys.accessToken, accessToken, { ...policies.token, maxAge: expiresIn.accessToken });
+    res.cookie(keys.refreshToken, refreshToken, {
+      ...policies.token,
+      maxAge: expiresIn.refreshToken,
+    });
+    res.cookie(
+      keys.loggedInUser,
+      JSON.stringify({
+        email: userInfo.email,
+        nickName: userInfo.nick_name,
+        avatarUrl: userInfo.avatar_url,
+      }),
+      { ...policies.loggedIn, maxAge: expiresIn.refreshToken }
+    );
 
-    return {
-      email: userInfo.email,
-      nickName: userInfo.nick_name,
-      avatarUrl: userInfo.avatar_url,
-    };
+    return;
   }
 }

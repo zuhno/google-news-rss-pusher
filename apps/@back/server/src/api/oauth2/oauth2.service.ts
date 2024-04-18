@@ -1,5 +1,5 @@
 import { HttpService } from "@nestjs/axios";
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { firstValueFrom } from "rxjs";
@@ -16,6 +16,8 @@ import { StoreService } from "@/common/store/store.service";
 
 @Injectable()
 export class OAuth2Service {
+  private readonly logger = new Logger(OAuth2Service.name);
+
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
@@ -37,13 +39,13 @@ export class OAuth2Service {
     const accessPayload = { id: user.id, email: user.email };
     const accessToken = await this.jwtService.signAsync(accessPayload, {
       secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
-      expiresIn: expiresIn.accessToken,
+      expiresIn: expiresIn.accessToken / 1000,
     });
 
     const refreshPayload = { ...accessPayload, accessToken: accessToken };
     const refreshToken = await this.jwtService.signAsync(refreshPayload, {
       secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
-      expiresIn: expiresIn.refreshToken,
+      expiresIn: expiresIn.refreshToken / 1000,
     });
 
     return { accessToken, refreshToken };
@@ -51,18 +53,26 @@ export class OAuth2Service {
 
   async postSlackAccess(
     code: string,
-    category: string,
+    categoryId: string,
     accessToken?: string
   ): Promise<OAuth2SlackAccessResponseDto> {
-    const app = await this.supabaseService
-      .getClient()
-      .anon.from("App")
-      .select("client_id, client_secret")
-      .eq("category_id", parseInt(category))
-      .eq("from", "SLACK")
-      .single();
+    const [app, category] = await Promise.all([
+      this.supabaseService
+        .getClient()
+        .anon.from("App")
+        .select("client_id, client_secret")
+        .eq("from", "SLACK")
+        .single(),
+      this.supabaseService
+        .getClient()
+        .anon.from("Category")
+        .select("id, title")
+        .eq("id", parseInt(categoryId))
+        .single(),
+    ]);
 
-    if (app.error) throw new HttpException(app.error.message, HttpStatus.NOT_FOUND);
+    if (app.error || category.error)
+      throw new HttpException(app.error.message || category.error.message, HttpStatus.NOT_FOUND);
 
     const formData = new FormData();
     formData.append("code", code);
@@ -82,32 +92,66 @@ export class OAuth2Service {
       ({ id: userId } = await this._decoded(accessToken));
     }
 
-    const { data, error } = await this.supabaseService
+    const existSubscriber = await this.supabaseService
       .getClient()
-      .serviceRole.from("Subscriber")
-      .insert({
-        ch_id: result.data.incoming_webhook?.channel_id,
+      .anon.from("Subscriber")
+      .select("interval_time ,categories")
+      .eq("ch_id", result.data.incoming_webhook?.channel_id)
+      .eq("app_id", result.data.app_id)
+      .single();
+
+    const categories = Array.from(
+      new Set([...(existSubscriber.data?.categories ?? []), category.data.id])
+    ).sort();
+
+    if (JSON.stringify(existSubscriber.data?.categories) === JSON.stringify(categories))
+      throw new HttpException("already exist category.", HttpStatus.CONFLICT);
+
+    let payload: Database["public"]["Tables"]["Subscriber"]["Update"] = {
+      ch_id: result.data.incoming_webhook?.channel_id,
+      app_id: result.data.app_id,
+      interval_time: existSubscriber.data?.interval_time,
+      categories,
+      ...(userId && { user_id: userId }),
+    };
+
+    if (existSubscriber.error) {
+      if (existSubscriber.error.code !== "PGRST116")
+        throw new HttpException(existSubscriber.error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+
+      // PGRST116 : the result contains 0 rows
+      payload = {
+        ...payload,
         ch_name: result.data.incoming_webhook?.channel,
         ch_url: result.data.incoming_webhook?.url,
         active: true,
         interval_time: 3,
-        user_id: userId,
-        app_id: result.data.app_id,
         team_id: result.data.team?.id,
-      })
+      };
+    }
+
+    const newSubscriber = await this.supabaseService
+      .getClient()
+      .serviceRole.from("Subscriber")
+      .upsert(payload as Database["public"]["Tables"]["Subscriber"]["Insert"])
       .select()
       .single();
 
-    if (error?.message) throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    if (newSubscriber.error)
+      throw new HttpException(newSubscriber.error.message, HttpStatus.BAD_REQUEST);
 
-    await firstValueFrom(this.slackService.postInitMessage(result.data.incoming_webhook?.url));
+    const categoryTitle = categories.length > 1 ? category.data.title : "";
+    await firstValueFrom(
+      this.slackService.postInitMessage(result.data.incoming_webhook?.url, categoryTitle)
+    );
 
     return {
-      active: data.active,
-      channelId: data.ch_id,
-      channelName: data.ch_name,
-      channelUrl: data.ch_url,
-      notificationInterval: data.interval_time,
+      active: newSubscriber.data.active,
+      channelId: newSubscriber.data.ch_id,
+      channelName: newSubscriber.data.ch_name,
+      channelUrl: newSubscriber.data.ch_url,
+      notificationInterval: newSubscriber.data.interval_time,
+      categories: newSubscriber.data.categories,
     };
   }
 
@@ -118,7 +162,7 @@ export class OAuth2Service {
     };
   }
 
-  async postGoogleAccess(code: string) {
+  async postGoogleAccess(code: string, requestConfig: string) {
     const oauth2Client = new google.auth.OAuth2(
       this.configService.get("GOOGLE_OAUTH_CLIENT_ID"),
       this.configService.get("GOOGLE_OAUTH_CLIENT_SECRET"),
@@ -172,10 +216,10 @@ export class OAuth2Service {
       .getClient()
       .serviceRole.from("UserAuth")
       .upsert({
+        user_id: user.data.id,
         access_token: accessToken,
         refresh_token: refreshToken,
-        userId: user.data.id,
-        request_config: "", // TODO: ip, user-agent, etc... whatever you want.
+        request_config: requestConfig,
       })
       .select("access_token, refresh_token")
       .single();

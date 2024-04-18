@@ -1,0 +1,7 @@
+.git
+.github
+node_modules
+.dockerignore
+Dockerfile.*
+fly.toml
+.env*

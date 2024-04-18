@@ -1,3 +1,5 @@
+import { Database } from "supabase-type";
+
 export interface IRssResponseItem {
   title: string;
   link: string;
@@ -17,3 +19,7 @@ export interface IRssResponse {
     };
   };
 }
+
+export type IFeedInsertData = Database["public"]["Tables"]["Feed"]["Insert"];
+
+export type IFeedViewInsertData = Database["public"]["Tables"]["FeedView"]["Insert"];

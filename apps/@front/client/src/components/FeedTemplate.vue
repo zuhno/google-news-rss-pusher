@@ -1,60 +1,63 @@
 <script setup lang="ts">
-import { onUnmounted, reactive, watch } from "vue";
+import { onMounted, onUnmounted, reactive, watch } from "vue";
 import { response } from "http-api-type";
 import { useQuery } from "@tanstack/vue-query";
 
 import apis from "@/apis";
 import { useConstantStore } from "@/store";
-import SlackBtn from "@/components/SlackBtn.vue";
-import FeedList from "@/components/FeedList.vue";
+import { storage } from "@/constants";
+import SlackBtn from "./SlackBtn.vue";
+import FeedList from "./FeedList.vue";
 
 interface Data {
-  querylastKey: number | null;
+  querylastKey: string | null;
   feeds: response.GetFeedsResponse["list"];
   hasNext: boolean;
-  categoryId: number | null;
   appByCategoryId: response.GetConstantsResponse["apps"][number];
 }
 
 const controller = new AbortController();
 
+const { id } = defineProps({ id: Number });
+
 const localState = reactive<Data>({
   querylastKey: null,
   feeds: [],
   hasNext: false,
-  categoryId: null,
   appByCategoryId: [],
 });
 const constantStore = useConstantStore();
 
-localState.categoryId = constantStore.categories.find(
-  (category) => category.title === "부동산"
-)!.id;
-localState.appByCategoryId = constantStore.apps?.[localState.categoryId] || [];
-
-const { isFetching, data, refetch } = useQuery({
-  queryKey: ["getFeeds", localState.categoryId, localState.querylastKey],
-  queryFn: async () => {
-    return apis.get.getFeeds({
+const { isFetching, data, isLoading, refetch } = useQuery({
+  queryKey: ["getFeeds", id, localState.querylastKey],
+  queryFn: () =>
+    apis.get.getFeeds({
       signal: controller.signal,
       params: {
         lastKey: localState.querylastKey,
         limit: 10,
-        categoryId: localState.categoryId!,
+        categoryId: id!,
       },
-    });
-  },
+    }),
 });
 
 watch(
-  () => data.value,
-  (newValue) => {
-    if (!newValue) return;
-    localState.hasNext = newValue.data.hasNext;
-    localState.querylastKey = newValue.data.lastKey || null;
-    localState.feeds = [...localState.feeds, ...(newValue.data.list || [])];
+  () => ({ feeds: data.value, constant: constantStore }),
+  ({ feeds, constant }) => {
+    if (feeds) {
+      localState.hasNext = feeds.data.hasNext;
+      localState.querylastKey = feeds.data.lastKey || null;
+      localState.feeds = [...localState.feeds, ...(feeds.data.list || [])];
+    }
+    if (constant.apps) {
+      localState.appByCategoryId = constant.apps?.[id!] || [];
+    }
   }
 );
+
+onMounted(() => {
+  sessionStorage.setItem(storage.CATEGORY, String(id));
+});
 
 onUnmounted(() => {
   controller.abort();
@@ -72,7 +75,7 @@ onUnmounted(() => {
     </div>
 
     <div class="content">
-      <FeedList :feeds="localState.feeds" />
+      <FeedList :feeds="localState.feeds" :loading="isLoading" />
 
       <button v-if="localState.hasNext" @click="refetch()">
         <div v-if="isFetching">

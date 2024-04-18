@@ -19,7 +19,7 @@ export class UserModule {
     consumer
       .apply(userAuthMiddleware)
       .forRoutes(
-        { path: "users", method: RequestMethod.GET },
+        { path: "users/check/auth", method: RequestMethod.GET },
         { path: "users/logout", method: RequestMethod.POST }
       );
   }

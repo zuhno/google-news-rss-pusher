@@ -29,7 +29,7 @@ export class userAuthMiddleware implements NestMiddleware {
       .getClient()
       .serviceRole.from("UserAuth")
       .delete()
-      .eq("userId", id);
+      .eq("user_id", id);
 
     if (userAuth.error) throw new HttpException(userAuth.error.message, HttpStatus.BAD_REQUEST);
   }
@@ -47,9 +47,11 @@ export class userAuthMiddleware implements NestMiddleware {
       .getClient()
       .serviceRole.from("UserAuth")
       .update({ access_token: accessToken })
-      .eq("userId", payload.id);
+      .eq("user_id", payload.id);
 
     if (userAuth.error) throw new HttpException(userAuth.error.message, HttpStatus.BAD_REQUEST);
+
+    this.logger.log(`user_id: ${payload.id}, reissue access token.`);
 
     return accessToken;
   }
@@ -65,7 +67,7 @@ export class userAuthMiddleware implements NestMiddleware {
 
       return payload;
     } catch (error) {
-      this.logger.verbose(error.message);
+      this.logger.warn(error.message);
       return false;
     }
   }
@@ -75,7 +77,7 @@ export class userAuthMiddleware implements NestMiddleware {
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { keys, policies } = this.storeService.getCookieConfig();
+    const { keys, policies, expiresIn } = this.storeService.getCookieConfig();
 
     const { [keys.accessToken]: accessToken, [keys.refreshToken]: refreshToken } = req.cookies;
 
@@ -95,6 +97,11 @@ export class userAuthMiddleware implements NestMiddleware {
     if (!refreshPayload) {
       const decoded = await this._decode(refreshToken);
       await this._deleteAuth(decoded.id);
+
+      res.clearCookie(keys.accessToken, policies.token);
+      res.clearCookie(keys.refreshToken, policies.token);
+      res.clearCookie(keys.loggedInUser, policies.loggedIn);
+
       throw new UnauthorizedException();
     }
 
@@ -105,7 +112,10 @@ export class userAuthMiddleware implements NestMiddleware {
     });
 
     // set new access token to cookie
-    res.cookie(keys.accessToken, newAccessToken, { ...policies });
+    res.cookie(keys.accessToken, newAccessToken, {
+      ...policies.token,
+      maxAge: expiresIn.accessToken,
+    });
 
     // pass if all conditions clear
     req.cookies[keys.accessToken] = newAccessToken;

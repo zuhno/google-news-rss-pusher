@@ -1,11 +1,11 @@
 import type { Database } from "supabase-type";
 
 export class GetFeedsResponse {
-  readonly list: Database["public"]["Tables"]["Feed"]["Row"][];
+  readonly list: ({ view: number } & Database["public"]["Tables"]["Feed"]["Row"])[];
   readonly hasNext: boolean;
-  readonly lastKey?: number;
+  readonly lastKey?: string;
 }
 
 export class GetFeedsLimitedAllResponse {
-  readonly [categoryId: number]: Database["public"]["Tables"]["Feed"]["Row"][];
+  readonly [categoryId: number]: ({ view: number } & Database["public"]["Tables"]["Feed"]["Row"])[];
 }
