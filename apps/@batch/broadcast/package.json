@@ -1,6 +1,6 @@
 {
   "name": "@batch/broadcast",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "pnpm dlx env-cmd -f .env.DEV ts-node-dev -r tsconfig-paths/register --respawn --ignore-watch node_modules --transpile-only ./src/index.ts",
