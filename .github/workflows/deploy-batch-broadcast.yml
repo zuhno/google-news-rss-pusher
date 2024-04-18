@@ -23,7 +23,7 @@ jobs:
         uses: superfly/flyctl-actions/setup-flyctl@master
 
       - name: Publish
-        run: flyctl deploy --remote-only --config apps/@batch/broadcast/fly.toml
+        run: flyctl deploy --config apps/@batch/broadcast/fly.toml
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       
