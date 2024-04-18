@@ -162,7 +162,7 @@ export class OAuth2Service {
     };
   }
 
-  async postGoogleAccess(code: string) {
+  async postGoogleAccess(code: string, requestConfig: string) {
     const oauth2Client = new google.auth.OAuth2(
       this.configService.get("GOOGLE_OAUTH_CLIENT_ID"),
       this.configService.get("GOOGLE_OAUTH_CLIENT_SECRET"),
@@ -219,7 +219,7 @@ export class OAuth2Service {
         user_id: user.data.id,
         access_token: accessToken,
         refresh_token: refreshToken,
-        request_config: "", // TODO: ip, user-agent, etc... whatever you want.
+        request_config: requestConfig,
       })
       .select("access_token, refresh_token")
       .single();
