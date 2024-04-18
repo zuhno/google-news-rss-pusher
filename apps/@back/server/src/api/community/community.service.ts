@@ -74,7 +74,7 @@ export class CommunityService {
           // if select 'feed' & 'active', change which categories, active, deactive_reason fields
           if (selectedFeedOption && selectedActiveOption) {
             const category = parseInt(selectedFeedOption.value);
-            const isActive = !!parseInt(selectedActiveOption.value);
+            const isActive = parseInt(selectedActiveOption.value);
 
             query["categories"] = isActive
               ? Array.from(new Set([...subscriber.data.categories, category])).sort()
@@ -91,6 +91,8 @@ export class CommunityService {
 
           // no changes
           if (!Object.keys(query).length) break;
+
+          this.logger.log("modify setting:", JSON.stringify(query));
 
           const update = await this.supabaseService
             .getClient()
