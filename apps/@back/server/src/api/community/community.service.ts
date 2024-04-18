@@ -75,7 +75,6 @@ export class CommunityService {
           if (selectedFeedOption && selectedActiveOption) {
             const category = parseInt(selectedFeedOption.value);
             const isActive = parseInt(selectedActiveOption.value);
-            this.logger.log("category:", category, ", isActive:", isActive);
 
             query["categories"] = isActive
               ? Array.from(new Set([...subscriber.data.categories, category])).sort()

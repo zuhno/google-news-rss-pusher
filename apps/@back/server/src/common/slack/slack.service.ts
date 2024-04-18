@@ -5,6 +5,7 @@ import type { AxiosResponse } from "axios";
 import type { Observable } from "rxjs";
 import type { CommunitySlackCommandBodyDto } from "@/api/community/dto/community_request.dto";
 import { SupabaseService } from "../supabase/supabase.service";
+import { StoreService } from "../store/store.service";
 
 @Injectable()
 export class SlackService {
@@ -14,6 +15,7 @@ export class SlackService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly storeService: StoreService,
     private readonly supabaseService: SupabaseService
   ) {
     // initial fetch
@@ -111,7 +113,7 @@ export class SlackService {
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: "*피드별 설정*",
+                text: "*키워드별 설정*",
               },
             },
             {
@@ -119,7 +121,7 @@ export class SlackService {
               block_id: "select_feed",
               text: {
                 type: "mrkdwn",
-                text: ">:iphone: *변경할 피드*\n>구독 중인 피드 중에서 선택할 수 있습니다.",
+                text: ">:iphone: *변경할 키워드*\n>수집하고 있는 키워드 중에서 선택할 수 있습니다.",
               },
               accessory: {
                 type: "static_select",
@@ -129,24 +131,14 @@ export class SlackService {
                   text: "Choose list",
                   emoji: true,
                 },
-                options: [
-                  {
-                    text: {
-                      type: "plain_text",
-                      text: "부동산",
-                      emoji: true,
-                    },
-                    value: "1",
+                options: this.storeService.getCategories()?.map((category) => ({
+                  text: {
+                    type: "plain_text",
+                    text: category.title,
+                    emoji: true,
                   },
-                  {
-                    text: {
-                      type: "plain_text",
-                      text: "블록체인",
-                      emoji: true,
-                    },
-                    value: "2",
-                  },
-                ],
+                  value: String(category.id),
+                })),
               },
             },
             {
