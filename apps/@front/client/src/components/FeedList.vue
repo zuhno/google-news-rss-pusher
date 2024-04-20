@@ -2,6 +2,11 @@
 import { response } from "http-api-type";
 import type { PropType } from "vue";
 import FeedItemSkeleton from "./FeedItemSkeleton.vue";
+import noImg from "@/assets/img/no-image.png";
+
+type HTMLImageElementEvent = {
+  target: HTMLImageElement;
+} & Event;
 
 const { feeds, loading } = defineProps({
   feeds: Object as PropType<response.GetFeedsResponse["list"]>,
@@ -19,6 +24,11 @@ function dateFormatting(date: string) {
   });
   return formatter.format(_date);
 }
+
+function setDefaultImage(event: Event) {
+  const { target } = event as HTMLImageElementEvent;
+  target.src = noImg;
+}
 </script>
 
 <template>
@@ -33,10 +43,10 @@ function dateFormatting(date: string) {
         <div>
           <a :href="feed.count_link!" target="_blank" rel="noreferer">
             <template v-if="feed.thumbnail">
-              <img :src="feed.thumbnail" alt="" onerror="this.src='/no-image.png'" />
+              <img :src="feed.thumbnail" :alt="feed.title!" @error="setDefaultImage" />
             </template>
             <template v-else>
-              <img src="/no-image.png" alt="" />
+              <img :src="noImg" :alt="feed.title!" />
             </template>
           </a>
           <div>
