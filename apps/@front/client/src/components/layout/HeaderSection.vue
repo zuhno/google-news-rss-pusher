@@ -26,7 +26,7 @@ const isActive = (path: string) => {
       </div>
       <div>
         <div class="logo">
-          <router-link to="/">Google News</router-link>
+          <router-link to="/">G.N.R.P</router-link>
         </div>
         <nav>
           <li>
