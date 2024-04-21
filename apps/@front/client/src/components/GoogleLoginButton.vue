@@ -102,10 +102,11 @@ onUnmounted(() => {
   transition: all 0.2s linear;
   white-space: nowrap;
   font-size: 1rem;
+  color: black;
 
   &:hover {
-    background-color: #000000;
-    color: #ffffff;
+    background-color: black;
+    color: white;
   }
 
   @include mqMax($breakpoint-mobile) {
