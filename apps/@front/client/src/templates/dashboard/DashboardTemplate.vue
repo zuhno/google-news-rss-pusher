@@ -3,7 +3,7 @@ import { onUnmounted } from "vue";
 import { useQuery } from "@tanstack/vue-query";
 
 import apis from "@/apis";
-import { useConstantStore } from "@/store";
+import { useConstantStore } from "@/stores";
 import { feedRoute } from "@/constants";
 import FeedList from "@/components/FeedList.vue";
 
@@ -11,7 +11,7 @@ const controller = new AbortController();
 
 const constantStore = useConstantStore();
 
-const { isLoading, data, error } = useQuery({
+const { isLoading, data } = useQuery({
   queryKey: ["getFeedsLimitedAll"],
   queryFn: () => apis.get.getFeedsLimitedAll({ signal: controller.signal, params: { limit: 4 } }),
   refetchOnMount: false,
@@ -37,6 +37,9 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
+@import "@/assets/scss/variables";
+@import "@/assets/scss/mixins";
+
 section {
   width: 100%;
   display: grid;
@@ -44,7 +47,7 @@ section {
   gap: 50px;
   justify-items: center;
 
-  @media (max-width: 768px) {
+  @include mqMax($breakpoint-mobile) {
     grid-template-columns: repeat(1, 1fr);
   }
 
@@ -61,10 +64,10 @@ section {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
 
       span {
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: 700;
       }
 

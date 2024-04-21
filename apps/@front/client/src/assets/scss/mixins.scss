@@ -1,0 +1,13 @@
+@mixin mediaHover {
+  @media (hover: hover) {
+    &:hover {
+      @content;
+    }
+  }
+}
+
+@mixin mqMax($breakpoint) {
+  @media (max-width: $breakpoint) {
+    @content;
+  }
+}

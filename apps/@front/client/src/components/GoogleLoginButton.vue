@@ -10,7 +10,7 @@ import {
 import { useCookies } from "@vueuse/integrations/useCookies";
 
 import apis from "@/apis";
-import { useConstantStore } from "@/store";
+import { useConstantStore } from "@/stores";
 import { cookie } from "@/constants";
 
 const controller = new AbortController();
@@ -68,7 +68,12 @@ onUnmounted(() => {
         <span>{{ cookies.get(cookie.LOGGED_IN_USER).nickName }}</span>
         <v-menu activator="parent">
           <v-list>
-            <v-list-item v-for="(item, index) in ['Logout']" :key="index" :value="index">
+            <v-list-item
+              v-for="(item, index) in ['Logout']"
+              :key="index"
+              :value="index"
+              :ripple="false"
+            >
               <v-list-item-title @click="onLogout">{{ item }}</v-list-item-title>
             </v-list-item>
           </v-list>
@@ -77,11 +82,16 @@ onUnmounted(() => {
     </div>
   </template>
   <template v-else>
-    <button class="login-button--google" :disabled="!isReady" @click="login">Google Login</button>
+    <button class="login-button--google" :disabled="!isReady" @click="login">
+      {{ `Google\nLogin` }}
+    </button>
   </template>
 </template>
 
 <style scoped lang="scss">
+@import "@/assets/scss/mixins";
+@import "@/assets/scss/variables";
+
 .login-button--google {
   outline: none;
   border: none;
@@ -90,10 +100,15 @@ onUnmounted(() => {
   background-color: transparent;
   padding: 8px 12px;
   transition: all 0.2s linear;
+  white-space: nowrap;
 
   &:hover {
     background-color: #000000;
     color: #ffffff;
+  }
+
+  @include mqMax($breakpoint-mobile) {
+    white-space: pre-line;
   }
 }
 
@@ -105,9 +120,9 @@ onUnmounted(() => {
   padding: 0 8px;
   border-radius: 5px;
   user-select: none;
-  transition: all 0.2s linear;
+  transition: all 0.2s;
 
-  &:hover {
+  @include mediaHover {
     background-color: whitesmoke;
   }
 
@@ -116,6 +131,17 @@ onUnmounted(() => {
     height: 25px;
     border-radius: 50%;
     margin-right: 10px;
+  }
+
+  @include mqMax($breakpoint-mobile) {
+    img {
+      margin-right: 0;
+      width: 30px;
+      height: 30px;
+    }
+    span {
+      display: none;
+    }
   }
 }
 
@@ -140,6 +166,11 @@ onUnmounted(() => {
         background-color: #e8e8e8;
       }
     }
+  }
+
+  @include mqMax($breakpoint-mobile) {
+    left: 0;
+    right: 20px;
   }
 }
 </style>

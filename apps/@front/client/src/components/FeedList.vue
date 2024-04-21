@@ -40,39 +40,43 @@ function setDefaultImage(event: Event) {
     </template>
     <template v-else>
       <li v-for="feed in feeds" :key="feed.id">
-        <div>
-          <a :href="feed.count_link!" target="_blank" rel="noreferer">
+        <a :href="feed.count_link!" target="_blank" rel="noreferer">
+          <div>
             <template v-if="feed.thumbnail">
               <img :src="feed.thumbnail" :alt="feed.title!" @error="setDefaultImage" />
             </template>
             <template v-else>
               <img :src="noImg" :alt="feed.title!" />
             </template>
-          </a>
-          <div>
-            <a :href="feed.count_link!" target="_blank" rel="noreferer">
-              <span>{{ feed.title }}</span>
-              <i class="pi pi-external-link" style="font-size: 0.8rem"></i>
-            </a>
+
             <div>
               <p>
-                <span>🗞️ {{ feed.publisher }}</span>
-                <span>👁️‍🗨️ {{ feed.view }}</span>
+                <span>{{ feed.title }}</span>
+                <i class="pi pi-external-link" style="font-size: 0.8rem"></i>
               </p>
-              <span>{{ dateFormatting(feed.created_at) }}</span>
+
+              <div>
+                <p>
+                  <span>🗞️ {{ feed.publisher }}</span>
+                  <span>👁️‍🗨️ {{ feed.view }}</span>
+                </p>
+                <span>{{ dateFormatting(feed.created_at) }}</span>
+              </div>
             </div>
           </div>
-        </div>
+        </a>
       </li>
     </template>
   </ul>
 </template>
 
 <style scoped lang="scss">
+@import "@/assets/scss/mixins";
+
 ul {
   width: 100%;
   display: grid;
-  gap: 35px;
+  gap: 30px;
 
   li {
     display: flex;
@@ -88,56 +92,54 @@ ul {
       }
     }
 
-    & > div {
-      display: flex;
-      gap: 20px;
+    & > a {
+      padding: 15px;
+      border-radius: 8px;
+      transition: background-color 0.2s;
 
-      img {
-        width: 180px;
-        aspect-ratio: 1 / 0.7;
-        object-fit: contain;
-        transition: opacity 0.2s;
-
-        @media (hover: hover) {
-          &:hover {
-            opacity: 0.6;
-          }
-        }
+      @include mediaHover {
+        background-color: whitesmoke;
       }
 
       & > div {
         display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        padding: 5px 0;
+        gap: 20px;
 
-        a {
-          width: fit-content;
-          display: flex;
-          gap: 10px;
-          transition: 0.2s;
-          font-weight: 700;
-
-          @media (hover: hover) {
-            &:hover {
-              color: gray;
-            }
-          }
+        img {
+          width: 180px;
+          aspect-ratio: 1 / 0.7;
+          object-fit: contain;
+          border: 1.5px solid white;
+          background-color: white;
         }
 
-        div {
+        & > div {
           display: flex;
           flex-direction: column;
-          gap: 10px;
+          justify-content: space-between;
+          padding: 5px 0;
 
-          span {
-            font-size: 14px;
+          & > p {
+            width: fit-content;
+            display: flex;
+            gap: 8px;
+            font-weight: 700;
           }
 
-          p {
+          div {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
+
+            span {
+              font-size: 14px;
+            }
+
+            p {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            }
           }
         }
       }

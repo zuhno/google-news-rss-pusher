@@ -6,12 +6,15 @@ const { authorizeLink } = defineProps({ authorizeLink: String });
   <a :href="authorizeLink">
     <button class="btn-slack">
       <i class="pi pi-slack"></i>
-      Add to Slack
+      <span>Add to Slack</span>
     </button>
   </a>
 </template>
 
 <style scoped lang="scss">
+@import "@/assets/scss/variables";
+@import "@/assets/scss/mixins";
+
 a {
   .btn-slack {
     outline: none;
@@ -25,6 +28,18 @@ a {
     display: flex;
     gap: 5px;
     align-items: center;
+
+    @include mqMax($breakpoint-mobile) {
+      padding: 15px;
+      border-radius: 50%;
+
+      i {
+        font-size: 1.5rem;
+      }
+      span {
+        display: none;
+      }
+    }
   }
 }
 </style>

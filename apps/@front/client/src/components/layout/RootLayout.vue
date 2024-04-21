@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 
-import { useConstantStore, useUserStore } from "@/store";
+import { useConstantStore, useUserStore } from "@/stores";
 import { useCookies } from "@vueuse/integrations/useCookies";
 import { cookie } from "@/constants";
 
@@ -33,7 +33,7 @@ article {
   max-width: 1200px;
   margin: 0 auto;
   margin-top: 70px;
-  padding: 40px 20px 100px;
+  padding: 60px 20px 100px;
   display: flex;
   justify-content: center;
 

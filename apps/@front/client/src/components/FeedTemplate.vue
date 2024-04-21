@@ -4,7 +4,7 @@ import { response } from "http-api-type";
 import { useQuery } from "@tanstack/vue-query";
 
 import apis from "@/apis";
-import { useConstantStore } from "@/store";
+import { useConstantStore } from "@/stores";
 import { storage } from "@/constants";
 import SlackBtn from "./SlackBtn.vue";
 import FeedList from "./FeedList.vue";
@@ -14,6 +14,7 @@ interface Data {
   feeds: response.GetFeedsResponse["list"];
   hasNext: boolean;
   appByCategoryId: response.GetConstantsResponse["apps"][number];
+  title?: string;
 }
 
 const controller = new AbortController();
@@ -25,6 +26,7 @@ const localState = reactive<Data>({
   feeds: [],
   hasNext: false,
   appByCategoryId: [],
+  title: "",
 });
 const constantStore = useConstantStore();
 
@@ -51,6 +53,7 @@ watch(
     }
     if (constant.apps) {
       localState.appByCategoryId = constant.apps?.[id!] || [];
+      localState.title = constant.categories?.find((category) => category.id === id)?.title;
     }
   }
 );
@@ -74,6 +77,8 @@ onUnmounted(() => {
       </template>
     </div>
 
+    <h1>{{ localState.title }}</h1>
+
     <div class="content">
       <FeedList :feeds="localState.feeds" :loading="isLoading" />
 
@@ -88,6 +93,9 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
+@import "@/assets/scss/variables";
+@import "@/assets/scss/mixins";
+
 section {
   max-width: 700px;
   width: 100%;
@@ -98,6 +106,17 @@ section {
     right: 100px;
     display: grid;
     gap: 10px;
+
+    @include mqMax($breakpoint-mobile) {
+      bottom: 50px;
+      right: 30px;
+    }
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 40px;
+    text-transform: uppercase;
   }
 
   .content {
