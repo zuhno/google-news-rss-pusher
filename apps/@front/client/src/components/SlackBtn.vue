@@ -21,13 +21,14 @@ a {
     border: none;
     padding: 10px 15px;
     border-radius: 5px;
-    background-color: #f5f5f5;
-    font-size: 15px;
+    background-color: whitesmoke;
+    font-size: 0.9rem;
     cursor: pointer;
     white-space: nowrap;
     display: flex;
     gap: 5px;
     align-items: center;
+    color: black;
 
     @include mqMax($breakpoint-mobile) {
       padding: 15px;

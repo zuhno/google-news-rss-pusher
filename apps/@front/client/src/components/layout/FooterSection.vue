@@ -7,12 +7,15 @@
 <style scoped lang="scss">
 footer {
   background-color: black;
-  padding: 8px 0;
+  width: 100%;
+  height: 32px;
   display: flex;
   justify-content: center;
+  align-items: center;
 
   span {
     color: white;
+    font-size: 1rem;
   }
 }
 </style>

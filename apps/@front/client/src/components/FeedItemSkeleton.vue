@@ -17,6 +17,9 @@
 </template>
 
 <style lang="scss">
+@import "@/assets/scss/variables";
+@import "@/assets/scss/mixins";
+
 .custom-v-container {
   padding: 0;
 }
@@ -34,6 +37,10 @@
   height: auto;
   aspect-ratio: 1 / 0.7;
   border-radius: 8px;
+
+  @include mqMax($breakpoint-mobile) {
+    width: 110px;
+  }
 }
 
 .custom-v-col--texts {
@@ -49,6 +56,20 @@
     .v-skeleton-loader__text {
       max-width: 90%;
       margin: 5px 16px;
+    }
+  }
+
+  @include mqMax($breakpoint-mobile) {
+    gap: 10px;
+
+    .v-skeleton-loader__heading {
+      margin: 2px 10px;
+    }
+
+    .v-skeleton-loader__sentences {
+      .v-skeleton-loader__text {
+        margin: 2px 10px;
+      }
     }
   }
 }

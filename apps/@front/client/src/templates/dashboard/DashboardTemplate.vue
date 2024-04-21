@@ -28,7 +28,9 @@ onUnmounted(() => {
       <div v-if="feedRoute.linkMap[category.id]">
         <p>
           <span>{{ feedRoute.linkMap[category.id].label }}</span>
-          <router-link :to="feedRoute.linkMap[category.id]"><button>...more</button></router-link>
+          <router-link :to="feedRoute.linkMap[category.id]">
+            <button>...more</button>
+          </router-link>
         </p>
         <FeedList :feeds="data?.data[category.id]" :loading="isLoading" />
       </div>
@@ -81,6 +83,7 @@ section {
         border-radius: 5px;
         cursor: pointer;
         background-color: whitesmoke;
+        color: black;
 
         &:hover {
           background-color: black;

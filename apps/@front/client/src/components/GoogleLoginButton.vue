@@ -101,6 +101,7 @@ onUnmounted(() => {
   padding: 8px 12px;
   transition: all 0.2s linear;
   white-space: nowrap;
+  font-size: 1rem;
 
   &:hover {
     background-color: #000000;
@@ -109,6 +110,7 @@ onUnmounted(() => {
 
   @include mqMax($breakpoint-mobile) {
     white-space: pre-line;
+    padding: 8px 10px;
   }
 }
 
@@ -150,6 +152,7 @@ onUnmounted(() => {
   left: 25px;
   box-shadow: 0 2px 5px #00000017 !important;
   width: fit-content !important;
+  overflow-x: hidden !important;
 
   .v-list-item {
     min-height: 0 !important;

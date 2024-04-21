@@ -127,13 +127,14 @@ section {
 
     button {
       width: fit-content;
-      font-size: 15px;
+      font-size: 0.9rem;
       border: none;
       outline: none;
       width: 100px;
       height: 40px;
       border-radius: 5px;
-      background-color: #f5f5f5;
+      background-color: whitesmoke;
+      color: black;
       cursor: pointer;
     }
   }

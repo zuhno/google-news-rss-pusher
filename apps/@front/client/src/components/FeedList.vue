@@ -71,6 +71,7 @@ function setDefaultImage(event: Event) {
 </template>
 
 <style scoped lang="scss">
+@import "@/assets/scss/variables";
 @import "@/assets/scss/mixins";
 
 ul {
@@ -111,6 +112,10 @@ ul {
           object-fit: contain;
           border: 1.5px solid white;
           background-color: white;
+
+          @include mqMax($breakpoint-mobile) {
+            width: 110px;
+          }
         }
 
         & > div {
@@ -124,6 +129,10 @@ ul {
             display: flex;
             gap: 8px;
             font-weight: 700;
+
+            & > span {
+              font-size: 1rem;
+            }
           }
 
           div {
@@ -131,8 +140,13 @@ ul {
             flex-direction: column;
             gap: 10px;
 
+            @include mqMax($breakpoint-mobile) {
+              gap: 4px;
+              margin-top: 10px;
+            }
+
             span {
-              font-size: 14px;
+              font-size: 0.8rem;
             }
 
             p {

@@ -24,7 +24,7 @@ const isActive = (path: string) => {
       <div class="hamburger" @click.stop="localState.drawer = !localState.drawer">
         <pre></pre>
       </div>
-      <div>
+      <div class="nav-wrapper">
         <div class="logo">
           <router-link to="/">G.N.R.P</router-link>
         </div>
@@ -49,7 +49,7 @@ const isActive = (path: string) => {
           </li>
         </nav>
       </div>
-      <div>
+      <div class="auth">
         <template v-if="!constantStore.isRootLoading">
           <GoogleLoginButton />
         </template>
@@ -97,7 +97,13 @@ header {
   background-color: white;
   box-shadow: 0 4px 15px rgba(225, 225, 225, 0.4);
 
+  @include mqMax($breakpoint-mobile) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
   .hamburger {
+    width: fit-content;
     display: none;
     padding: 8px;
     cursor: pointer;
@@ -110,7 +116,7 @@ header {
     pre {
       width: 15px;
       height: 1.5px;
-      background-color: #000000;
+      background-color: black;
     }
     &::before,
     &::after {
@@ -118,7 +124,7 @@ header {
       display: block;
       width: 15px;
       height: 1.5px;
-      background-color: #000000;
+      background-color: black;
     }
     &::before {
       margin-bottom: 3px;
@@ -128,7 +134,7 @@ header {
     }
   }
 
-  & > div {
+  .nav-wrapper {
     display: flex;
     align-items: center;
 
@@ -136,8 +142,8 @@ header {
       margin-right: 50px;
 
       a {
-        font-size: 20px;
-        font-weight: 900;
+        font-size: 1.4rem;
+        font-weight: 700;
       }
     }
 
@@ -152,6 +158,7 @@ header {
         border-radius: 5px;
         transition: all 0.2s;
         font-weight: 500;
+        font-size: 1rem;
         &:hover {
           background-color: whitesmoke;
         }
@@ -163,14 +170,19 @@ header {
     padding: 0 20px;
     .hamburger {
       display: block;
+      justify-self: flex-start;
     }
-    & > div {
+    .nav-wrapper {
+      justify-self: center;
       .logo {
         margin-right: 0;
       }
       nav {
         display: none;
       }
+    }
+    .auth {
+      justify-self: flex-end;
     }
   }
 }
@@ -180,6 +192,7 @@ header {
   left: 0;
   box-shadow: 0 2px 5px #00000017 !important;
   width: 100% !important;
+  overflow-x: hidden !important;
 
   .v-list-item {
     min-height: 0 !important;
@@ -189,11 +202,11 @@ header {
     }
     .v-list-item-title {
       padding: 5px 15px;
-      color: #000000 !important;
+      color: black !important;
       text-align: center;
       transition: all 0.2s linear;
       &:hover {
-        background-color: #e8e8e8;
+        background-color: whitesmoke;
       }
     }
   }
@@ -212,7 +225,7 @@ header {
       padding: 10px;
       box-sizing: border-box;
       border-radius: 5px;
-      border: 1px solid rgb(235, 235, 235);
+      font-size: 1rem;
 
       @include mediaHover {
         background-color: whitesmoke;
