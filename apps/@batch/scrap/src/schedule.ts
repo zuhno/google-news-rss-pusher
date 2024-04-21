@@ -150,6 +150,7 @@ export const scheduler = () => {
 
   rule.hour = [2, 5, 8, 11, 14, 17, 20, 23];
   rule.minute = 55;
+  rule.tz = "Asia/Seoul";
 
   console.log("Scheduler is Running 🥳");
 
