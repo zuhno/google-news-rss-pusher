@@ -56,10 +56,9 @@ const job = async (intervalTime: IntervalTimeEnum) => {
             }
           }
         }
-        await sleep(200);
       }
-
-      await sleep(2000);
+      console.log(`successful serving message to ${app.from}`);
+      await sleep(1000);
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -75,10 +74,11 @@ const threeTimeJob = () => {
 
   rule.hour = [9, 12, 15, 18, 21];
   rule.minute = 0;
+  rule.tz = "Asia/Seoul";
 
   // Called every 3 hour
-  scheduleJob(rule, async () => {
-    await job(IntervalTimeEnum.THREE);
+  scheduleJob(rule, () => {
+    job(IntervalTimeEnum.THREE);
   });
 };
 
@@ -87,10 +87,11 @@ const sixTimeJob = () => {
 
   rule.hour = [9, 15, 21];
   rule.minute = 0;
+  rule.tz = "Asia/Seoul";
 
   // Called every 6 hour
-  scheduleJob(rule, async () => {
-    await job(IntervalTimeEnum.SIX);
+  scheduleJob(rule, () => {
+    job(IntervalTimeEnum.SIX);
   });
 };
 
@@ -99,10 +100,11 @@ const twelveTimeJob = () => {
 
   rule.hour = [9, 21];
   rule.minute = 0;
+  rule.tz = "Asia/Seoul";
 
   // Called every 12 hour
-  scheduleJob(rule, async () => {
-    await job(IntervalTimeEnum.TWELVE);
+  scheduleJob(rule, () => {
+    job(IntervalTimeEnum.TWELVE);
   });
 };
 
