@@ -72,18 +72,12 @@ const clippedNews = async (prevTitles: string[], categoryTitle: string, banList:
 const job = async () => {
   try {
     // Read Category List
-    const categories = await supabaseAnonClient.from("Category").select("*");
+    const categories = await supabaseAnonClient.from("Category").select("*").eq("active", true);
 
     if (categories.error) throw new Error(categories.error.message);
     if (categories.data.length === 0) return;
 
     for (const category of categories.data) {
-      // Inactive category(a.k.a keyword) skip
-      if (!category.active) {
-        console.log(`${category.title} is inactive.`);
-        continue;
-      }
-
       // Read the list of saved feeds by category
       const prevFeeds = await supabaseAnonClient
         .from("Feed")

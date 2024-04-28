@@ -5,7 +5,7 @@ import { Categories, FeedMap, IntervalTimeEnum, Releases } from "./types";
 export const makeText = (categoryIds: number[], feedMap: FeedMap) => {
   return categoryIds
     .map((category) =>
-      feedMap[category]
+      !!feedMap[category]
         ? `<${feedMap[category].link}|*${feedMap[category].title}*>\n` +
           `🔑 ${feedMap[category].category_title || "-"} 🗞️ ${feedMap[category].publisher || "-"}`
         : ""
@@ -35,8 +35,6 @@ export const getFeedMap = async (releases: Releases, categories: Categories) => 
   const feedMap: FeedMap = {};
 
   for (const category of categories) {
-    if (!category.active) continue;
-
     const feed = await supabaseAnonClient
       .from("Feed")
       .select("*")
@@ -65,7 +63,7 @@ export const getFeedMap = async (releases: Releases, categories: Categories) => 
 export const baseFetch = async (intervalTime: IntervalTimeEnum) => {
   const [releases, categories, apps] = await Promise.all([
     supabaseAnonClient.from("Release").select("*").eq("interval_time", intervalTime),
-    supabaseAnonClient.from("Category").select("id, title"),
+    supabaseAnonClient.from("Category").select("id, title").eq("active", true),
     supabaseAnonClient.from("App").select("id, from"),
   ]);
 
