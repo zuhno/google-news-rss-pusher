@@ -7,7 +7,7 @@ export const makeText = (categoryIds: number[], feedMap: FeedMap) => {
     .map((category) =>
       !!feedMap[category]
         ? `<${feedMap[category].link}|*${feedMap[category].title}*>\n` +
-          `🔑 ${feedMap[category].category_title || "-"} 🗞️ ${feedMap[category].publisher || "-"}`
+          `🗝️ ${feedMap[category].category_title || "-"}  🗞️ ${feedMap[category].publisher || "-"}`
         : ""
     )
     .filter((msg) => !!msg)
