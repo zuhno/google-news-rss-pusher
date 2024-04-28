@@ -84,7 +84,8 @@ export class StoreService {
 
   private async invalidate() {
     const now = new Date().getTime();
-    if (now - this.lastUpdateTimestamp < 1000 * 60 * 60) return;
+    // Update every 5 minutes.
+    if (now - this.lastUpdateTimestamp < 1000 * 60 * 5) return;
     this.logger.log("#invalidate call🫡");
     this.lastUpdateTimestamp = now;
     await this.initialize();
