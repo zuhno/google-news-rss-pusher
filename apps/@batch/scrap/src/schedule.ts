@@ -78,13 +78,19 @@ const job = async () => {
     if (categories.data.length === 0) return;
 
     for (const category of categories.data) {
+      // Inactive category(a.k.a keyword) skip
+      if (!category.active) {
+        console.log(`${category.title} is inactive.`);
+        continue;
+      }
+
       // Read the list of saved feeds by category
       const prevFeeds = await supabaseAnonClient
         .from("Feed")
         .select("*")
         .eq("category_id", category.id)
-        .order("id", { ascending: false })
-        .limit(3);
+        .order("created_at", { ascending: false })
+        .limit(5);
 
       if (prevFeeds.error) throw new Error(prevFeeds.error.message);
 
@@ -109,7 +115,7 @@ const job = async () => {
         const countLink = `${process.env.SERVER_BASE_URL}/temp/news/${id}?redirect=${encodedUrl}`;
 
         feedQuery.push({
-          id: id,
+          id,
           title: feed.title,
           publisher: feed.source || "-",
           link: realLink,
@@ -119,7 +125,7 @@ const job = async () => {
         });
 
         feedViewQuery.push({
-          id: id,
+          id,
           view: 0,
         });
       }

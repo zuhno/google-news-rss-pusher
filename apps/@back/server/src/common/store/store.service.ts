@@ -8,7 +8,7 @@ import { ConfigService } from "@nestjs/config";
 @Injectable()
 export class StoreService {
   private readonly logger = new Logger(StoreService.name);
-
+  private lastUpdateTimestamp = new Date().getTime();
   private lastFeed: Record<number, { id: string; createdAt: string }> = {};
   private categoryIds: number[] = [];
   private categories: Database["public"]["Tables"]["Category"]["Row"][];
@@ -32,16 +32,6 @@ export class StoreService {
     private readonly configService: ConfigService,
     private readonly supabaseService: SupabaseService
   ) {
-    this.initialize();
-  }
-
-  private async initialize() {
-    const categories = await this.supabaseService.getClient().anon.from("Category").select("*");
-    if (categories.error) this.logger.warn("#category error : " + categories.error.message);
-
-    this.setFirstFeed(categories.data ?? []);
-    this.setCategories(categories.data ?? []);
-
     this.cookieConfig = {
       keys: {
         accessToken: "gnrp_access_token",
@@ -76,6 +66,28 @@ export class StoreService {
         refreshToken: 1000 * 60 * 60 * 24, // 24h
       },
     };
+
+    this.initialize();
+  }
+
+  private async initialize() {
+    const categories = await this.supabaseService
+      .getClient()
+      .anon.from("Category")
+      .select("*")
+      .eq("active", true);
+    if (categories.error) this.logger.warn("#category error : " + categories.error.message);
+
+    this.setFirstFeed(categories.data ?? []);
+    this.setCategories(categories.data ?? []);
+  }
+
+  private async invalidate() {
+    const now = new Date().getTime();
+    if (now - this.lastUpdateTimestamp < 1000 * 60 * 60) return;
+    console.log("#invalidate call🫡");
+    this.lastUpdateTimestamp = now;
+    await this.initialize();
   }
 
   private async setFirstFeed(categories: Database["public"]["Tables"]["Category"]["Row"][]) {
@@ -117,14 +129,17 @@ export class StoreService {
   }
 
   getFirstFeed() {
+    this.invalidate();
     return this.lastFeed;
   }
 
   getCategoryIds() {
+    this.invalidate();
     return this.categoryIds;
   }
 
   getCategories() {
+    this.invalidate();
     return this.categories;
   }
 

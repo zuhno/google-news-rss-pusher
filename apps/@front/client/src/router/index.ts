@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-import { feedRoute } from "@/constants";
 import DashboardView from "@/views/DashboardView.vue";
 
 const router = createRouter({
@@ -11,12 +10,11 @@ const router = createRouter({
       name: "dashboard",
       component: DashboardView,
     },
-    // feed routes
-    ...Object.values(feedRoute.linkMap).map((link) => ({
-      path: link.path,
-      name: link.path.replace("/", ""),
-      component: link.component,
-    })),
+    {
+      path: "/feed",
+      name: "feed",
+      component: () => import("@/views/FeedView.vue"),
+    },
     {
       path: "/auth",
       name: "auth",

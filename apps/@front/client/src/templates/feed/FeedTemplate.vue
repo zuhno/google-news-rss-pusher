@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, reactive, watch } from "vue";
+import { onUnmounted, reactive, watch } from "vue";
 import { response } from "http-api-type";
 import { useQuery } from "@tanstack/vue-query";
 
 import apis from "@/apis";
 import { useConstantStore } from "@/stores";
 import { storage } from "@/constants";
-import SlackBtn from "./SlackBtn.vue";
-import FeedList from "./FeedList.vue";
+import SlackBtn from "@/components/SlackBtn.vue";
+import FeedList from "@/components/FeedList.vue";
+import { useRoute } from "vue-router";
 
 interface Data {
   querylastKey: string | null;
@@ -15,11 +16,12 @@ interface Data {
   hasNext: boolean;
   appByCategoryId: response.GetConstantsResponse["apps"][number];
   title?: string;
+  categoryId: number;
 }
 
 const controller = new AbortController();
 
-const { id } = defineProps({ id: Number });
+const route = useRoute();
 
 const localState = reactive<Data>({
   querylastKey: null,
@@ -27,21 +29,37 @@ const localState = reactive<Data>({
   hasNext: false,
   appByCategoryId: [],
   title: "",
+  categoryId: Number(route.query.keyword),
 });
 const constantStore = useConstantStore();
 
 const { isFetching, data, isLoading, refetch } = useQuery({
-  queryKey: ["getFeeds", id, localState.querylastKey],
+  queryKey: ["getFeeds", localState.categoryId, localState.querylastKey],
   queryFn: () =>
     apis.get.getFeeds({
       signal: controller.signal,
       params: {
         lastKey: localState.querylastKey,
         limit: 10,
-        categoryId: id!,
+        categoryId: localState.categoryId,
       },
     }),
 });
+
+watch(
+  () => route.query.keyword,
+  (categoryId) => {
+    localState.hasNext = false;
+    localState.querylastKey = null;
+    localState.feeds = [];
+    localState.appByCategoryId = [];
+    localState.title = "";
+    localState.categoryId = Number(categoryId);
+    sessionStorage.setItem(storage.CATEGORY, String(categoryId));
+    refetch();
+  },
+  { immediate: true }
+);
 
 watch(
   () => ({ feeds: data.value, constant: constantStore }),
@@ -52,15 +70,13 @@ watch(
       localState.feeds = [...localState.feeds, ...(feeds.data.list || [])];
     }
     if (constant.apps) {
-      localState.appByCategoryId = constant.apps?.[id!] || [];
-      localState.title = constant.categories?.find((category) => category.id === id)?.title;
+      localState.appByCategoryId = constant.apps?.[localState.categoryId] || [];
+      localState.title = constant.categories?.find(
+        (category) => category.id === localState.categoryId
+      )?.title;
     }
   }
 );
-
-onMounted(() => {
-  sessionStorage.setItem(storage.CATEGORY, String(id));
-});
 
 onUnmounted(() => {
   controller.abort();

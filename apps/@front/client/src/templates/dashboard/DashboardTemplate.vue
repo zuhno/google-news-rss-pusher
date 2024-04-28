@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/vue-query";
 
 import apis from "@/apis";
 import { useConstantStore } from "@/stores";
-import { feedRoute } from "@/constants";
 import FeedList from "@/components/FeedList.vue";
 
 const controller = new AbortController();
@@ -25,10 +24,10 @@ onUnmounted(() => {
 <template>
   <section>
     <template v-for="category in constantStore.categories" :key="category.id">
-      <div v-if="feedRoute.linkMap[category.id]">
+      <div v-if="category.id">
         <p>
-          <span>{{ feedRoute.linkMap[category.id].label }}</span>
-          <router-link :to="feedRoute.linkMap[category.id]">
+          <span>{{ category.title }}</span>
+          <router-link :to="'/feed?keyword=' + category.id">
             <button>...more</button>
           </router-link>
         </p>
@@ -71,6 +70,7 @@ section {
       span {
         font-size: 1.5rem;
         font-weight: 700;
+        text-transform: uppercase;
       }
 
       button {

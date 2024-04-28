@@ -47,16 +47,19 @@ export type Database = {
       }
       Category: {
         Row: {
+          active: boolean
           ban_list: string[] | null
           id: number
           title: string
         }
         Insert: {
+          active?: boolean
           ban_list?: string[] | null
           id: number
           title: string
         }
         Update: {
+          active?: boolean
           ban_list?: string[] | null
           id?: number
           title?: string

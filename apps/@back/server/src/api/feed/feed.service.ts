@@ -37,6 +37,9 @@ export class FeedService {
   }
 
   async getFeeds({ lastKey, limit = 10, categoryId }: FeedsQueryDto): Promise<FeedsResponseDto> {
+    if (!this.storeService.getCategoryIds()?.includes(+categoryId))
+      throw new HttpException("Unavailable keyword", HttpStatus.BAD_REQUEST);
+
     const query = this.supabaseService
       .getClient()
       .anon.from("Feed")

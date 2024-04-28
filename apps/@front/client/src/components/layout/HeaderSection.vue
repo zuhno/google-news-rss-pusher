@@ -1,20 +1,19 @@
 <script setup lang="ts">
-import { useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { reactive } from "vue";
 
 import { useConstantStore } from "@/stores";
-import { feedRoute } from "@/constants";
 import GoogleLoginButton from "../GoogleLoginButton.vue";
 
-const router = useRouter();
+const route = useRoute();
 const constantStore = useConstantStore();
 
 const localState = reactive({
   drawer: false,
 });
 
-const isActive = (path: string) => {
-  return path === router.currentRoute.value.path ? "active" : null;
+const isActive = (keyword: number) => {
+  return keyword === Number(route.query.keyword) ? "active" : null;
 };
 </script>
 
@@ -34,13 +33,13 @@ const isActive = (path: string) => {
             <v-menu activator="parent">
               <v-list>
                 <v-list-item
-                  v-for="link in Object.values(feedRoute.linkMap)"
-                  :key="link.path"
+                  v-for="category in constantStore.categories"
+                  :key="category?.id"
                   :ripple="false"
                 >
-                  <router-link :class="isActive(link.path)" :to="link.path">
+                  <router-link :class="isActive(category.id)" :to="'/feed?keyword=' + category.id">
                     <v-list-item-title>
-                      {{ link.label }}
+                      {{ category.title }}
                     </v-list-item-title>
                   </router-link>
                 </v-list-item>
@@ -62,13 +61,13 @@ const isActive = (path: string) => {
         <v-menu activator="parent">
           <v-list class="drawer-list">
             <v-list-item
-              v-for="link in Object.values(feedRoute.linkMap)"
-              :key="link.path"
+              v-for="category in constantStore.categories"
+              :key="category?.id"
               :ripple="false"
             >
-              <router-link :class="isActive(link.path)" :to="link.path">
+              <router-link :class="isActive(category.id)" :to="'/feed?keyword=' + category.id">
                 <v-list-item-title>
-                  {{ link.label }}
+                  {{ category.title }}
                 </v-list-item-title>
               </router-link>
             </v-list-item>

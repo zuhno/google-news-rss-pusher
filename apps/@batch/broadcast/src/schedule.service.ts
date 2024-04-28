@@ -6,9 +6,8 @@ export const makeText = (categoryIds: number[], feedMap: FeedMap) => {
   return categoryIds
     .map((category) =>
       feedMap[category]
-        ? `<${feedMap[category].link}|*${feedMap[category].title}*>\n📍${
-            feedMap[category].category_title || "-"
-          } 🗞️ ${feedMap[category].publisher || "-"}`
+        ? `<${feedMap[category].link}|*${feedMap[category].title}*>\n` +
+          `🔑 ${feedMap[category].category_title || "-"} 🗞️ ${feedMap[category].publisher || "-"}`
         : ""
     )
     .filter((msg) => !!msg)
@@ -36,6 +35,8 @@ export const getFeedMap = async (releases: Releases, categories: Categories) => 
   const feedMap: FeedMap = {};
 
   for (const category of categories) {
+    if (!category.active) continue;
+
     const feed = await supabaseAnonClient
       .from("Feed")
       .select("*")
