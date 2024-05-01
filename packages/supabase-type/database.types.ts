@@ -50,18 +50,21 @@ export type Database = {
           active: boolean
           ban_list: string[] | null
           id: number
+          pastDate: string
           title: string
         }
         Insert: {
           active?: boolean
           ban_list?: string[] | null
           id: number
+          pastDate?: string
           title: string
         }
         Update: {
           active?: boolean
           ban_list?: string[] | null
           id?: number
+          pastDate?: string
           title?: string
         }
         Relationships: []
