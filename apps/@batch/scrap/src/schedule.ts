@@ -40,9 +40,10 @@ const clippedNews = async (
   const newFeeds: IRssResponseItem[] = [];
   const banListStr = banList.map((word) => "-" + word).join(" ");
   const excludes = banListStr ? " " + banListStr : "";
+  const encodedTitle = encodeURIComponent(categoryTitle);
 
   const { data } = await axios.get(
-    `https://news.google.com/rss/search?q=${categoryTitle} when:${pastDate}${excludes}&hl=ko&gl=KR&ceid=KR:ko`
+    `https://news.google.com/rss/search?q=${encodedTitle} when:${pastDate}${excludes}&hl=ko&gl=KR&ceid=KR:ko`
   );
 
   const parseData = xml2json.parse(data) as IRssResponse;
