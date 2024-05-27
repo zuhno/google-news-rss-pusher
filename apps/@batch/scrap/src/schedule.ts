@@ -1,6 +1,6 @@
 import axios from "axios";
-import { createClient } from "@supabase/supabase-js";
-import { XMLParser } from "fast-xml-parser";
+import { randomUUID } from "crypto";
+import { scheduleJob, gracefulShutdown, RecurrenceRule } from "node-schedule";
 
 import {
   extractValidTitle,
@@ -10,33 +10,21 @@ import {
   rawUnduplicatedRatio,
 } from "./utils";
 import type { IFeedInsertData, IFeedViewInsertData, IRssResponse, IRssResponseItem } from "./types";
-import type { Database } from "supabase-type";
-import { randomUUID } from "crypto";
-import { scheduleJob, gracefulShutdown, RecurrenceRule } from "node-schedule";
+import { axiosInstance, supabaseAnonClient, supabaseServiceRoleClient, xml2json } from "./config";
 
-const xml2json = new XMLParser();
-
-const supabaseAnonClient = createClient<Database>(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-const supabaseServiceRoleClient = createClient<Database>(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-const axiosInstance = axios.create({
-  headers: {
-    "Content-Type": "text/html",
-  },
-});
-
-const clippedNews = async (
-  prevTitles: string[],
-  categoryTitle: string,
-  banList: string[],
-  pastDate: string
-) => {
+const clippedNews = async ({
+  prevTitles,
+  newFeedTitles,
+  categoryTitle,
+  banList,
+  pastDate,
+}: {
+  prevTitles: string[];
+  newFeedTitles: string[];
+  categoryTitle: string;
+  banList: string[];
+  pastDate: string;
+}) => {
   const newFeeds: IRssResponseItem[] = [];
   const banListStr = banList.map((word) => "-" + word).join(" ");
   const excludes = banListStr ? " " + banListStr : "";
@@ -59,7 +47,7 @@ const clippedNews = async (
 
     // Duplicate check with saved titles
     const duplicatedCheckByNewFeed = removeSourceItems.filter(
-      (feed) => rawUnduplicatedRatio(prevTitles, feed.title) < 0.4
+      (feed) => rawUnduplicatedRatio([...newFeedTitles, ...prevTitles], feed.title) < 0.4
     );
 
     // Duplicate check by text - Considered redundant if matched more than 40%
@@ -67,7 +55,7 @@ const clippedNews = async (
   } else if (items) {
     items.title = extractValidTitle(items.title, items.source);
 
-    if (rawUnduplicatedRatio(prevTitles, items.title) < 0.4) {
+    if (rawUnduplicatedRatio([...newFeedTitles, ...prevTitles], items.title) < 0.4) {
       newFeeds.push(items);
     }
   }
@@ -83,6 +71,8 @@ const job = async () => {
     if (categories.error) throw new Error(categories.error.message);
     if (categories.data.length === 0) return;
 
+    const newFeedTitles = [];
+
     for (const category of categories.data) {
       // Read the list of saved feeds by category
       const prevFeeds = await supabaseAnonClient
@@ -97,17 +87,21 @@ const job = async () => {
       const prevTitles = prevFeeds.data.map((feed) => feed?.title || "");
 
       // Clip new non-overlapping news against saved feed titles
-      const newFeeds = await clippedNews(
+      const newFeeds = await clippedNews({
         prevTitles,
-        category.title,
-        category.ban_list ?? [],
-        category.pastDate
-      );
+        newFeedTitles,
+        categoryTitle: category.title,
+        banList: category.ban_list ?? [],
+        pastDate: category.pastDate,
+      });
 
       if (newFeeds.length === 0) {
         console.log(`There is no clipping '${category.title}' news`);
         continue;
       }
+
+      // check for duplicated titles on current schedule job
+      newFeedTitles.push(...newFeeds.map((feed) => feed?.title || ""));
 
       const feedQuery: IFeedInsertData[] = [];
       const feedViewQuery: IFeedViewInsertData[] = [];
