@@ -3,6 +3,7 @@ import { response } from "http-api-type";
 import type { PropType } from "vue";
 import FeedItemSkeleton from "./FeedItemSkeleton.vue";
 import noImg from "@/assets/img/no-image.png";
+import ListItemAds from "./ads/ListItemAds.vue";
 
 type HTMLImageElementEvent = {
   target: HTMLImageElement;
@@ -39,6 +40,11 @@ function setDefaultImage(event: Event) {
       </div>
     </template>
     <template v-else>
+      <!-- coupang ads -->
+      <li>
+        <ListItemAds />
+      </li>
+      <!--  -->
       <li v-for="feed in feeds" :key="feed.id">
         <a :href="feed.count_link!" target="_blank" rel="noreferer">
           <div>
