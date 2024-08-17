@@ -17,13 +17,16 @@ function makeRandomAdsUrl() {
 </script>
 
 <template>
-  <iframe
-    :src="makeRandomAdsUrl()"
-    frameborder="0"
-    scrolling="no"
-    referrerpolicy="unsafe-url"
-    browsingtopics
-  ></iframe>
+  <div>
+    <iframe
+      :src="makeRandomAdsUrl()"
+      frameborder="0"
+      scrolling="no"
+      referrerpolicy="unsafe-url"
+      browsingtopics
+    ></iframe>
+    <span>* 쿠팡 파트너스 활동을 통해 일정액의 수수료를 제공받을 수 있습니다.</span>
+  </div>
 </template>
 
 <style scoped lang="scss">
@@ -37,5 +40,12 @@ iframe {
   @include mqMax($breakpoint-mobile) {
     height: 110px;
   }
+}
+
+span {
+  color: #adadad;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 100%;
 }
 </style>
