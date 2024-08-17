@@ -6,7 +6,7 @@ export const makeText = (categoryIds: number[], feedMap: FeedMap) => {
   return categoryIds
     .map((category) =>
       !!feedMap[category]
-        ? `<${feedMap[category].link}|*${feedMap[category].title}*>\n` +
+        ? `<${feedMap[category].count_link}|*${feedMap[category].title}*>\n` +
           `🗝️ ${feedMap[category].category_title || "-"}  🗞️ ${feedMap[category].publisher || "-"}`
         : ""
     )
