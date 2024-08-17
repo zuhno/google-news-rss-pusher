@@ -1,5 +1,6 @@
 # syntax = docker/dockerfile:1
 FROM node:18.18.2-slim as base
+FROM zenika/alpine-chrome:89-with-node-14
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -15,6 +16,8 @@ RUN rm -rf ./apps/@batch/broadcast
 WORKDIR /app/apps/@batch/scrap
 RUN pnpm install
 RUN pnpm build
+
+ENV PUPPETEER_EXECUTABLE_PATH='/usr/bin/chromium-browser'
 
 EXPOSE 8080
 

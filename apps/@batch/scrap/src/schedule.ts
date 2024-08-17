@@ -166,6 +166,7 @@ export const scheduler = () => {
 
   console.log("Scheduler is Running 🥳");
 
+  job();
   // Called every 55 minutes of every hour
   scheduleJob(rule, async () => {
     await job();
