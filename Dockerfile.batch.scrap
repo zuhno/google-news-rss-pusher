@@ -1,13 +1,23 @@
 # syntax = docker/dockerfile:1
-FROM node:18.18.2-slim as base
-FROM zenika/alpine-chrome:89-with-node-14
+FROM node:18.18.2-slim
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    chromium \
+    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH='/usr/bin/chromium'
 
 RUN corepack enable
 
 WORKDIR /app
+
 COPY . .
 RUN rm -rf ./apps/@back
 RUN rm -rf ./apps/@front
@@ -17,8 +27,5 @@ WORKDIR /app/apps/@batch/scrap
 RUN pnpm install
 RUN pnpm build
 
-ENV PUPPETEER_EXECUTABLE_PATH='/usr/bin/chromium-browser'
-
 EXPOSE 8080
-
 CMD ["pnpm", "start"]

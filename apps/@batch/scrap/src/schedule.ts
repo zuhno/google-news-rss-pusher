@@ -66,7 +66,20 @@ const clippedNews = async ({
 
 const job = async () => {
   console.log("Browser 🅾 🅿︎ 🅴 🅽 .");
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    executablePath:
+      process.env.NODE_ENV === "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"
+        : undefined,
+    // @ts-ignore
+    headless: "new",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-gpu",
+      "--disable-software-rasterizer",
+    ],
+  });
   const page = await browser.newPage();
 
   try {
@@ -166,7 +179,6 @@ export const scheduler = () => {
 
   console.log("Scheduler is Running 🥳");
 
-  job();
   // Called every 55 minutes of every hour
   scheduleJob(rule, async () => {
     await job();
