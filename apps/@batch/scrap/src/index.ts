@@ -10,6 +10,6 @@ app.get("/", (req, res) => {
 });
 
 app.listen(8080, () => {
-  scheduler();
   console.log("Scrap Server is Running 🥳");
+  scheduler();
 });

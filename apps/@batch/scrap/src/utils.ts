@@ -1,4 +1,5 @@
 import type { AxiosStatic } from "axios";
+import { type Page } from "puppeteer";
 import * as cheerio from "cheerio";
 
 import type { IRssResponseItem } from "./types";
@@ -26,13 +27,32 @@ const _textMatchRate = (text1: string, text2: string) => {
 };
 
 // ! unexport
-const getRootLink = (link: string) => {
+const _getRootLink = (link: string) => {
   const removeProtocolLink = link.replace(/(https:\/\/|http:\/\/)/, "");
   const end = removeProtocolLink.indexOf("/");
   const domain = removeProtocolLink.slice(0, end);
   const protocol = link.match(/(https:\/\/|http:\/\/)/)[0];
 
   return protocol + domain;
+};
+
+// ! unexport
+const _recursiveCheckUrl = (
+  originUrl: string,
+  page: Page,
+  limitCount: number,
+  pResolve: (value?: any) => void
+) => {
+  if (limitCount > 10) {
+    pResolve();
+    return;
+  }
+
+  const removeQueryOriginUrl = originUrl.split("?")[0];
+  const removeQueryPageUrl = page.url().split("?")[0];
+  if (removeQueryOriginUrl === removeQueryPageUrl) {
+    setTimeout(() => _recursiveCheckUrl(originUrl, page, limitCount + 1, pResolve), 1000);
+  } else pResolve();
 };
 
 const getRandomUserAgent = () => {
@@ -69,16 +89,15 @@ export const rawUnduplicatedFeeds = (items: IRssResponseItem[], ratio: number) =
 export const extractValidTitle = (title: string, source?: string) =>
   title.replace(` - ${source}`, "").replace(/\s?<\s?[\w가-힣]*\s?/g, "");
 
-export const getRealLink = async (originLink: string, axiosGet: AxiosStatic["get"]) => {
+export const getRealLink = async (originLink: string, page: Page) => {
   try {
-    const { data } = await axiosGet(originLink, {
-      headers: { "User-Agent": getRandomUserAgent() },
+    await page.goto(originLink);
+
+    await new Promise((resolve) => {
+      _recursiveCheckUrl(originLink, page, 0, resolve);
     });
 
-    const match = String(data).match(/<a[^>]*>(.*?)<\/a>/);
-
-    if (!match?.[1]) return originLink;
-    return match[1];
+    return page.url();
   } catch (error) {
     return originLink;
   }
@@ -89,7 +108,7 @@ export const getOpengraphImage = async (link: string, axiosGet: AxiosStatic["get
     const { data } = await axiosGet(link, {
       headers: { "User-Agent": getRandomUserAgent() },
     }).catch(async () => {
-      const rootLink = getRootLink(link);
+      const rootLink = _getRootLink(link);
       return await axiosGet(rootLink);
     });
 
@@ -104,7 +123,7 @@ export const getOpengraphImage = async (link: string, axiosGet: AxiosStatic["get
     if (imageUrl?.startsWith("https://") || imageUrl?.startsWith("http://")) {
       return imageUrl;
     } else if (imageUrl?.startsWith("/")) {
-      const rootLink = getRootLink(link);
+      const rootLink = _getRootLink(link);
 
       return rootLink + imageUrl;
     } else {

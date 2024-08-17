@@ -1,6 +1,7 @@
 import axios from "axios";
 import { randomUUID } from "crypto";
 import { scheduleJob, gracefulShutdown, RecurrenceRule } from "node-schedule";
+import puppeteer from "puppeteer";
 
 import {
   extractValidTitle,
@@ -64,6 +65,10 @@ const clippedNews = async ({
 };
 
 const job = async () => {
+  console.log("Browser 🅾 🅿︎ 🅴 🅽 .");
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+
   try {
     // Read Category List
     const categories = await supabaseAnonClient.from("Category").select("*").eq("active", true);
@@ -105,10 +110,12 @@ const job = async () => {
 
       const feedQuery: IFeedInsertData[] = [];
       const feedViewQuery: IFeedViewInsertData[] = [];
+
       for (const feed of newFeeds) {
         const id = randomUUID();
-        const realLink = await getRealLink(feed.link, axiosInstance.get);
-        const opengraphImage = await getOpengraphImage(realLink, axiosInstance.get);
+        const realLink = await getRealLink(feed.link, page);
+        let opengraphImage = await getOpengraphImage(realLink, axiosInstance.get);
+        if (!opengraphImage) opengraphImage = await getOpengraphImage(feed.link, axiosInstance.get);
 
         const encodedUrl = btoa(encodeURI(realLink));
         const countLink = `${process.env.SERVER_BASE_URL}/temp/news/${id}?redirect=${encodedUrl}`;
@@ -123,10 +130,7 @@ const job = async () => {
           category_id: category.id,
         });
 
-        feedViewQuery.push({
-          id,
-          view: 0,
-        });
+        feedViewQuery.push({ id, view: 0 });
       }
 
       const [insertedFeeds, insertedFeedViews] = await Promise.all([
@@ -147,6 +151,9 @@ const job = async () => {
     } else {
       console.log("Unkown Error : ", error);
     }
+  } finally {
+    await browser.close();
+    console.log("Browser 🅲 🅻 🅾 🆂 🅴 .");
   }
 };
 
