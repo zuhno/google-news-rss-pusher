@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1
 FROM node:18.18.2-slim
 
-# Install dependencies
+# ref (https://community.fly.io/t/how-can-i-run-puppeteer-on-fly-io/5435/18)
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
