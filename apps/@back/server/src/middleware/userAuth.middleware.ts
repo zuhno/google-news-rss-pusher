@@ -36,7 +36,7 @@ export class userAuthMiddleware implements NestMiddleware {
 
   // reissue access token
   private async _reIssue(payload: { id: number; email: string }) {
-    const { expiresIn } = this.storeService.getCookieConfig();
+    const { expiresIn } = this.storeService.getJwtConfig();
 
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
@@ -79,7 +79,7 @@ export class userAuthMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const { keys, policies, expiresIn } = this.storeService.getCookieConfig();
 
-    const { [keys.accessToken]: accessToken, [keys.refreshToken]: refreshToken } = req.cookies;
+    const { [keys.accessToken]: accessToken } = req.cookies;
 
     // check verify access token
     const accessPayload = await this._verify(accessToken);
@@ -90,7 +90,23 @@ export class userAuthMiddleware implements NestMiddleware {
       return;
     }
 
-    // if access token is unverified, check verify refresh token
+    // if access token is unverified, read refreshToken by accessToken and then check verify refresh token
+    const userAuth = await this.supabaseService
+      .getClient()
+      .anon.from("UserAuth")
+      .select("refresh_token")
+      .eq("access_token", accessToken)
+      .single();
+
+    if (userAuth.error) {
+      this.logger.log("#userAuth error : " + userAuth.error.message);
+      res.clearCookie(keys.accessToken, policies.token);
+      res.clearCookie(keys.loggedInUser, policies.loggedInUser);
+
+      throw new UnauthorizedException();
+    }
+
+    const refreshToken = userAuth.data.refresh_token;
     const refreshPayload = await this._verify(refreshToken);
 
     // if refresh token is verify failed, delete user auth and return unauthorized code
@@ -99,8 +115,7 @@ export class userAuthMiddleware implements NestMiddleware {
       await this._deleteAuth(decoded.id);
 
       res.clearCookie(keys.accessToken, policies.token);
-      res.clearCookie(keys.refreshToken, policies.token);
-      res.clearCookie(keys.loggedInUser, policies.loggedIn);
+      res.clearCookie(keys.loggedInUser, policies.loggedInUser);
 
       throw new UnauthorizedException();
     }

@@ -34,18 +34,18 @@ export class OAuth2Service {
   private async _setUserToken(
     user: Pick<Database["public"]["Tables"]["User"]["Row"], "id" | "email">
   ) {
-    const { expiresIn } = this.storeService.getCookieConfig();
+    const { expiresIn } = this.storeService.getJwtConfig();
 
     const accessPayload = { id: user.id, email: user.email };
     const accessToken = await this.jwtService.signAsync(accessPayload, {
       secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
-      expiresIn: expiresIn.accessToken / 1000,
+      expiresIn: expiresIn.accessToken,
     });
 
     const refreshPayload = { ...accessPayload, accessToken: accessToken };
     const refreshToken = await this.jwtService.signAsync(refreshPayload, {
       secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
-      expiresIn: expiresIn.refreshToken / 1000,
+      expiresIn: expiresIn.refreshToken,
     });
 
     return { accessToken, refreshToken };
@@ -229,7 +229,6 @@ export class OAuth2Service {
 
     return {
       accessToken: newAuth.data.access_token,
-      refreshToken: newAuth.data.refresh_token,
       userInfo: user.data,
     };
   }

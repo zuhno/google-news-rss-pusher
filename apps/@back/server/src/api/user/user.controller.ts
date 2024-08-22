@@ -29,8 +29,7 @@ export class UserController {
 
     if (count <= 1) {
       res.clearCookie(keys.accessToken, policies.token);
-      res.clearCookie(keys.refreshToken, policies.token);
-      res.clearCookie(keys.loggedInUser, policies.loggedIn);
+      res.clearCookie(keys.loggedInUser, policies.loggedInUser);
     }
 
     return { count };

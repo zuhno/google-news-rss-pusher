@@ -38,17 +38,13 @@ export class OAuth2Controller {
       ...(ip && { ipAddr: ip }),
       ...(headers["user-agent"] && { userAgent: headers["user-agent"] }),
     });
-    const { accessToken, refreshToken, userInfo } = await this.oauth2Service.postGoogleAccess(
+    const { accessToken, userInfo } = await this.oauth2Service.postGoogleAccess(
       body.code,
       requestConfig
     );
     const { keys, policies, expiresIn } = this.storeService.getCookieConfig();
 
     res.cookie(keys.accessToken, accessToken, { ...policies.token, maxAge: expiresIn.accessToken });
-    res.cookie(keys.refreshToken, refreshToken, {
-      ...policies.token,
-      maxAge: expiresIn.refreshToken,
-    });
     res.cookie(
       keys.loggedInUser,
       JSON.stringify({
@@ -56,7 +52,7 @@ export class OAuth2Controller {
         nickName: userInfo.nick_name,
         avatarUrl: userInfo.avatar_url,
       }),
-      { ...policies.loggedIn, maxAge: expiresIn.refreshToken }
+      { ...policies.loggedInUser, maxAge: expiresIn.loggedInUser }
     );
 
     return;

@@ -12,19 +12,24 @@ export class StoreService {
   private lastFeed: Record<number, { id: string; createdAt: string }> = {};
   private categoryIds: number[] = [];
   private categories: Database["public"]["Tables"]["Category"]["Row"][];
-  private cookieConfig: {
-    keys: {
-      accessToken: string;
-      refreshToken: string;
-      loggedInUser: string;
-    };
-    policies: {
-      token: CookieOptions;
-      loggedIn: CookieOptions;
-    };
+  private jwtConfig: {
     expiresIn: {
       accessToken: number;
       refreshToken: number;
+    };
+  };
+  private cookieConfig: {
+    keys: {
+      loggedInUser: string;
+      accessToken: string;
+    };
+    policies: {
+      token: CookieOptions;
+      loggedInUser: CookieOptions;
+    };
+    expiresIn: {
+      accessToken: number;
+      loggedInUser: number;
     };
   };
 
@@ -32,10 +37,15 @@ export class StoreService {
     private readonly configService: ConfigService,
     private readonly supabaseService: SupabaseService
   ) {
+    this.jwtConfig = {
+      expiresIn: {
+        accessToken: 60 * 30, // 30m
+        refreshToken: 60 * 60 * 24, // 24h
+      },
+    };
     this.cookieConfig = {
       keys: {
         accessToken: "gnrp_access_token",
-        refreshToken: "gnrp_refresh_token",
         loggedInUser: "gnrp_logged_in_user",
       },
       policies: {
@@ -53,7 +63,7 @@ export class StoreService {
               path: "/",
               domain: ".zuhno.io",
             }) as CookieOptions,
-        loggedIn: {
+        loggedInUser: {
           httpOnly: false,
           sameSite: "none",
           path: "/",
@@ -63,7 +73,7 @@ export class StoreService {
       },
       expiresIn: {
         accessToken: 1000 * 60 * 30, // 30m
-        refreshToken: 1000 * 60 * 60 * 24, // 24h
+        loggedInUser: 1000 * 60 * 60 * 24, // 24h
       },
     };
 
@@ -146,5 +156,9 @@ export class StoreService {
 
   getCookieConfig() {
     return this.cookieConfig;
+  }
+
+  getJwtConfig() {
+    return this.jwtConfig;
   }
 }
