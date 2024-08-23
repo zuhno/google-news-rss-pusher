@@ -105,7 +105,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Feed_category_id_fkey"
+            foreignKeyName: "public_Feed_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "Category"
@@ -127,6 +127,41 @@ export type Database = {
           view?: number
         }
         Relationships: []
+      }
+      FeedViewLog: {
+        Row: {
+          additional_info: string | null
+          created_at: string
+          feed_id: string
+          id: string
+          user_agent: string | null
+          user_ip: string
+        }
+        Insert: {
+          additional_info?: string | null
+          created_at?: string
+          feed_id: string
+          id?: string
+          user_agent?: string | null
+          user_ip: string
+        }
+        Update: {
+          additional_info?: string | null
+          created_at?: string
+          feed_id?: string
+          id?: string
+          user_agent?: string | null
+          user_ip?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FeedViewLog_feed_id_fkey"
+            columns: ["feed_id"]
+            isOneToOne: false
+            referencedRelation: "Feed"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       Interval: {
         Row: {
@@ -164,14 +199,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Release_category_id_fkey"
+            foreignKeyName: "public_Release_category_id_fkey"
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "Category"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "Release_interval_time_fkey"
+            foreignKeyName: "public_Release_interval_time_fkey"
             columns: ["interval_time"]
             isOneToOne: false
             referencedRelation: "Interval"
@@ -224,21 +259,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Subscriber_app_id_fkey"
+            foreignKeyName: "public_Subscriber_app_id_fkey"
             columns: ["app_id"]
             isOneToOne: false
             referencedRelation: "App"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "Subscriber_interval_time_fkey"
+            foreignKeyName: "public_Subscriber_interval_time_fkey"
             columns: ["interval_time"]
             isOneToOne: false
             referencedRelation: "Interval"
             referencedColumns: ["time"]
           },
           {
-            foreignKeyName: "Subscriber_user_id_fkey"
+            foreignKeyName: "public_Subscriber_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "User"
@@ -335,7 +370,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "UserRole_user_id_fkey"
+            foreignKeyName: "public_UserRole_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "User"
@@ -362,7 +397,7 @@ export type Database = {
       AppFrom: "SLACK"
       DeactiveReason: "NOT_FOUND" | "USER_REQUEST" | "BAN" | "UNKNOWN"
       MemberRole: "OWNER" | "ADMIN" | "USER_BASIC"
-      SocialPlatform: "GOOGLE"
+      SocialPlatform: "GOOGLE" | "ADMIN" | "USER_BASIC"
     }
     CompositeTypes: {
       [_ in never]: never

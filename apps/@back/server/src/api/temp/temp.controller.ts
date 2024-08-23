@@ -1,6 +1,6 @@
-import { Controller, Get, Param, Query, Res } from "@nestjs/common";
+import { Controller, Get, Param, Query, Req, Res } from "@nestjs/common";
 import { TempService } from "./temp.service";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { TempNewsParamDto, TempNewsQueryDto } from "./dto/temp_request.dto";
 
 @Controller()
@@ -11,8 +11,9 @@ export class TempController {
   getTempNews(
     @Param() params: TempNewsParamDto,
     @Query() query: TempNewsQueryDto,
+    @Req() req: Request,
     @Res() res: Response
   ) {
-    return this.tempService.getTempNews(res, params, query);
+    return this.tempService.getTempNews(req, res, params, query);
   }
 }

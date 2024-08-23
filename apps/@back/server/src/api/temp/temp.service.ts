@@ -1,6 +1,6 @@
 import { SupabaseService } from "@/common/supabase/supabase.service";
 import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { TempNewsParamDto, TempNewsQueryDto } from "./dto/temp_request.dto";
 
 @Injectable()
@@ -9,7 +9,19 @@ export class TempService {
 
   constructor(private readonly supabaseService: SupabaseService) {}
 
-  async getTempNews(res: Response, params: TempNewsParamDto, query: TempNewsQueryDto) {
+  async getTempNews(
+    req: Request,
+    res: Response,
+    params: TempNewsParamDto,
+    query: TempNewsQueryDto
+  ) {
+    const {
+      ip: user_ip,
+      headers: { ["user-agent"]: user_agent },
+    } = req;
+
+    console.log(JSON.stringify(req.headers));
+
     const rpcIncrementField = await this.supabaseService
       .getClient()
       .serviceRole.rpc("increment_field", {
@@ -21,6 +33,19 @@ export class TempService {
 
     if (rpcIncrementField?.error)
       throw new HttpException(rpcIncrementField?.error?.message, HttpStatus.INTERNAL_SERVER_ERROR);
+
+    // save log
+    const viewLog = await this.supabaseService.getClient().serviceRole.from("FeedViewLog").insert({
+      user_ip,
+      user_agent,
+      feed_id: params.id,
+    });
+
+    if (viewLog?.error) {
+      this.logger.error(
+        `The log with feed_id: ${params.id} / user_ip: ${user_ip} / user_agent: ${user_agent} could not be saved.\nerror msg: ${viewLog?.error?.message}`
+      );
+    }
 
     this.logger.log(`increase feed views. (id: ${params.id})`);
 
