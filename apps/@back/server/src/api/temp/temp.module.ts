@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 
 import { SupabaseModule } from "@/common/supabase/supabase.module";
+import { BotFilterMiddleware } from "@/middleware/botFilter.middleware";
 import { TempService } from "./temp.service";
 import { TempController } from "./temp.controller";
 
@@ -9,4 +10,11 @@ import { TempController } from "./temp.controller";
   controllers: [TempController],
   providers: [TempService],
 })
-export class TempModule {}
+export class TempModule {
+  configure(consumer: MiddlewareConsumer) {
+    // for filtered bot client
+    consumer
+      .apply(BotFilterMiddleware)
+      .forRoutes({ path: "temp/news/:id", method: RequestMethod.GET });
+  }
+}

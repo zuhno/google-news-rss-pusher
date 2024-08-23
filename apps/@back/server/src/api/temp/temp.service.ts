@@ -16,12 +16,10 @@ export class TempService {
     query: TempNewsQueryDto
   ) {
     const {
-      ip: user_ip,
-      headers: { ["user-agent"]: user_agent },
+      headers: { ["user-agent"]: user_agent, ["fly-client-ip"]: ip, ["fly-forwarded-port"]: port },
     } = req;
 
-    console.log(JSON.stringify(req.headers));
-
+    // increase view count by feed id
     const rpcIncrementField = await this.supabaseService
       .getClient()
       .serviceRole.rpc("increment_field", {
@@ -35,15 +33,18 @@ export class TempService {
       throw new HttpException(rpcIncrementField?.error?.message, HttpStatus.INTERNAL_SERVER_ERROR);
 
     // save log
-    const viewLog = await this.supabaseService.getClient().serviceRole.from("FeedViewLog").insert({
-      user_ip,
-      user_agent,
-      feed_id: params.id,
-    });
+    const viewLog = await this.supabaseService
+      .getClient()
+      .serviceRole.from("FeedViewLog")
+      .insert({
+        user_ip: `${ip}:${port}`,
+        user_agent,
+        feed_id: params.id,
+      });
 
     if (viewLog?.error) {
       this.logger.error(
-        `The log with feed_id: ${params.id} / user_ip: ${user_ip} / user_agent: ${user_agent} could not be saved.\nerror msg: ${viewLog?.error?.message}`
+        `The log with feed_id: ${params.id} / user_ip: ${ip}:${port} / user_agent: ${user_agent} could not be saved.\nerror msg: ${viewLog?.error?.message}`
       );
     }
 
