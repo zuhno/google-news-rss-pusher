@@ -133,7 +133,7 @@ export type Database = {
           additional_info: string | null
           created_at: string
           feed_id: string
-          id: string
+          id: number
           user_agent: string | null
           user_ip: string
         }
@@ -141,7 +141,7 @@ export type Database = {
           additional_info?: string | null
           created_at?: string
           feed_id: string
-          id?: string
+          id?: number
           user_agent?: string | null
           user_ip: string
         }
@@ -149,7 +149,7 @@ export type Database = {
           additional_info?: string | null
           created_at?: string
           feed_id?: string
-          id?: string
+          id?: number
           user_agent?: string | null
           user_ip?: string
         }

@@ -40,6 +40,7 @@ export class BotFilterMiddleware implements NestMiddleware {
       "heritrix",
       "archive.org_bot",
       "axios",
+      "googleother",
     ];
 
     const isBot = botKeywords.some((keyword) => userAgent.toLowerCase().includes(keyword));
