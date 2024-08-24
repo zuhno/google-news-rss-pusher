@@ -44,9 +44,10 @@ function setDefaultImage(event: Event) {
       <li>
         <ListItemAds />
       </li>
-      <!--  -->
+
+      <!-- feed list -->
       <li v-for="feed in feeds" :key="feed.id">
-        <a :href="feed.count_link!" target="_blank" rel="noreferer">
+        <a :href="feed.count_link!" target="_blank" rel="noreferrer nofollow">
           <div>
             <template v-if="feed.thumbnail">
               <img :src="feed.thumbnail" :alt="feed.title!" @error="setDefaultImage" />
