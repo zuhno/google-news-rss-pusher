@@ -1,8 +1,10 @@
-import { ForbiddenException, Injectable, NestMiddleware } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger, NestMiddleware } from "@nestjs/common";
 import { Request, Response, NextFunction } from "express";
 
 @Injectable()
 export class BotFilterMiddleware implements NestMiddleware {
+  private readonly logger = new Logger(BotFilterMiddleware.name);
+
   use(req: Request, res: Response, next: NextFunction) {
     const userAgent = req.headers["user-agent"] || "";
 
@@ -45,7 +47,10 @@ export class BotFilterMiddleware implements NestMiddleware {
 
     const isBot = botKeywords.some((keyword) => userAgent.toLowerCase().includes(keyword));
 
-    if (isBot) throw new ForbiddenException();
+    if (isBot) {
+      this.logger.log(`detected bot from user-agent: ${userAgent}`);
+      throw new ForbiddenException();
+    }
 
     next();
   }
