@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Ip, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
 import { Request, Response } from "express";
 import { OAuth2Service } from "./oauth2.service";
 import { OAuth2GoogleAccessBodyDto, OAuth2SlackAccessBodyDto } from "./dto/oauth2_request.dto";
@@ -30,13 +30,16 @@ export class OAuth2Controller {
   @Post("/google")
   async postGoogleAccess(
     @Body() body: OAuth2GoogleAccessBodyDto,
-    @Ip() ip: Request["ip"],
-    @Headers() headers: Request["headers"],
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
+    const {
+      headers: { ["user-agent"]: userAgent, ["fly-client-ip"]: ip, ["fly-forwarded-port"]: port },
+    } = req;
+
     const requestConfig = JSON.stringify({
-      ...(ip && { ipAddr: ip }),
-      ...(headers["user-agent"] && { userAgent: headers["user-agent"] }),
+      ip: `${ip}:${port}`,
+      userAgent,
     });
     const { accessToken, userInfo } = await this.oauth2Service.postGoogleAccess(
       body.code,
