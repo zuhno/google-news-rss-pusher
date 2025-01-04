@@ -30,14 +30,14 @@ function makeRandomAdsUrl() {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/scss/variables";
-@import "@/assets/scss/mixins";
+@use "@/assets/scss/variables";
+@use "@/assets/scss/mixins";
 
 iframe {
   width: 100%;
   height: 150px;
 
-  @include mqMax($breakpoint-mobile) {
+  @include mixins.mqMax(variables.$breakpoint-mobile) {
     height: 110px;
   }
 }

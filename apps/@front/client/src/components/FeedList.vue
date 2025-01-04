@@ -68,8 +68,8 @@ function setDefaultImage(event: Event) {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/scss/variables";
-@import "@/assets/scss/mixins";
+@use "@/assets/scss/variables";
+@use "@/assets/scss/mixins";
 
 ul {
   width: 100%;
@@ -95,7 +95,7 @@ ul {
       border-radius: 8px;
       transition: background-color 0.2s;
 
-      @include mediaHover {
+      @include mixins.mediaHover {
         background-color: whitesmoke;
       }
 
@@ -121,7 +121,7 @@ ul {
           flex-direction: column;
           gap: 10px;
 
-          @include mqMax($breakpoint-mobile) {
+          @include mixins.mqMax(variables.$breakpoint-mobile) {
             gap: 4px;
             margin-top: 10px;
           }

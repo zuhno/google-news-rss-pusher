@@ -12,8 +12,8 @@ const { authorizeLink } = defineProps({ authorizeLink: String });
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/scss/variables";
-@import "@/assets/scss/mixins";
+@use "@/assets/scss/variables";
+@use "@/assets/scss/mixins";
 
 a {
   .btn-slack {
@@ -30,7 +30,7 @@ a {
     align-items: center;
     color: black;
 
-    @include mqMax($breakpoint-mobile) {
+    @include mixins.mqMax(variables.$breakpoint-mobile) {
       padding: 15px;
       border-radius: 50%;
 

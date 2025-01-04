@@ -109,8 +109,8 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/scss/variables";
-@import "@/assets/scss/mixins";
+@use "@/assets/scss/variables";
+@use "@/assets/scss/mixins";
 
 section {
   max-width: 700px;
@@ -123,7 +123,7 @@ section {
     display: grid;
     gap: 10px;
 
-    @include mqMax($breakpoint-mobile) {
+    @include mixins.mqMax(variables.$breakpoint-mobile) {
       bottom: 50px;
       right: 30px;
     }

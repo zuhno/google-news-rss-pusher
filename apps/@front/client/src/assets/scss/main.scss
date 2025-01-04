@@ -1,12 +1,12 @@
-@use "./reset.scss";
-@import "./mixins.scss";
-@import "./variables.scss";
+@use "./reset";
+@use "./mixins";
+@use "./variables";
 
 html {
   font-family: Pretendard;
   font-size: 16px;
 
-  @include mqMax($breakpoint-mobile) {
+  @include mixins.mqMax(variables.$breakpoint-mobile) {
     font-size: 13px;
   }
 }

@@ -38,8 +38,8 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/scss/variables";
-@import "@/assets/scss/mixins";
+@use "@/assets/scss/variables";
+@use "@/assets/scss/mixins";
 
 section {
   width: 100%;
@@ -48,7 +48,7 @@ section {
   gap: 50px;
   justify-items: center;
 
-  @include mqMax($breakpoint-mobile) {
+  @include mixins.mqMax(variables.$breakpoint-mobile) {
     grid-template-columns: repeat(1, 1fr);
   }
 

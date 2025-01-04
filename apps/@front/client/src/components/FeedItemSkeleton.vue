@@ -12,8 +12,8 @@
 </template>
 
 <style lang="scss">
-@import "@/assets/scss/variables";
-@import "@/assets/scss/mixins";
+@use "@/assets/scss/variables";
+@use "@/assets/scss/mixins";
 
 .custom-v-container {
   padding: 0;
@@ -39,7 +39,7 @@
     }
   }
 
-  @include mqMax($breakpoint-mobile) {
+  @include mixins.mqMax(variables.$breakpoint-mobile) {
     gap: 10px;
 
     .v-skeleton-loader__heading {

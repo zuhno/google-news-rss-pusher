@@ -89,8 +89,8 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/scss/mixins";
-@import "@/assets/scss/variables";
+@use "@/assets/scss/mixins";
+@use "@/assets/scss/variables";
 
 .login-button--google {
   outline: none;
@@ -109,7 +109,7 @@ onUnmounted(() => {
     color: white;
   }
 
-  @include mqMax($breakpoint-mobile) {
+  @include mixins.mqMax(variables.$breakpoint-mobile) {
     white-space: pre-line;
     padding: 8px 10px;
   }
@@ -125,7 +125,7 @@ onUnmounted(() => {
   user-select: none;
   transition: all 0.2s;
 
-  @include mediaHover {
+  @include mixins.mediaHover {
     background-color: whitesmoke;
   }
 
@@ -136,7 +136,7 @@ onUnmounted(() => {
     margin-right: 10px;
   }
 
-  @include mqMax($breakpoint-mobile) {
+  @include mixins.mqMax(variables.$breakpoint-mobile) {
     img {
       margin-right: 0;
       width: 30px;
@@ -172,7 +172,7 @@ onUnmounted(() => {
     }
   }
 
-  @include mqMax($breakpoint-mobile) {
+  @include mixins.mqMax(variables.$breakpoint-mobile) {
     left: 0;
     right: 20px;
   }

@@ -79,8 +79,8 @@ const isActive = (keyword: number) => {
 </template>
 
 <style scoped lang="scss">
-@import "@/assets/scss/variables";
-@import "@/assets/scss/mixins";
+@use "@/assets/scss/variables";
+@use "@/assets/scss/mixins";
 
 header {
   position: fixed;
@@ -96,7 +96,7 @@ header {
   background-color: white;
   box-shadow: 0 4px 15px rgba(225, 225, 225, 0.4);
 
-  @include mqMax($breakpoint-mobile) {
+  @include mixins.mqMax(variables.$breakpoint-mobile) {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
   }
@@ -108,7 +108,7 @@ header {
     cursor: pointer;
     transition: background-color 0.2s;
 
-    @include mediaHover {
+    @include mixins.mediaHover {
       background-color: whitesmoke;
     }
 
@@ -165,7 +165,7 @@ header {
     }
   }
 
-  @include mqMax($breakpoint-mobile) {
+  @include mixins.mqMax(variables.$breakpoint-mobile) {
     padding: 0 20px;
     .hamburger {
       display: block;
@@ -226,7 +226,7 @@ header {
       border-radius: 5px;
       font-size: 1rem;
 
-      @include mediaHover {
+      @include mixins.mediaHover {
         background-color: whitesmoke;
       }
     }
