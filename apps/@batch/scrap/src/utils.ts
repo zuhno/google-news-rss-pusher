@@ -1,9 +1,7 @@
-import type { AxiosStatic } from "axios";
 import { type Page } from "puppeteer";
-import * as cheerio from "cheerio";
 
 import type { IRssResponseItem } from "./types";
-import { excludeTitleRegex, metaPropNamesForPreviewImage, userAgents } from "./constants";
+import { excludeTitleRegex } from "./constants";
 
 // ! unexport
 const _textMatchRate = (text1: string, text2: string) => {
@@ -55,9 +53,9 @@ const _recursiveCheckUrl = (
   } else pResolve();
 };
 
-const getRandomUserAgent = () => {
-  return userAgents[Math.floor(Math.random() * userAgents.length)];
-};
+// const getRandomUserAgent = () => {
+//   return userAgents[Math.floor(Math.random() * userAgents.length)];
+// };
 
 export const rawUnduplicatedRatio = (texts: string[], target: string) => {
   let max = 0;
@@ -88,49 +86,3 @@ export const rawUnduplicatedFeeds = (items: IRssResponseItem[], ratio: number) =
 
 export const extractValidTitle = (title: string, source?: string) =>
   title.replace(` - ${source}`, "").replace(/\s?<\s?[\w가-힣]*\s?/g, "");
-
-export const getRealLink = async (originLink: string, page: Page) => {
-  try {
-    await page.goto(originLink);
-
-    await new Promise((resolve) => {
-      _recursiveCheckUrl(originLink, page, 0, resolve);
-    });
-
-    return page.url();
-  } catch (error) {
-    return originLink;
-  }
-};
-
-export const getOpengraphImage = async (link: string, axiosGet: AxiosStatic["get"]) => {
-  try {
-    const { data } = await axiosGet(link, {
-      headers: { "User-Agent": getRandomUserAgent() },
-    }).catch(async () => {
-      const rootLink = _getRootLink(link);
-      return await axiosGet(rootLink);
-    });
-
-    const $ = cheerio.load(data);
-
-    let imageUrl: undefined | string;
-    for (const propName of metaPropNamesForPreviewImage) {
-      imageUrl = $(`meta[property='${propName}']`).prop("content");
-      if (!!imageUrl) break;
-    }
-
-    if (imageUrl?.startsWith("https://") || imageUrl?.startsWith("http://")) {
-      return imageUrl;
-    } else if (imageUrl?.startsWith("/")) {
-      const rootLink = _getRootLink(link);
-
-      return rootLink + imageUrl;
-    } else {
-      return;
-    }
-  } catch (error) {
-    console.log("getOpengraphImage() error : ", error.message);
-    return;
-  }
-};

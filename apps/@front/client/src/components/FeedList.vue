@@ -35,9 +35,9 @@ function setDefaultImage(event: Event) {
 <template>
   <ul>
     <template v-if="loading">
-      <div v-for="k in 4" :key="k">
+      <li v-for="k in 4" :key="k">
         <FeedItemSkeleton />
-      </div>
+      </li>
     </template>
     <template v-else>
       <!-- coupang ads -->
@@ -49,26 +49,16 @@ function setDefaultImage(event: Event) {
       <li v-for="feed in feeds" :key="feed.id">
         <a :href="feed.count_link!" target="_blank" rel="noreferrer nofollow">
           <div>
-            <template v-if="feed.thumbnail">
-              <img :src="feed.thumbnail" :alt="feed.title!" @error="setDefaultImage" />
-            </template>
-            <template v-else>
-              <img :src="noImg" :alt="feed.title!" />
-            </template>
-
+            <p>
+              <span>{{ feed.title }}</span>
+              <i class="pi pi-external-link" style="font-size: 0.8rem"></i>
+            </p>
             <div>
               <p>
-                <span>{{ feed.title }}</span>
-                <i class="pi pi-external-link" style="font-size: 0.8rem"></i>
+                <span>🗞️ {{ feed.publisher }}</span>
+                <span>👁️‍🗨️ {{ feed.view }}</span>
               </p>
-
-              <div>
-                <p>
-                  <span>🗞️ {{ feed.publisher }}</span>
-                  <span>👁️‍🗨️ {{ feed.view }}</span>
-                </p>
-                <span>{{ dateFormatting(feed.created_at) }}</span>
-              </div>
+              <span>{{ dateFormatting(feed.created_at) }}</span>
             </div>
           </div>
         </a>
@@ -111,56 +101,39 @@ ul {
 
       & > div {
         display: flex;
-        gap: 20px;
+        flex-direction: column;
+        gap: 10px;
+        padding: 5px 0;
 
-        img {
-          width: 180px;
-          aspect-ratio: 1 / 0.7;
-          object-fit: contain;
-          border: 1.5px solid white;
-          background-color: white;
+        & > p {
+          width: fit-content;
+          display: flex;
+          gap: 10px;
+          font-weight: 700;
 
-          @include mqMax($breakpoint-mobile) {
-            width: 110px;
+          & > span {
+            font-size: 1rem;
           }
         }
 
         & > div {
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
-          padding: 5px 0;
+          gap: 10px;
 
-          & > p {
-            width: fit-content;
-            display: flex;
-            gap: 8px;
-            font-weight: 700;
-
-            & > span {
-              font-size: 1rem;
-            }
+          @include mqMax($breakpoint-mobile) {
+            gap: 4px;
+            margin-top: 10px;
           }
 
-          div {
+          span {
+            font-size: 0.8rem;
+          }
+
+          p {
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 10px;
-
-            @include mqMax($breakpoint-mobile) {
-              gap: 4px;
-              margin-top: 10px;
-            }
-
-            span {
-              font-size: 0.8rem;
-            }
-
-            p {
-              display: flex;
-              align-items: center;
-              gap: 10px;
-            }
           }
         }
       }

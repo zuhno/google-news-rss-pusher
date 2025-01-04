@@ -1,23 +1,12 @@
 # syntax = docker/dockerfile:1
 FROM node:18.18.2-slim
 
-# ref (https://community.fly.io/t/how-can-i-run-puppeteer-on-fly-io/5435/18)
-RUN apt-get update && apt-get install -y \
-    chromium \
-    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
-
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-ENV PUPPETEER_SKIP_DOWNLOAD=true
-ENV PUPPETEER_EXECUTABLE_PATH='/usr/bin/chromium'
 
 RUN corepack enable
 
 WORKDIR /app
-
 COPY . .
 RUN rm -rf ./apps/@back
 RUN rm -rf ./apps/@front
@@ -28,4 +17,5 @@ RUN pnpm install
 RUN pnpm build
 
 EXPOSE 8080
+
 CMD ["pnpm", "start"]

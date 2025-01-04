@@ -1,17 +1,10 @@
 import axios from "axios";
 import { randomUUID } from "crypto";
 import { scheduleJob, gracefulShutdown, RecurrenceRule } from "node-schedule";
-import puppeteer from "puppeteer";
 
-import {
-  extractValidTitle,
-  getOpengraphImage,
-  getRealLink,
-  rawUnduplicatedFeeds,
-  rawUnduplicatedRatio,
-} from "./utils";
+import { extractValidTitle, rawUnduplicatedFeeds, rawUnduplicatedRatio } from "./utils";
 import type { IFeedInsertData, IFeedViewInsertData, IRssResponse, IRssResponseItem } from "./types";
-import { axiosInstance, supabaseAnonClient, supabaseServiceRoleClient, xml2json } from "./config";
+import { supabaseAnonClient, supabaseServiceRoleClient, xml2json } from "./config";
 
 const clippedNews = async ({
   prevTitles,
@@ -65,23 +58,6 @@ const clippedNews = async ({
 };
 
 const job = async () => {
-  console.log("Browser 🅾 🅿︎ 🅴 🅽 .");
-  const browser = await puppeteer.launch({
-    executablePath:
-      process.env.NODE_ENV === "production"
-        ? process.env.PUPPETEER_EXECUTABLE_PATH || "/usr/bin/chromium"
-        : undefined,
-    // @ts-ignore
-    headless: "new",
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-gpu",
-      "--disable-software-rasterizer",
-    ],
-  });
-  const page = await browser.newPage();
-
   try {
     // Read Category List
     const categories = await supabaseAnonClient.from("Category").select("*").eq("active", true);
@@ -126,18 +102,16 @@ const job = async () => {
 
       for (const feed of newFeeds) {
         const id = randomUUID();
-        const realLink = await getRealLink(feed.link, page);
-        let opengraphImage = await getOpengraphImage(realLink, axiosInstance.get);
-        if (!opengraphImage) opengraphImage = await getOpengraphImage(feed.link, axiosInstance.get);
+        const opengraphImage = "";
 
-        const encodedUrl = btoa(encodeURI(realLink));
+        const encodedUrl = btoa(encodeURI(feed.link));
         const countLink = `${process.env.SERVER_BASE_URL}/temp/news/${id}?redirect=${encodedUrl}`;
 
         feedQuery.push({
           id,
           title: feed.title,
           publisher: feed.source || "-",
-          link: realLink,
+          link: feed.link,
           count_link: countLink,
           thumbnail: opengraphImage,
           category_id: category.id,
@@ -164,9 +138,6 @@ const job = async () => {
     } else {
       console.log("Unkown Error : ", error);
     }
-  } finally {
-    await browser.close();
-    console.log("Browser 🅲 🅻 🅾 🆂 🅴 .");
   }
 };
 

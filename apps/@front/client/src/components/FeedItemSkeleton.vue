@@ -3,14 +3,9 @@
 <template>
   <v-container class="custom-v-container">
     <v-row class="custom-v-row" no-gutters>
-      <v-col style="max-width: fit-content">
-        <v-skeleton-loader type="image" />
-      </v-col>
-      <v-col class="custom-v-col">
-        <v-col class="custom-v-col--texts">
-          <v-skeleton-loader type="heading" />
-          <v-skeleton-loader type="list-item-two-line" />
-        </v-col>
+      <v-col class="custom-v-col--texts">
+        <v-skeleton-loader type="heading" />
+        <v-skeleton-loader type="list-item-two-line" />
       </v-col>
     </v-row>
   </v-container>
@@ -26,21 +21,6 @@
 
 .custom-v-row {
   align-items: center;
-}
-
-.custom-v-col {
-  height: fit-content;
-}
-
-.v-skeleton-loader__image {
-  width: 180px;
-  height: auto;
-  aspect-ratio: 1 / 0.7;
-  border-radius: 8px;
-
-  @include mqMax($breakpoint-mobile) {
-    width: 110px;
-  }
 }
 
 .custom-v-col--texts {
