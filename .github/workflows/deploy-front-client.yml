@@ -21,7 +21,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: .env.PROD setting
         working-directory: ./apps/@front/client
