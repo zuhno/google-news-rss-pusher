@@ -16,11 +16,11 @@
   "packageManager": "pnpm@9.7.1+sha256.46f1bbc8f8020aa9869568c387198f1a813f21fb44c82f400e7d1dbde6c70b40",
   "scripts": {
     "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
-    "@front/client": "cd apps/@front/client && pnpm",
-    "@back/server": "cd apps/@back/server && pnpm",
-    "@batch/scrap": "cd apps/@batch/scrap && pnpm",
-    "@batch/broadcast": "cd apps/@batch/broadcast && pnpm",
-    "supabase-type": "cd packages/supabase-type && pnpm"
+    "@front/client": "cd apps/@front/client && corepack pnpm",
+    "@back/server": "cd apps/@back/server && corepack pnpm",
+    "@batch/scrap": "cd apps/@batch/scrap && corepack pnpm",
+    "@batch/broadcast": "cd apps/@batch/broadcast && corepack pnpm",
+    "supabase-type": "cd packages/supabase-type && corepack pnpm"
   },
   "devDependencies": {
     "prettier": "^3.0.3",

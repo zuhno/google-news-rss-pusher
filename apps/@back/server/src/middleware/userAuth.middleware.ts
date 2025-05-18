@@ -43,10 +43,16 @@ export class userAuthMiddleware implements NestMiddleware {
       expiresIn: expiresIn.accessToken,
     });
 
+    const refreshPayload = { ...payload, accessToken };
+    const refreshToken = await this.jwtService.signAsync(refreshPayload, {
+      secret: this.configService.get("GOOGLE_OAUTH_JWT_SECRET"),
+      expiresIn: expiresIn.refreshToken,
+    });
+
     const userAuth = await this.supabaseService
       .getClient()
       .serviceRole.from("UserAuth")
-      .update({ access_token: accessToken })
+      .update({ access_token: accessToken, refresh_token: refreshToken })
       .eq("user_id", payload.id);
 
     if (userAuth.error) throw new HttpException(userAuth.error.message, HttpStatus.BAD_REQUEST);
@@ -73,7 +79,11 @@ export class userAuthMiddleware implements NestMiddleware {
   }
 
   private async _decode(token: string) {
-    return this.jwtService.decode(token, { json: true });
+    try {
+      return this.jwtService.decode(token, { json: true });
+    } catch {
+      return null;
+    }
   }
 
   async use(req: Request, res: Response, next: NextFunction) {
@@ -108,11 +118,12 @@ export class userAuthMiddleware implements NestMiddleware {
 
     const refreshToken = userAuth.data.refresh_token;
     const refreshPayload = await this._verify(refreshToken);
+    const decoded = await this._decode(refreshToken);
+    const notSameAccessToken = decoded?.accessToken !== accessToken;
 
     // if refresh token is verify failed, delete user auth and return unauthorized code
-    if (!refreshPayload) {
-      const decoded = await this._decode(refreshToken);
-      await this._deleteAuth(decoded.id);
+    if (!refreshPayload || notSameAccessToken) {
+      await this._deleteAuth(decoded?.id);
 
       res.clearCookie(keys.accessToken, policies.token);
       res.clearCookie(keys.loggedInUser, policies.loggedInUser);

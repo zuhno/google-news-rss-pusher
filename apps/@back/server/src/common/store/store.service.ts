@@ -39,7 +39,7 @@ export class StoreService {
   ) {
     this.jwtConfig = {
       expiresIn: {
-        accessToken: 60 * 30, // 30m
+        accessToken: 60 * 10, // 10m
         refreshToken: 60 * 60 * 24, // 24h
       },
     };
@@ -72,7 +72,7 @@ export class StoreService {
         } as CookieOptions,
       },
       expiresIn: {
-        accessToken: 1000 * 60 * 30, // 30m
+        accessToken: 1000 * 60 * 10, // 10m
         loggedInUser: 1000 * 60 * 60 * 24, // 24h
       },
     };
