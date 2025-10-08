@@ -36,7 +36,7 @@ jobs:
 
       - name: Publish
         working-directory: ./apps/@front/client
-        run: pnpm --package=netlify-cli dlx netlify deploy --dir=./apps/@front/client/dist --prod
+        run: pnpm --package=netlify-cli dlx netlify deploy --dir=./apps/@front/client/dist --prod --no-build
         env:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
