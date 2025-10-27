@@ -61,14 +61,14 @@ export class StoreService {
               httpOnly: true,
               sameSite: "strict",
               path: "/",
-              domain: ".zuhno.io",
+              domain: ".zuhno.org",
             }) as CookieOptions,
         loggedInUser: {
           httpOnly: false,
           sameSite: "none",
           path: "/",
           secure: true,
-          domain: this.configService.get("NODE_ENV") === "development" ? "localhost" : ".zuhno.io",
+          domain: this.configService.get("NODE_ENV") === "development" ? "localhost" : ".zuhno.org",
         } as CookieOptions,
       },
       expiresIn: {
