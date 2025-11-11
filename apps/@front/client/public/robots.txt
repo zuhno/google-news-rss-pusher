@@ -1,2 +1,2 @@
 User-agent: *
-Sitemap: https://gnrp.zuhno.io/sitemap.xml
+Sitemap: https://gnrp.zuhno.org/sitemap.xml
